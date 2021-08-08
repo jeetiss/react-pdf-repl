@@ -1,0 +1,60 @@
+.container {
+  display: grid;
+  grid-template-columns: 595px 1fr;
+  grid-template-rows: 2fr 1fr;
+
+  height: 100vh;
+}
+
+.container > div {
+  overflow: scroll;
+}
+
+.container > div:first-child {
+  grid-row: 1 / -1;
+  position: relative;
+}
+
+.debug {
+  position: absolute;
+  background-color: blue;
+
+  opacity: 0.3;
+}
+
+.code {
+  display: block;
+  font-family: monospace;
+
+  padding: 20px;
+
+  border-left: 1px solid #e2e2e2;
+  border-bottom: 1px solid #e2e2e2;
+}
+
+.details {
+  padding: 20px;
+  font-family: monospace;
+  font-size: 16px;
+  line-height: 20px;
+
+  border-left: 1px solid #e2e2e2;
+
+  position: relative;
+}
+
+.details > div:first-child {
+  opacity: 0.5;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.line {
+  padding-left: calc(var(--indent) * 16px);
+  width: 100%;
+}
+
+.line:hover {
+  background-color: #e2e2e2;
+  cursor: default;
+}

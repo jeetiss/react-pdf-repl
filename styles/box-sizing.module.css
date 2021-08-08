@@ -1,0 +1,27 @@
+.container {
+  position: absolute;
+
+  top: 20px;
+  right: 20px;
+
+  font-size: 12px;
+}
+
+.size {
+  padding: 10px 14px;
+  font-weight: bold;
+  background-color: rgb(168, 168, 252);
+}
+
+.padding {
+  background-color: rgb(168, 235, 168);
+  font-weight: bold;
+  padding: 1px 8px;
+}
+
+
+.margin {
+  background-color: rgb(255, 207, 180);
+  font-weight: bold;
+  padding: 1px 8px;
+}
