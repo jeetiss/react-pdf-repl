@@ -111,7 +111,7 @@ export default function Home() {
       setLayout(addParent(layout));
       setUrl(URL.createObjectURL(pdf));
     });
-  }, [Doc]);
+  }, []);
 
   useEffect(() => console.log(layout), [layout]);
   // useEffect(() => console.log(hovered), [hovered]);
