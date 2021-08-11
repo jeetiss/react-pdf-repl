@@ -1,5 +1,5 @@
 import { createElement, useEffect, useState } from "react";
-import Doc from "../src/example";
+import Doc from "../src/gradient";
 import { pdf } from "../src/pdf";
 
 import styles from "../styles/layout.module.css";
@@ -163,19 +163,19 @@ const BoxSizing = ({ box }) => {
       <SizingWrapper
         className={st.margin}
         numbers={[
-          box.marginBottom,
+          box.marginTop,
           box.marginLeft,
           box.marginRight,
-          box.marginTop,
+          box.marginBottom,
         ]}
       >
         <SizingWrapper
           className={st.padding}
           numbers={[
-            box.paddingBottom,
+            box.paddingTop,
             box.paddingLeft,
             box.paddingRight,
-            box.paddingTop,
+            box.paddingBottom,
           ]}
         >
           <div className={st.size}>
