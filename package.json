@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@monaco-editor/react": "^4.2.2",
+    "@next/bundle-analyzer": "^11.1.0",
     "@react-pdf/font": "^2.0.11",
     "@react-pdf/layout": "^2.0.18",
     "@react-pdf/pdfkit": "^2.0.11",

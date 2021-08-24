@@ -1,4 +1,8 @@
-module.exports = {
+const withBundleAnalyzer = require("@next/bundle-analyzer")({
+  enabled: process.env.ANALYZE === "true",
+});
+
+module.exports = withBundleAnalyzer({
   reactStrictMode: true,
   webpack: (config) => {
     // load worker files as a urls by using Asset Modules
@@ -7,10 +11,10 @@ module.exports = {
       test: /pdf\.worker\.(min\.)?js/,
       type: "asset/resource",
       generator: {
-        filename: "static/worker/[hash][ext][query]"
-      }
+        filename: "static/worker/[hash][ext][query]",
+      },
     });
 
     return config;
-  }
-};
+  },
+});
