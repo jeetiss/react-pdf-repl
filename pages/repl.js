@@ -1,16 +1,20 @@
 import { useEffect, useState } from "react";
-import Editor from "@monaco-editor/react";
 
 import { ReactCompareSlider } from "react-compare-slider";
 
 import { createSingleton } from "../hooks";
 import { WorkerV1, WorkerV2 } from "../worker";
 
+import dynamic from "next/dynamic";
 import { code as defCode } from "../code/default-example";
+
+// import definitions from "../types/builded.d.ts";
 
 import { Document, Page, pdfjs } from "react-pdf";
 import workerSrc from "pdfjs-dist/build/pdf.worker.min.js";
 pdfjs.GlobalWorkerOptions.workerSrc = workerSrc;
+
+const MonacoEditor = dynamic(import("react-monaco-editor"), { ssr: false });
 
 const useWorkerV1 = createSingleton(
   () => new WorkerV1(),
@@ -21,14 +25,6 @@ const useWorkerV2 = createSingleton(
   () => new WorkerV2(),
   (worker) => worker.terminate()
 );
-
-function handleEditorWillMount(monaco) {
-  monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
-    noEmit: true,
-    jsx: monaco.languages.typescript.JsxEmit.React,
-    allowJs: true,
-  });
-}
 
 const Repl = () => {
   const [urlv1, setUrlv1] = useState();
@@ -46,14 +42,60 @@ const Repl = () => {
 
   return (
     <div style={{ display: "flex" }}>
-      <Editor
+      <MonacoEditor
         width="50%"
         height="100vh"
         value={code}
         onChange={setCode}
-        defaultLanguage="typescript"
-        path="./fake.tsx"
-        beforeMount={handleEditorWillMount}
+        language="typescript"
+        editorWillMount={(monaco) => {
+          monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
+            jsx: monaco.languages.typescript.JsxEmit.React,
+            lib: [],
+          });
+
+          const fakeDefs = [
+            "declare const render: (arg: any) => void;",
+            "declare const React: object;",
+          ].join("\n");
+
+          const fakeUri = "ts:filename/a.d.ts";
+
+          monaco.languages.typescript.typescriptDefaults.addExtraLib(
+            fakeDefs,
+            fakeUri
+          );
+
+          monaco.editor.createModel(
+            fakeDefs,
+            "typescript",
+            monaco.Uri.parse(fakeUri)
+          );
+
+          let model = monaco.editor.createModel(
+            code,
+            "typescript",
+            monaco.Uri.file("foo.tsx")
+          );
+          return { model };
+        }}
+        editorDidMount={(editor, monaco) => {
+          console.log(editor, monaco);
+          monaco.editor.onDidChangeMarkers((uris) => {
+            const editorUri = editor.getModel().uri;
+            if (editorUri) {
+              const currentEditorHasMarkerChanges = uris.find(
+                (uri) => uri.path === editorUri.path
+              );
+              if (currentEditorHasMarkerChanges) {
+                const markers = monaco.editor.getModelMarkers({
+                  resource: editorUri,
+                });
+                console.log(markers);
+              }
+            }
+          });
+        }}
       />
       <div>
         <ReactCompareSlider

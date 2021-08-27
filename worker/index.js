@@ -1,5 +1,3 @@
-//
-
 class Wrapper {
   constructor(ctr) {
     this.index = 0;
