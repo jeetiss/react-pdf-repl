@@ -44,8 +44,6 @@ export default function Home() {
     });
   }, [setLayout, setUrl]);
 
-  useEffect(() => console.log(layout), [layout]);
-
   return layout ? (
     <div className={styles.container}>
       <div>

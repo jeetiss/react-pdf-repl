@@ -1,6 +1,6 @@
 import { useAtom } from "jotai";
 import { useState } from "react";
-import { useEffect } from "react/cjs/react.development";
+import { useEffect } from "react";
 
 import { selectedAtom, hoverAtom, hoverPathAtom } from "../code/store";
 
