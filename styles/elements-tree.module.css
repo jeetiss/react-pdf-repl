@@ -1,0 +1,18 @@
+.line {
+  padding-left: calc(var(--indent) * 16px + var(--addition, 0px));
+  width: 100%;
+}
+
+.hover {
+  cursor: default;
+}
+
+.line.hover {
+  background-color: #e2e2e2;
+}
+
+.expbutton {
+  cursor: pointer;
+  padding: 0 4px;
+  color: #b6b6b6;
+}

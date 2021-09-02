@@ -1,120 +1,50 @@
-import { createElement, useEffect, useState } from "react";
-import Doc from "../code/page-wrap";
+import { createElement, useEffect } from "react";
+import { useAtom } from "jotai";
+
+import Doc from "../code/example";
 import { pdf } from "../code/pdf";
 
 import styles from "../styles/layout.module.css";
-import st from "../styles/box-sizing.module.css";
+
+import ElementsTree from "../components/elements-tree";
+import DebugTree from "../components/debug-tree";
+import BoxSizing from "../components/box-sizing";
+
+import { layoutAtom, urlAtom, selectedAtom } from "../code/store";
 
 import { Document, Page, pdfjs } from "react-pdf";
 import workerSrc from "pdfjs-dist/build/pdf.worker.min.js";
 pdfjs.GlobalWorkerOptions.workerSrc = workerSrc;
 
-const Leaf = ({ node, select, hover, indent }) => {
-  const attrs = node.props
-    ? Object.entries(node.props)
-        .map(([key, value]) => `${key}="${value}"`)
-        .join(" ")
-    : null;
-
-  const tagWithAttrs = [node.type, attrs].filter(Boolean).join(" ");
-
-  const hoverHandler = () => hover(node);
-  const selectHandler = () => select(node);
-  const blurHandler = () => hover(null);
-
-  return node.children && node.children.length > 0 ? (
-    <>
-      <div
-        className={styles.line}
-        style={{ "--indent": indent }}
-        onMouseEnter={hoverHandler}
-        onMouseOut={blurHandler}
-        onClick={selectHandler}
-      >{`<${tagWithAttrs}>`}</div>
-      <Tree
-        nodes={node.children}
-        select={select}
-        hover={hover}
-        indent={indent + 1}
-      />
-      <div
-        className={styles.line}
-        style={{ "--indent": indent }}
-        onMouseEnter={hoverHandler}
-        onMouseOut={blurHandler}
-        onClick={selectHandler}
-      >{`</${node.type}>`}</div>
-    </>
-  ) : node.type === "TEXT_INSTANCE" ? (
-    <div className={styles.line} style={{ "--indent": indent }}>
-      {node.value}
-    </div>
-  ) : (
-    <div
-      className={styles.line}
-      style={{ "--indent": indent }}
-      onMouseEnter={hoverHandler}
-      onMouseOut={blurHandler}
-      onClick={selectHandler}
-    >{`<${tagWithAttrs} />`}</div>
-  );
-};
-
-const Tree = ({ nodes, select, hover, indent = 0 }) =>
-  nodes.map((child, index) => (
-    <Leaf
-      node={child}
-      key={index}
-      indent={indent}
-      select={select}
-      hover={hover}
-    />
-  ));
-
-const addParent = (node, parent) => {
+const addId = (node, parent, prefix, postfix) => {
   if (parent) node.parent = parent;
+  node._id = [prefix, node.type, postfix].filter((v) => v).join("__");
 
   if (node.children)
-    node.children.forEach((child) => {
-      addParent(child, node);
+    node.children.forEach((child, index) => {
+      addId(child, node, node._id, index + 1);
     });
 
   return node;
 };
 
-const calcSize = (node) => {
-  let top = node.box.top;
-  let left = node.box.left;
-
-  while (node.parent) {
-    node = node.parent;
-
-    top += node.box.top || 0;
-    left += node.box.left || 0;
-  }
-
-  return { top, left };
-};
-
 export default function Home() {
-  const [layout, setLayout] = useState();
-  const [url, setUrl] = useState();
+  const [layout, setLayout] = useAtom(layoutAtom);
+  const [url, setUrl] = useAtom(urlAtom);
 
-  const [selected, select] = useState();
-  const [hovered, hover] = useState();
+  const [selected] = useAtom(selectedAtom);
 
   useEffect(() => {
     const instance = pdf();
 
     instance.updateContainer(createElement(Doc));
     instance.render().then(({ layout, pdf }) => {
-      setLayout(addParent(layout));
+      setLayout(addId(layout));
       setUrl(URL.createObjectURL(pdf));
     });
-  }, []);
+  }, [setLayout, setUrl]);
 
   useEffect(() => console.log(layout), [layout]);
-  // useEffect(() => console.log(hovered), [hovered]);
 
   return layout ? (
     <div className={styles.container}>
@@ -123,20 +53,13 @@ export default function Home() {
           <Page pageNumber={1} />
         </Document>
 
-        {hovered && (
-          <div
-            className={styles.debug}
-            style={{
-              width: hovered.box.width,
-              height: hovered.box.height,
-              ...calcSize(hovered),
-            }}
-          ></div>
-        )}
+        <div className={styles.debug}>
+          <DebugTree nodes={[layout]}></DebugTree>
+        </div>
       </div>
 
       <div className={styles.code}>
-        <Tree nodes={[layout]} select={select} hover={hover} />
+        <ElementsTree nodes={[layout]} />
       </div>
 
       <div className={styles.details}>
@@ -156,59 +79,3 @@ export default function Home() {
     </div>
   ) : null;
 }
-
-const BoxSizing = ({ box }) => {
-  return (
-    <div className={st.container}>
-      <SizingWrapper
-        className={st.margin}
-        numbers={[
-          box.marginTop,
-          box.marginLeft,
-          box.marginRight,
-          box.marginBottom,
-        ]}
-      >
-        <SizingWrapper
-          className={st.padding}
-          numbers={[
-            box.paddingTop,
-            box.paddingLeft,
-            box.paddingRight,
-            box.paddingBottom,
-          ]}
-        >
-          <div className={st.size}>
-            {box.width ? box.width.toFixed(2) : "-"} x{" "}
-            {box.height ? box.height.toFixed(2) : "-"}
-          </div>
-        </SizingWrapper>
-      </SizingWrapper>
-    </div>
-  );
-};
-
-// class Hovered = ({ margin, padding, size }) => (
-  
-// )  
-
-const SizingWrapper = ({ className, numbers = [], children }) => (
-  <div
-    className={className}
-    style={{
-      display: "grid",
-      gridTemplate: "repeat(3, min-content) / repeat(3, max-content)",
-      justifyItems: "center",
-      alignItems: "center",
-      gap: "5px",
-    }}
-  >
-    <div style={{ gridRow: "1", gridColumn: "2" }}>{numbers[0] || "-"}</div>
-    <div style={{ gridRow: "2", gridColumn: "1" }}>{numbers[1] || "-"}</div>
-
-    <div style={{ gridRow: "2", gridColumn: "2" }}>{children}</div>
-
-    <div style={{ gridRow: "2", gridColumn: "3" }}>{numbers[2] || "-"}</div>
-    <div style={{ gridRow: "3", gridColumn: "2" }}>{numbers[3] || "-"}</div>
-  </div>
-);

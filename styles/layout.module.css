@@ -17,9 +17,10 @@
 
 .debug {
   position: absolute;
-  background-color: blue;
-
-  opacity: 0.3;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 }
 
 .code {
@@ -47,14 +48,4 @@
   opacity: 0.5;
   text-transform: uppercase;
   margin-bottom: 8px;
-}
-
-.line {
-  padding-left: calc(var(--indent) * 16px);
-  width: 100%;
-}
-
-.line:hover {
-  background-color: #e2e2e2;
-  cursor: default;
 }
