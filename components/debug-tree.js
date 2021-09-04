@@ -1,6 +1,6 @@
 import { useAtom } from "jotai";
 
-import { hoverAtom, hoverPathAtom, selectedAtom } from "../code/store";
+import { hoverAtom, selectedAtom } from "../code/store";
 
 const Box = ({ box, children, active, ...props }) => (
   <div
@@ -13,7 +13,7 @@ const Box = ({ box, children, active, ...props }) => (
       bottom: box.bottom,
       width: box.width,
       height: box.height,
-      backgroundColor: active ? "#e2e2e2e2" : "transparent",
+      backgroundColor: active ? "#80acff79" : "transparent",
     }}
   >
     {children}

@@ -1,26 +1,20 @@
 .container {
-  display: grid;
-  grid-template-columns: 595px 1fr;
-  grid-template-rows: 2fr 1fr;
-
   height: 100vh;
 }
 
-.container > div {
-  overflow: scroll;
+.previewContainer {
+  display: flex;
+  justify-content: safe center;
+
+  width: 100%;
+  padding: 30px 10px;
 }
 
-.container > div:first-child {
-  grid-row: 1 / -1;
+.preview {
   position: relative;
-}
-
-.debug {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  border-radius: 3px;
+  overflow: hidden;
+  box-shadow: 0px 4px 15px 4px rgb(0 0 0 / 25%);
 }
 
 .code {

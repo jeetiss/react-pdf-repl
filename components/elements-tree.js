@@ -8,16 +8,22 @@ import styles from "../styles/elements-tree.module.css";
 
 const cn = (...styles) => styles.filter((v) => v).join(" ");
 
-const OpenTag = ({ children, hover, indent, expand, expanded, ...props }) => (
-  <div
-    className={cn(styles.line, hover && styles.hover)}
-    style={{ "--indent": indent }}
-  >
+const OpenTag = ({
+  children,
+  className,
+  indent,
+  expand,
+  expanded,
+  ...props
+}) => (
+  <div className={className} style={{ "--indent": indent }}>
     <span className={styles.expbutton} onClick={() => expand((v) => !v)}>
       {expanded ? "▼" : "▶"}
     </span>
 
-    <span {...props}>{children}</span>
+    <span className={styles.tagName} {...props}>
+      {children}
+    </span>
   </div>
 );
 
@@ -32,6 +38,7 @@ const Leaf = ({ node, indent }) => {
 
   const [, select] = useAtom(selectedAtom);
   const [hover, setHover] = useAtom(hoverAtom);
+  const [selected] = useAtom(selectedAtom);
   const [hoverPath] = useAtom(hoverPathAtom);
 
   const [expanded, expand] = useState(() => hoverPath.includes(node._id));
@@ -42,10 +49,12 @@ const Leaf = ({ node, indent }) => {
     }
   }, [hoverPath, node._id]);
 
-  const styleProps = {
-    className: cn(styles.line, hover === node._id && styles.hover),
-    style: { "--indent": indent },
-  };
+  const getClassName = (node) =>
+    cn(
+      styles.line,
+      hover === node._id && styles.hover,
+      selected?._id === node._id && styles.selected
+    );
 
   const props = {
     onMouseEnter: () => setHover({ id: node._id, pathable: false }),
@@ -56,8 +65,8 @@ const Leaf = ({ node, indent }) => {
   if (node.type === "TEXT_INSTANCE") {
     return (
       <div
-        className={cn(styles.line, hover === node.parent._id && styles.hover)}
-        style={{ "--indent": indent, "--addition": "21px" }}
+        className={getClassName(node.parent)}
+        style={{ "--indent": indent, "--addition": "17px" }}
         onMouseEnter={() => setHover({ id: node.parent._id, pathable: false })}
         onMouseLeave={() => setHover(null)}
         onClick={() => select(node.parent)}
@@ -68,6 +77,7 @@ const Leaf = ({ node, indent }) => {
   } else if (node.children && node.children.length > 0 && !expanded) {
     return (
       <OpenTag
+        className={getClassName(node)}
         expand={expand}
         expanded={expanded}
         indent={indent}
@@ -79,6 +89,7 @@ const Leaf = ({ node, indent }) => {
     return (
       <>
         <OpenTag
+          className={getClassName(node)}
           expand={expand}
           expanded={expanded}
           indent={indent}
@@ -88,13 +99,19 @@ const Leaf = ({ node, indent }) => {
         <Tree nodes={node.children} indent={indent + 1} />
         <div
           {...props}
-          className={cn(styles.line, hover === node._id && styles.hover)}
-          style={{ "--indent": indent, "--addition": "21px" }}
+          className={getClassName(node)}
+          style={{ "--indent": indent, "--addition": "17px" }}
         >{`</${node.type}>`}</div>
       </>
     );
   } else {
-    return <div {...styleProps} {...props}>{`<${tagWithAttrs} />`}</div>;
+    return (
+      <div
+        className={getClassName(node)}
+        style={{ "--indent": indent, "--addition": "17px" }}
+        {...props}
+      >{`<${tagWithAttrs} />`}</div>
+    );
   }
 };
 

@@ -1,9 +1,14 @@
 .line {
   padding-left: calc(var(--indent) * 16px + var(--addition, 0px));
   width: 100%;
+  display: flex;
 }
 
 .hover {
+  cursor: default;
+}
+
+.selected {
   cursor: default;
 }
 
@@ -11,8 +16,20 @@
   background-color: #e2e2e2;
 }
 
+.line.selected {
+  background-color: #80acff79;
+}
+
+.line.selected.hover {
+  background-color: #4f8cff79;
+}
+
 .expbutton {
   cursor: pointer;
   padding: 0 4px;
   color: #b6b6b6;
+}
+
+.tagName {
+  flex-grow: 1;
 }
