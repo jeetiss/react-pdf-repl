@@ -131,6 +131,17 @@ const toggle = atom(
   (get, set) => set(usedMosaic, !get(usedMosaic))
 );
 
+const pageCount = atom(0);
+const pageNumber = atom(1);
+
+const pageNumberDerived = atom(
+  (get) => get(pageNumber),
+  (get, set, update) => {
+    const max = get(pageCount);
+    set(pageNumber, ((update - 1 + max) % max) + 1);
+  }
+);
+
 export {
   layout as layoutAtom,
   url as urlAtom,
@@ -139,4 +150,6 @@ export {
   protectSelected as selectedAtom,
   mosaic as mosaicAtom,
   toggle as toggleAtom,
+  pageCount as pageCountAtom,
+  pageNumberDerived as pageNumberAtom,
 };

@@ -4,7 +4,9 @@
 
 .previewContainer {
   display: flex;
+  flex-direction: column;
   justify-content: safe center;
+  align-items: safe center;
 
   width: 100%;
   padding: 30px 10px;

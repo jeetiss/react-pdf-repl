@@ -18,6 +18,8 @@ import {
   selectedAtom,
   mosaicAtom,
   toggleAtom,
+  pageCountAtom,
+  pageNumberAtom,
 } from "../code/store";
 
 import { Document, Page, pdfjs } from "react-pdf";
@@ -41,6 +43,9 @@ const Preview = ({ path }) => {
   const [layout] = useAtom(layoutAtom);
   const [url] = useAtom(urlAtom);
 
+  const [count, setCount] = useAtom(pageCountAtom);
+  const [page, setPage] = useAtom(pageNumberAtom);
+
   return (
     <MosaicWindow
       path={path}
@@ -53,9 +58,12 @@ const Preview = ({ path }) => {
       {layout && (
         <div className={styles.previewContainer}>
           <div className={styles.preview}>
-            <Document file={url}>
+            <Document
+              file={url}
+              onLoadSuccess={({ numPages }) => setCount(numPages)}
+            >
               <Page
-                pageNumber={1}
+                pageNumber={page}
                 renderAnnotationLayer={false}
                 renderTextLayer={false}
               />
@@ -66,6 +74,12 @@ const Preview = ({ path }) => {
                 <DebugTree nodes={[layout]}></DebugTree>
               </div>
             )}
+          </div>
+
+          <div>
+            <button onClick={() => setPage(page - 1)}>{"<"}</button>
+            {page} - {count}
+            <button onClick={() => setPage(page + 1)}>{">"}</button>
           </div>
         </div>
       )}
