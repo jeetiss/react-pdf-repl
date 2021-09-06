@@ -1,6 +1,12 @@
 import { useAtom } from "jotai";
+import { useMemo } from "react";
 
-import { hoverAtom, selectedAtom } from "../code/store";
+import {
+  hoverAtom,
+  selectedAtom,
+  layoutAtom,
+  pageNumberAtom,
+} from "../code/store";
 
 const Box = ({ box, children, active, ...props }) => (
   <div
@@ -23,13 +29,26 @@ const Box = ({ box, children, active, ...props }) => (
 const DebugLeaf = ({ node }) => {
   const [hover] = useAtom(hoverAtom);
 
+  const [layout] = useAtom(layoutAtom);
+  const [page] = useAtom(pageNumberAtom);
+
+  const skip = useMemo(() => {
+    if (node.type === "PAGE") {
+      return layout.children[page - 1] !== node;
+    } else {
+      return false;
+    }
+  }, [layout.children, node, page]);
+
   const props = {
     "data-id": node._id,
     box: node.box,
     active: node._id === hover,
   };
 
-  if (node.type === "DOCUMENT") {
+  if (skip || node.type === "TEXT_INSTANCE") {
+    return null;
+  } else if (node.type === "DOCUMENT") {
     return <DebugTree nodes={node.children} />;
   } else if (node.children && node.children.length > 0) {
     return (
@@ -37,8 +56,6 @@ const DebugLeaf = ({ node }) => {
         <DebugTree nodes={node.children} />
       </Box>
     );
-  } else if (node.type === "TEXT_INSTANCE") {
-    return null;
   } else {
     return <Box {...props} />;
   }

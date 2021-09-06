@@ -1,8 +1,14 @@
 import { useAtom } from "jotai";
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useEffect } from "react";
 
-import { selectedAtom, hoverAtom, hoverPathAtom } from "../code/store";
+import {
+  selectedAtom,
+  hoverAtom,
+  hoverPathAtom,
+  pageNumberAtom,
+  layoutAtom,
+} from "../code/store";
 
 import styles from "../styles/elements-tree.module.css";
 
@@ -40,8 +46,31 @@ const Leaf = ({ node, indent }) => {
   const [hover, setHover] = useAtom(hoverAtom);
   const [selected] = useAtom(selectedAtom);
   const [hoverPath] = useAtom(hoverPathAtom);
+  const [layout] = useAtom(layoutAtom);
+  const [page, setPage] = useAtom(pageNumberAtom);
 
-  const [expanded, expand] = useState(() => hoverPath.includes(node._id));
+  const [iexpanded, iexpand] = useState(() => hoverPath.includes(node._id));
+
+  const expanded = useMemo(() => {
+    if (node.type === "PAGE") {
+      return layout.children[page - 1] === node && iexpanded;
+    } else {
+      return iexpanded;
+    }
+  }, [iexpanded, layout.children, node, page]);
+
+  const expand = useCallback(
+    (value) => {
+      if (node.type === "PAGE") {
+        const index = layout.children.indexOf(node);
+        setPage(index + 1);
+        return iexpand(index + 1 !== page ? true : value);
+      } else {
+        return iexpand(value);
+      }
+    },
+    [layout.children, node, page, setPage]
+  );
 
   useEffect(() => {
     if (hoverPath.includes(node._id)) {
