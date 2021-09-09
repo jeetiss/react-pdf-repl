@@ -1,5 +1,13 @@
 import React from "react";
-import { Document, Page, View, Text, Image, Font, StyleSheet } from "./pdf";
+import {
+  Document,
+  Page,
+  View,
+  Text,
+  Image,
+  Font,
+  StyleSheet,
+} from "@react-pdf/renderer";
 
 const styles = StyleSheet.create({
   body: {
@@ -59,4 +67,4 @@ Font.register({
   src: "https://fonts.gstatic.com/s/oswald/v13/Y_TKV6o8WovbUd3m_X9aAA.ttf",
 });
 
-export default Images
+export default Images;

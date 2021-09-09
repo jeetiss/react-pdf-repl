@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@next/bundle-analyzer": "^11.1.0",
@@ -14,7 +15,7 @@
     "@react-pdf/layout": "^2.0.18",
     "@react-pdf/pdfkit": "^2.0.11",
     "@react-pdf/render": "^2.0.12",
-    "@react-pdf/renderer": "^2.0.18",
+    "@react-pdf/renderer": "2.0.19",
     "@react-pdf/renderer-v1": "npm:@react-pdf/renderer@^1.6.16",
     "acorn": "^8.4.1",
     "acorn-jsx": "^5.3.2",
@@ -36,6 +37,7 @@
   "devDependencies": {
     "eslint": "7.32.0",
     "eslint-config-next": "11.0.1",
+    "patch-package": "^6.4.7",
     "raw-loader": "^4.0.2"
   }
 }

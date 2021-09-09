@@ -1,5 +1,13 @@
 import React, { createContext, useContext } from "react";
-import { Document, Page, View, Text, Link, Font, StyleSheet } from "./pdf";
+import {
+  Document,
+  Page,
+  View,
+  Text,
+  Link,
+  Font,
+  StyleSheet,
+} from "@react-pdf/renderer";
 
 const styles = StyleSheet.create({
   title: {

@@ -4,7 +4,7 @@ import { useAtom } from "jotai";
 import { Mosaic, MosaicWindow } from "react-mosaic-component";
 
 import Doc from "../code/example";
-import { pdf } from "../code/pdf";
+import { pdf } from "@react-pdf/renderer";
 
 import styles from "../styles/layout.module.css";
 
@@ -140,9 +140,9 @@ export default function Home() {
     const instance = pdf();
 
     instance.updateContainer(createElement(Doc));
-    instance.render().then(({ layout, pdf }) => {
-      setLayout(addId(layout));
-      setUrl(URL.createObjectURL(pdf));
+    instance.toBlob().then((blob) => {
+      setUrl(URL.createObjectURL(blob));
+      setLayout(addId(blob.__SECRET_LAYOUT_DO_NOT_USE_OR_YOU_WILL_BE_FIRED));
     });
   }, [setLayout, setUrl]);
 

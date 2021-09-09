@@ -1,19 +1,16 @@
 import React from "react";
-import {
-  Document,
-  Page,
-  Font,
-  Text,
-  View
-  
-} from "./pdf";
+import { Document, Page, Font, Text, View } from "@react-pdf/renderer";
 
 const WAP = () => {
   return (
     <Document>
       <Page>
         <View>
-          <Text wrap={false}>{'a\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\n'}</Text>
+          <Text wrap={false}>
+            {
+              "a\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\na\n"
+            }
+          </Text>
         </View>
       </Page>
     </Document>

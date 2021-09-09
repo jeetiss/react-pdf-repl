@@ -3,20 +3,12 @@ import {
   Document,
   Page,
   Font,
-  StyleSheet,
   LinearGradient,
   Svg,
   Stop,
   Rect,
   Defs,
-} from "./pdf";
-
-const styles = StyleSheet.create({
-  svg: {
-    width: "100%",
-    height: "100%",
-  },
-});
+} from "@react-pdf/renderer";
 
 const Gradient = () => {
   return (

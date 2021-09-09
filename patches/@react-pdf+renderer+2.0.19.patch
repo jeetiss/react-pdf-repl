@@ -1,0 +1,23 @@
+diff --git a/node_modules/@react-pdf/renderer/lib/react-pdf.browser.es.js b/node_modules/@react-pdf/renderer/lib/react-pdf.browser.es.js
+index 52d4b40..bc8a9fe 100644
+--- a/node_modules/@react-pdf/renderer/lib/react-pdf.browser.es.js
++++ b/node_modules/@react-pdf/renderer/lib/react-pdf.browser.es.js
+@@ -219,7 +219,9 @@ var pdf = function pdf(initialValue) {
+ 
+             case 6:
+               layout = _context.sent;
+-              return _context.abrupt("return", renderPDF(ctx, layout));
++              var result = renderPDF(ctx, layout);
++              result.__INTERNAL_LAYOUT = layout
++              return _context.abrupt("return", result);
+ 
+             case 8:
+             case "end":
+@@ -264,6 +266,7 @@ var pdf = function pdf(initialValue) {
+                     callOnRender({
+                       blob: blob
+                     });
++                    blob.__SECRET_LAYOUT_DO_NOT_USE_OR_YOU_WILL_BE_FIRED = instance.__INTERNAL_LAYOUT
+                     resolve(blob);
+                   } catch (error) {
+                     reject(error);
