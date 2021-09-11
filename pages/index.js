@@ -3,7 +3,7 @@ import { createElement, useEffect, useContext } from "react";
 import { useAtom } from "jotai";
 import { Mosaic, MosaicWindow } from "react-mosaic-component";
 
-import Doc from "../code/example";
+import Doc from "../code/wrap";
 import { pdf } from "@react-pdf/renderer";
 
 import styles from "../styles/layout.module.css";
