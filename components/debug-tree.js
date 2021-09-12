@@ -8,7 +8,7 @@ import {
   pageNumberAtom,
 } from "../code/store";
 
-const Box = ({ box, children, active, ...props }) => (
+const Box = ({ box, children, active, minPresenceAhead, ...props }) => (
   <div
     {...props}
     style={{
@@ -22,6 +22,18 @@ const Box = ({ box, children, active, ...props }) => (
       backgroundColor: active ? "#80acff79" : "transparent",
     }}
   >
+    {minPresenceAhead && (
+      <div
+        style={{
+          position: "absolute",
+          bottom: -(minPresenceAhead + box.marginBottom),
+          width: "100%",
+          height: minPresenceAhead,
+          borderBottom: active ? "1px solid red" : "none",
+          pointerEvents: "none",
+        }}
+      ></div>
+    )}
     {children}
   </div>
 );
@@ -44,6 +56,7 @@ const DebugLeaf = ({ node }) => {
     "data-id": node._id,
     box: node.box,
     active: node._id === hover,
+    minPresenceAhead: node.props?.minPresenceAhead,
   };
 
   if (skip || node.type === "TEXT_INSTANCE") {
