@@ -1,4 +1,3 @@
-import React from "react";
 import {
   StyleSheet,
   Document,
@@ -46,7 +45,7 @@ const Wrap = () => {
                 Header
               </Text>
 
-              <Text style={[styles.text, { color: "white" }]}>{'w\ne'}</Text>
+              <Text style={[styles.text, { color: "white" }]}>{"w\ne"}</Text>
             </View>
 
             <View style={{ flexGrow: 1, flexBasis: 0 }}>
@@ -74,4 +73,6 @@ Font.register({
   src: "https://fonts.gstatic.com/s/oswald/v13/Y_TKV6o8WovbUd3m_X9aAA.ttf",
 });
 
-export default Wrap;
+// hack for hmr
+const exportComponent = { component: Wrap }
+export default exportComponent;

@@ -1,4 +1,3 @@
-import React from "react";
 import { Document, Page, Font, Text, View } from "@react-pdf/renderer";
 
 const WAP = () => {

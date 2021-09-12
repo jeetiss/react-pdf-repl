@@ -1,9 +1,9 @@
 /* eslint-disable react/display-name */
-import { createElement, useEffect, useContext } from "react";
+import { useEffect } from "react";
 import { useAtom } from "jotai";
 import { Mosaic, MosaicWindow } from "react-mosaic-component";
 
-import Doc from "../code/wrap";
+import doc from "../code/wrap";
 import { pdf } from "@react-pdf/renderer";
 
 import styles from "../styles/layout.module.css";
@@ -133,18 +133,23 @@ const ELEMENT_MAP = {
 export default function Home() {
   const [currentNode, setNode] = useAtom(mosaicAtom);
 
-  const [, setLayout] = useAtom(layoutAtom);
+  const [layout, setLayout] = useAtom(layoutAtom);
   const [, setUrl] = useAtom(urlAtom);
 
   useEffect(() => {
+    const { component: Wrap } = doc;
     const instance = pdf();
 
-    instance.updateContainer(createElement(Doc));
+    instance.updateContainer(<Wrap />);
     instance.toBlob().then((blob) => {
       setUrl(URL.createObjectURL(blob));
       setLayout(addId(blob.__SECRET_LAYOUT_DO_NOT_USE_OR_YOU_WILL_BE_FIRED));
     });
   }, [setLayout, setUrl]);
+
+  useEffect(() => {
+    console.log(layout);
+  }, [layout]);
 
   return (
     <div className={styles.container}>
