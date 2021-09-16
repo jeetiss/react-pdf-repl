@@ -25,12 +25,14 @@ const styles = StyleSheet.create({
   row: {
     flexGrow: 1,
     flexDirection: "row",
+    alignItems: "stretch",
   },
   block: {
     flexGrow: 1,
   },
   fill1: {
     width: "40%",
+    height: "100%",
     backgroundColor: "#e14427",
   },
   fill2: {
@@ -85,11 +87,11 @@ Font.register({
   src: "https://fonts.gstatic.com/s/oswald/v13/Y_TKV6o8WovbUd3m_X9aAA.ttf",
 });
 
-export default function Doc() {
+function Doc() {
   return (
     <Document>
       <Page size="A4">
-        <ThemeContext.Provider value={{ size: 20 }}>
+        <ThemeContext.Provider value={{ size: 10 }}>
           <Link
             style={styles.title}
             src="https://es.wikipedia.org/wiki/Lorem_ipsum"
@@ -98,7 +100,7 @@ export default function Doc() {
           </Link>
           <View style={styles.body}>
             <View style={styles.row}>
-              <SText size={30}>
+              <SText>
                 Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do
                 eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
                 enim ad minim veniam, quis nostrud exercitation ullamco laboris
@@ -109,7 +111,7 @@ export default function Doc() {
             </View>
             <View style={[styles.row, { padding: 15 }]}>
               <View style={styles.fill2} />
-              <SText size={15}>
+              <SText>
                 Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do
                 eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
                 enim ad minim veniam, quis nostrud exercitation ullamco laboris
@@ -133,3 +135,7 @@ export default function Doc() {
     </Document>
   );
 }
+
+// hack for hmr
+const exportComponent = { component: Doc };
+export default exportComponent;

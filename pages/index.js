@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { useAtom } from "jotai";
 import { Mosaic, MosaicWindow } from "react-mosaic-component";
 
-import doc from "../code/wrap";
+import doc from "../code/bug";
 import { pdf } from "@react-pdf/renderer";
 
 import styles from "../styles/layout.module.css";
@@ -52,6 +52,14 @@ const Preview = ({ path }) => {
       renderToolbar={() => (
         <div>
           <button onClick={toggle}>debugger;</button>
+          <a
+            href={url}
+            target="_blank"
+            rel="noreferrer"
+            download="document.pdf"
+          >
+            Download
+          </a>
         </div>
       )}
     >
@@ -137,10 +145,10 @@ export default function Home() {
   const [, setUrl] = useAtom(urlAtom);
 
   useEffect(() => {
-    const { component: Wrap } = doc;
+    const { component: Doc } = doc;
     const instance = pdf();
 
-    instance.updateContainer(<Wrap />);
+    instance.updateContainer(<Doc />);
     instance.toBlob().then((blob) => {
       setUrl(URL.createObjectURL(blob));
       setLayout(addId(blob.__SECRET_LAYOUT_DO_NOT_USE_OR_YOU_WILL_BE_FIRED));

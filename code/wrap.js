@@ -5,6 +5,7 @@ import {
   Font,
   View,
   Text,
+  Link,
 } from "@react-pdf/renderer";
 
 const styles = StyleSheet.create({
@@ -55,10 +56,14 @@ const Wrap = () => {
 
               <Text style={styles.text} widows={1} orphans={1}>
                 Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do
-                eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-                enim ad minim veniam, quis nostrud exercitation ullamco laboris
-                nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor
-                in reprehenderit in voluptate velit esse cillum.
+                eiusmod tempor incididunt ut{" "}
+                <Link href="https://github.com/diegomura/react-pdf">
+                  labore et dolore
+                </Link>{" "}
+                magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation
+                ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis
+                aute irure dolor in reprehenderit in voluptate velit esse
+                cillum.
               </Text>
             </View>
           </View>
@@ -74,5 +79,5 @@ Font.register({
 });
 
 // hack for hmr
-const exportComponent = { component: Wrap }
+const exportComponent = { component: Wrap };
 export default exportComponent;
