@@ -10,7 +10,8 @@ import {
   Note,
   Image,
   Canvas,
-  StyleSheet
+  StyleSheet,
+  version as reactPdfVersion
 } from "@react-pdf/renderer-v1";
 
 import preprocessJsx from "./process-jsx";
@@ -46,8 +47,11 @@ const evaluate = (code) =>
     c.evaluate(executableCode);
   });
 
+  const version = () => reactPdfVersion
+
 const methods = {
   evaluate,
+  version
 };
 
 self.addEventListener("message", (e) => {

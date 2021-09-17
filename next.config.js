@@ -40,7 +40,7 @@ module.exports = withBundleAnalyzer({
 
     config.plugins.push(
       new MonacoWebpackPlugin({
-        languages: ["typescript"],
+        languages: ["typescript", "javascript"],
         filename: "static/[name].worker.js",
       })
     );
