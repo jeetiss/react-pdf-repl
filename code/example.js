@@ -20,7 +20,7 @@ const styles = StyleSheet.create({
     fontFamily: "Oswald",
   },
   body: {
-    flexGrow: 1,
+    flexGrow: 0,
   },
   row: {
     flexGrow: 1,
@@ -31,8 +31,9 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   fill1: {
+    marginTop: '20pt',
     width: "40%",
-    height: "100%",
+    height: "1pt",
     backgroundColor: "#e14427",
   },
   fill2: {
@@ -99,7 +100,7 @@ function Doc() {
             Lorem Ipsum
           </Link>
           <View style={styles.body}>
-            <View style={styles.row}>
+            <View style={[styles.row, { margin: 15 }]}>
               <SText>
                 Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do
                 eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
@@ -109,7 +110,7 @@ function Doc() {
               </SText>
               <View style={styles.fill1} />
             </View>
-            <View style={[styles.row, { padding: 15 }]}>
+            <View style={[styles.row, { marginTop: 15, marginHorizontal: 'auto' }]}>
               <View style={styles.fill2} />
               <SText>
                 Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do
