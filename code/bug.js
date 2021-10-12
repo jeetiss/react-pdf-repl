@@ -2,13 +2,13 @@ import { Document, Page, View, Text, StyleSheet } from "@react-pdf/renderer";
 
 const styles = StyleSheet.create({
   column: {
-    display: 'flex',
+    display: "flex",
     flexDirection: "column",
     backgroundColor: "wheat",
   },
 
   row: {
-    display: 'flex',
+    display: "flex",
     flexDirection: "row",
     flexGrow: 1,
   },
@@ -20,24 +20,35 @@ const styles = StyleSheet.create({
 
   green: {
     backgroundColor: "green",
-  }
+  },
 });
+
+// <Document>
+//   <Page style={styles.column}>
+//     <View style={styles.row}>
+//       <View style={styles.fill}></View>
+
+//       {/* <View style={[styles.fill, styles.green]}></View> */}
+
+//       <Text>lorem ipsum</Text>
+//     </View>
+//   </Page>
+// </Document>
 
 const Bug = () => (
   <Document>
-    <Page style={styles.column}>
-      <View style={styles.row}>
-        <View style={styles.fill}></View>
-        
-        {/* <View style={[styles.fill, styles.green]}></View> */}
-        
-        <Text>lorem ipsum</Text>
-      </View>
+    <Page>
+      <View
+        render={({ pageNumber }) => <Text>Im visible in all pages!</Text>}
+      />
+
+      <Text
+        render={({ pageNumber, totalPages }) => `${pageNumber} / ${totalPages}`}
+        fixed
+      />
     </Page>
   </Document>
 );
-
-
 
 // hack for hmr
 const exportComponent = { component: Bug };
