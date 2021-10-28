@@ -40,9 +40,35 @@ const Doc = () => (
         <View style={styles.row}>
           <Text style={styles.text}>
             Lorem ipsum dolor sita met cons ecte tur ad ip
+            Lorem ipsum dolor sita met cons ecte tur ad ip
           </Text>
           <View style={styles.fill1} />
         </View>
+
+        <View style={styles.row}>
+          <View style={styles.fill1} />
+          <Text style={styles.text}>
+            Lorem ipsum dolor sita met cons ecte tur ad ip
+            Lorem ipsum dolor sita met cons ecte tur ad ip
+          </Text>
+        </View>
+
+        <View style={styles.row}>
+          <Text style={styles.text}>
+            Lorem ipsum dolor sita met cons ecte tur ad ip
+            Lorem ipsum dolor sita met cons ecte tur ad ip
+          </Text>
+          <View style={styles.fill1} />
+        </View>
+
+        <View style={styles.row}>
+          <View style={styles.fill1} />
+          <Text style={styles.text}>
+            Lorem ipsum dolor sita met cons ecte tur ad ip
+            Lorem ipsum dolor sita met cons ecte tur ad ip
+          </Text>
+        </View>
+        
       </View>
     </Page>
   </Document>

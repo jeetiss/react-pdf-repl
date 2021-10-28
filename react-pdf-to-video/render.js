@@ -6,30 +6,25 @@ const {
   Page,
   View,
   Text,
-} = require("@react-pdf/renderer-v1");
+} = require("@react-pdf/renderer");
 const render = require("./index");
 const { writeFile } = require("fs/promises");
-("use strict");
 
-const styles = StyleSheet.create({
+var styles = StyleSheet.create({
   body: {
+    padding: 20,
     fontFamily: "Oswald",
-    padding: "40 50",
+  },
+  card: {
+    padding: 20,
+    backgroundColor: "#efefef",
+    color: "rgb(23, 23, 23)",
+    borderRadius: 14,
   },
   title: {
-    fontSize: 14,
-    lineHeight: 16 / 14,
-    marginBottom: 12,
-    color: "#1A1A1A",
-  },
-  text: {
-    fontSize: 10,
-    lineHeight: 12 / 10,
-  },
-  size: {
-    position: "absolute",
-    backgroundColor: "wheat",
-    width: 20,
+    fontSize: 24,
+    fontWeight: 700,
+    paddingBottom: 8,
   },
 });
 
@@ -38,73 +33,45 @@ Font.register({
   src: "https://fonts.gstatic.com/s/oswald/v13/Y_TKV6o8WovbUd3m_X9aAA.ttf",
 });
 
-var Show = function Show(_ref) {
-  var minPresenceAhead = _ref.minPresenceAhead,
-    children = _ref.children;
-  return  React.createElement(
-    View,
-    {
-      minPresenceAhead: minPresenceAhead,
-    },
-    children,
-     React.createElement(View, {
-      style: [
-        styles.size,
-        {
-          bottom: -minPresenceAhead,
-          height: minPresenceAhead,
-        },
-      ],
-    })
-  );
-};
-
-const doc = (index) => (
-   React.createElement(
+const doc = (i) =>
+  React.createElement(
     Document,
     null,
-     React.createElement(
+    React.createElement(
       Page,
       {
         style: styles.body,
-        size: [300, 225],
+        size: [400, 400],
       },
-       React.createElement(View, {
+      React.createElement(View, {
         style: {
-          paddingTop: index,
+          paddingBottom: i,
         },
       }),
-       React.createElement(
+      React.createElement(
         View,
-        null,
-         React.createElement(
-          Show,
-          {
-            minPresenceAhead: 26,
-          },
-           React.createElement(
-            Text,
-            {
-              style: styles.title,
-            },
-            "Header 1"
-          )
-        ),
-         React.createElement(
+        {
+          style: styles.card,
+        },
+        React.createElement(
           Text,
           {
-            style: styles.text,
+            style: styles.title,
           },
-          "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis vehicula nisl quis ex dapibus sollicitudin. Fusce blandit ante sed auctor laoreet. Donec eget mollis nisl. Suspendisse potenti. Proin suscipit, diam non efficitur tempor, turpis mi sodales lacus, nec accumsan orci dolor quis eros. Vivamus sagittis scelerisque dictum. Fusce tincidunt ultricies arcu non viverra."
+          "Section Title"
+        ),
+        React.createElement(
+          Text,
+          null,
+          "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum."
         )
       )
     )
-  )
-);
+  );
 
 (async () => {
   try {
-    for (let i = 1; i < 145; ++i) {
+    for (let i = 1; i < 331; ++i) {
       const buffer = await render(doc(i));
       await writeFile(
         `react-pdf-to-video/frames/${String(i).padStart(3, "0")}.png`,
@@ -118,12 +85,12 @@ const doc = (index) => (
   }
 })();
 
-// 
-// command for video concatenation 
+//
+// command for video concatenation
 // ffmpeg -i out.mp4 -i out2.mp4 -filter_complex hstack output.mp4
-// 
+//
 
-// 
+//
 // command for video creation
-// ffmpeg -r 10 -i %03d.png -c:v libx264 -vf fps=10 -pix_fmt yuv420p out.mp4
-// 
+// ffmpeg -r 30 -i %03d.png -c:v libx264 -vf fps=30 -pix_fmt yuv420p out.mp4
+//

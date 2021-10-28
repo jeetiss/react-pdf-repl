@@ -1,7 +1,7 @@
 const { Buffer } = require("buffer");
 const Canvas = require("canvas");
 const pdfjs = require("pdfjs-dist/legacy/build/pdf");
-const { renderToStream } = require("@react-pdf/renderer-v1");
+const { renderToStream } = require("@react-pdf/renderer");
 
 const NodeCanvasFactory = {
   create(width, height) {
@@ -28,7 +28,7 @@ const NodeCanvasFactory = {
 
 async function getCanvas(pagePromise) {
   const page = await pagePromise;
-  const viewport = page.getViewport({ scale: 2.0 });
+  const viewport = page.getViewport({ scale: 1.0 });
   const canvasFactory = NodeCanvasFactory;
   const { canvas, context } = canvasFactory.create(
     viewport.width,
@@ -98,7 +98,7 @@ const renderComponent = async (element) => {
   const canvases = await Promise.all(pages.map((page) => getCanvas(page)));
   const pageSnapshots = composeCanvases(canvases);
 
-  const bgCanvas = Canvas.createCanvas(320 * 2, 480 * 2);
+  const bgCanvas = Canvas.createCanvas(440, 430 * 2);
 
   const ctx = bgCanvas.getContext("2d");
   ctx.fillStyle = "#7D7D7D";
