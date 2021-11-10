@@ -3,14 +3,9 @@ import { Document, Page, View, Text } from "@react-pdf/renderer";
 const Bug = () => (
   <Document>
     <Page>
-      <View
-        render={({ pageNumber }) => <Text>Im visible in all pages!</Text>}
-      />
-
-      <Text
-        render={({ pageNumber, totalPages }) => `${pageNumber} / ${totalPages}`}
-        fixed
-      />
+      <View style={{ alignSelf: "flex-start", backgroundColor: "green" }}>
+        <Text style={{ transform: "translate(50%, 0)" }}>hello</Text>
+      </View>
     </Page>
   </Document>
 );
