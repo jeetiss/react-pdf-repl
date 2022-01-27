@@ -11,8 +11,8 @@ import {
   Image,
   Canvas,
   StyleSheet,
-  version as reactPdfVersion
-} from "@react-pdf/renderer";
+  version as reactPdfVersion,
+} from "../exp-layout";
 
 import preprocessJsx from "./process-jsx";
 
@@ -47,7 +47,7 @@ const evaluate = (code) =>
     c.evaluate(executableCode);
   });
 
-const version = () => reactPdfVersion
+const version = () => reactPdfVersion;
 
 const methods = {
   evaluate,

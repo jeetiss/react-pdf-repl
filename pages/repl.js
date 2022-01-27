@@ -1,13 +1,11 @@
 import { useEffect, useReducer, useState } from "react";
 import LZString from "lz-string";
 
-import { ReactCompareSlider } from "react-compare-slider";
-
 import { createSingleton } from "../hooks";
-import { WorkerV1, WorkerV2 } from "../worker";
+import { WorkerV2 } from "../worker";
 
 import dynamic from "next/dynamic";
-import { code as defCode } from "../code/default-example";
+import { code as defCode } from "../code/nth-page";
 
 // import definitions from "../types/builded.d.ts";
 
@@ -30,11 +28,6 @@ pdfjs.GlobalWorkerOptions.workerSrc = workerSrc;
 
 const MonacoEditor = dynamic(import("react-monaco-editor"), { ssr: false });
 
-const useWorkerV1 = createSingleton(
-  () => new WorkerV1(),
-  (worker) => worker.terminate()
-);
-
 const useWorkerV2 = createSingleton(
   () => new WorkerV2(),
   (worker) => worker.terminate()
@@ -44,11 +37,6 @@ const useMergeState = (initial) =>
   useReducer((s, a) => ({ ...s, ...a }), initial);
 
 const Repl = () => {
-  const [state1, update1] = useMergeState({
-    url: null,
-    version: null,
-    time: null,
-  });
   const [state2, update2] = useMergeState({
     url: null,
     version: null,
@@ -60,30 +48,25 @@ const Repl = () => {
     if (typeof window === "undefined") return;
 
     const query = new URLSearchParams(window.location.search);
-    if (query.has('code')) {
-      return decompress(query.get('code'));
+    if (query.has("code")) {
+      return decompress(query.get("code"));
     }
 
     return defCode;
   });
 
   const pdfV2 = useWorkerV2();
-  const pdfV1 = useWorkerV1();
 
   useEffect(() => {
-    pdfV1.call("version").then((version) => update1({ version }));
     pdfV2.call("version").then((version) => update2({ version }));
-  }, [pdfV1, pdfV2, update1, update2]);
+  }, [pdfV2, update2]);
 
   useEffect(() => {
     const startTime = Date.now();
-    pdfV1
-      .call("evaluate", code)
-      .then((url) => update1({ url, time: Date.now() - startTime }));
     pdfV2
       .call("evaluate", code)
       .then((url) => update2({ url, time: Date.now() - startTime }));
-  }, [pdfV2, code, pdfV1, update1, update2]);
+  }, [pdfV2, code, update2]);
 
   return (
     <div style={{ display: "flex" }}>
@@ -157,43 +140,22 @@ const Repl = () => {
             justifyContent: "space-around",
           }}
         >
-          <div>
-            <div>react-pdf v{state1.version}</div>
-            <div>time:{state1.time}</div>
-          </div>
-
           <div style={{ textAlign: "right" }}>
             <div>react-pdf v{state2.version}</div>
             <div>time:{state2.time}</div>
           </div>
         </div>
 
-        <ReactCompareSlider
-          itemOne={
-            state1.url && (
-              <Document file={state1.url}>
-                <Page
-                  scale={0.85}
-                  pageNumber={page}
-                  renderTextLayer={false}
-                  renderAnnotationLayer={false}
-                />
-              </Document>
-            )
-          }
-          itemTwo={
-            state2.url && (
-              <Document file={state2.url}>
-                <Page
-                  scale={0.85}
-                  pageNumber={page}
-                  renderTextLayer={false}
-                  renderAnnotationLayer={false}
-                />
-              </Document>
-            )
-          }
-        ></ReactCompareSlider>
+        {state2.url && (
+          <Document file={state2.url}>
+            <Page
+              scale={0.85}
+              pageNumber={page}
+              renderTextLayer={false}
+              renderAnnotationLayer={false}
+            />
+          </Document>
+        )}
 
         <div>
           <button onClick={() => setPage((page) => page - 1)}>prev</button>

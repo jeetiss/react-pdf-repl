@@ -11,8 +11,7 @@
   },
   "dependencies": {
     "@next/bundle-analyzer": "^11.1.0",
-    "@react-pdf/renderer": "2.0.21",
-    "@react-pdf/renderer-v1": "npm:@react-pdf/renderer@^1.6.17",
+    "@react-pdf/renderer": "2.1.1",
     "acorn": "^8.6.0",
     "acorn-jsx": "^5.3.2",
     "astring": "^1.8.1",
