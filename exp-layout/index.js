@@ -34,9 +34,10 @@ const pdf = (initialValue) => {
 
     const layout = await layoutDocument(container.document, fontStore);
 
-    console.log(layout)
+    const stream = renderPDF(ctx, layout);
+    stream.__INTERNAL_LAYOUT = layout
 
-    return renderPDF(ctx, layout);
+    return stream
   };
 
   const toBlob = async () => {
@@ -51,11 +52,11 @@ const pdf = (initialValue) => {
         });
 
         stream.on("end", () => {
-          resolve(
-            new Blob(chunks, {
-              type: "application/pdf",
-            })
-          );
+          const blob = new Blob(chunks, {
+            type: "application/pdf",
+          })
+          blob.__SECRET_LAYOUT_DO_NOT_USE_OR_YOU_WILL_BE_FIRED = stream.__INTERNAL_LAYOUT
+          resolve(blob);
         });
       } catch (error) {
         reject(error);
