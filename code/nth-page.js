@@ -4,10 +4,10 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     border: '1px solid black',
-    '&:first-page': {
+    '&:first': {
       backgroundColor: 'red'
     },
-    '&:last-page': {
+    '&:nth-child(3)': {
       backgroundColor: 'blue'
     }
   }

@@ -1,61 +1,64 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable no-continue */
 /* eslint-disable prefer-destructuring */
 
-import * as R from 'ramda';
-import * as P from '@react-pdf/primitives';
+import * as R from "ramda";
+import * as P from "@react-pdf/primitives";
 
-import isFixed from '../node/isFixed';
-import splitText from '../text/splitText';
-import splitNode from '../node/splitNode';
-import canNodeWrap from '../node/getWrap';
-import getWrapArea from '../page/getWrapArea';
-import getContentArea from '../page/getContentArea';
-import createInstance from '../node/createInstance';
-import shouldNodeBreak from '../node/shouldBreak';
-import resolveTextLayout from './resolveTextLayout';
-import resolveInheritance from './resolveInheritance';
-import { resolvePageDimensions } from './resolveDimensions';
+import isFixed from "../node/isFixed";
+import splitText from "../text/splitText";
+import splitNode from "../node/splitNode";
+import canNodeWrap from "../node/getWrap";
+import getWrapArea from "../page/getWrapArea";
+import getContentArea from "../page/getContentArea";
+import createInstance from "../node/createInstance";
+import shouldNodeBreak from "../node/shouldBreak";
+import resolveTextLayout from "./resolveTextLayout";
+import resolveInheritance from "./resolveInheritance";
+import { resolvePageDimensions } from "./resolveDimensions";
 
-const isText = R.propEq('type', P.Text);
+const isText = R.propEq("type", P.Text);
 
 // Prevent splitting elements by low decimal numbers
 const SAFTY_THRESHOLD = 0.001;
 
-const assingChildren = R.assoc('children');
+const assingChildren = R.assoc("children");
 
-const getTop = R.pathOr(0, ['box', 'top']);
+const getTop = R.pathOr(0, ["box", "top"]);
 
-const getHeight = R.path(['box', 'height']);
+const getHeight = R.path(["box", "height"]);
 
-const getChildren = R.propOr([], 'children');
+const getChildren = R.propOr([], "children");
 
 const isElementOutside = R.useWith(R.lte, [R.identity, getTop]);
 
 const allFixed = R.all(isFixed);
 
-const isDynamic = R.hasPath(['props', 'render']);
+const isDynamic = R.hasPath(["props", "render"]);
 
-const compose = (...fns) => (value, ...args) => {
-  let result = value;
-  const reversedFns = R.reverse(fns);
+const compose =
+  (...fns) =>
+  (value, ...args) => {
+    let result = value;
+    const reversedFns = R.reverse(fns);
 
-  for (let i = 0; i < reversedFns.length; i += 1) {
-    const fn = reversedFns[i];
-    result = fn(result, ...args);
-  }
+    for (let i = 0; i < reversedFns.length; i += 1) {
+      const fn = reversedFns[i];
+      result = fn(result, ...args);
+    }
 
-  return result;
-};
+    return result;
+  };
 
 const relayoutPage = compose(
   resolveTextLayout,
   resolveInheritance,
-  resolvePageDimensions,
+  resolvePageDimensions
 );
 
-const warnUnavailableSpace = node => {
+const warnUnavailableSpace = (node) => {
   console.warn(
-    `Node of type ${node.type} can't wrap between pages and it's bigger than available page height`,
+    `Node of type ${node.type} can't wrap between pages and it's bigger than available page height`
   );
 };
 
@@ -135,7 +138,7 @@ const splitView = (node, height, contentArea) => {
   const [currentChilds, nextChildren] = splitChildren(
     height,
     contentArea,
-    node,
+    node
   );
 
   return [
@@ -146,7 +149,7 @@ const splitView = (node, height, contentArea) => {
 
 const split = R.ifElse(isText, splitText, splitView);
 
-const shouldResolveDynamicNodes = node => {
+const shouldResolveDynamicNodes = (node) => {
   const children = node.children || [];
   return isDynamic(node) || children.some(shouldResolveDynamicNodes);
 };
@@ -161,11 +164,11 @@ const resolveDynamicNodes = (props, node) => {
       return [createInstance(res)].filter(Boolean);
     }
 
-    return children.map(c => resolveDynamicNodes(props, c));
+    return children.map((c) => resolveDynamicNodes(props, c));
   };
 
   // We reset dynamic text box so it can be computed again later on
-  const resolveBox = box => {
+  const resolveBox = (box) => {
     return isNodeDynamic && isText(node) ? { ...box, height: 0 } : box;
   };
 
@@ -173,9 +176,9 @@ const resolveDynamicNodes = (props, node) => {
     {
       box: resolveBox,
       children: resolveChildren,
-      lines: prev => (isNodeDynamic ? null : prev),
+      lines: (prev) => (isNodeDynamic ? null : prev),
     },
-    node,
+    node
   );
 };
 
@@ -189,23 +192,24 @@ const resolveDynamicPage = (props, page, fontStore) => {
 };
 
 const splitPage = (page, pageNumber, fontStore) => {
+  page.box.pageNumber = pageNumber;
   const wrapArea = getWrapArea(page);
   const contentArea = getContentArea(page);
-  const height = R.path(['style', 'height'], page);
+  const height = R.path(["style", "height"], page);
   const dynamicPage = resolveDynamicPage({ pageNumber }, page, fontStore);
 
   const [currentChilds, nextChilds] = splitNodes(
     wrapArea,
     contentArea,
-    dynamicPage.children,
+    dynamicPage.children
   );
 
-  const relayout = node => relayoutPage(node, fontStore);
+  const relayout = (node) => relayoutPage(node, fontStore);
 
   const currentPage = R.compose(
     relayout,
     assingChildren(currentChilds),
-    R.assocPath(['box', 'height'], height),
+    R.assocPath(["box", "height"], height)
   )(page);
 
   if (R.isEmpty(nextChilds) || allFixed(nextChilds)) return [currentPage, null];
@@ -213,13 +217,13 @@ const splitPage = (page, pageNumber, fontStore) => {
   const nextPage = R.compose(
     relayout,
     assingChildren(nextChilds),
-    R.dissocPath(['box', 'height']),
+    R.dissocPath(["box", "height"])
   )(page);
 
   return [currentPage, nextPage];
 };
 
-const resolvePageIndices = fontStore => (page, pageNumber, pages) => {
+const resolvePageIndices = (fontStore) => (page, pageNumber, pages) => {
   const totalPages = pages.length;
 
   const props = {
@@ -232,7 +236,7 @@ const resolvePageIndices = fontStore => (page, pageNumber, pages) => {
   return resolveDynamicPage(props, page, fontStore);
 };
 
-const assocSubPageData = subpages => {
+const assocSubPageData = (subpages) => {
   return subpages.map((page, i) => ({
     ...page,
     subPageNumber: i,
@@ -240,10 +244,10 @@ const assocSubPageData = subpages => {
   }));
 };
 
-const dissocSubPageData = page => {
+const dissocSubPageData = (page) => {
   return R.compose(
-    R.dissoc('subPageNumber'),
-    R.dissoc('subPageTotalPages'),
+    R.dissoc("subPageNumber"),
+    R.dissoc("subPageTotalPages")
   )(page);
 };
 
@@ -287,7 +291,7 @@ const resolvePagination = (doc, fontStore) => {
   }
 
   pages = pages.map(
-    R.compose(dissocSubPageData, resolvePageIndices(fontStore)),
+    R.compose(dissocSubPageData, resolvePageIndices(fontStore))
   );
 
   return assingChildren(pages, doc);

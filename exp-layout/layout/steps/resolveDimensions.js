@@ -1,49 +1,49 @@
-import * as R from 'ramda';
-import Yoga from '@react-pdf/yoga';
-import * as P from '@react-pdf/primitives';
+import * as R from "ramda";
+import Yoga from "@react-pdf/yoga";
+import * as P from "@react-pdf/primitives";
 
-import getMargin from '../node/getMargin';
-import getPadding from '../node/getPadding';
-import getPosition from '../node/getPosition';
-import getDimension from '../node/getDimension';
-import getBorderWidth from '../node/getBorderWidth';
-import setDisplay from '../node/setDisplay';
-import setOverflow from '../node/setOverflow';
-import setFlexWrap from '../node/setFlexWrap';
-import setFlexGrow from '../node/setFlexGrow';
-import setFlexBasis from '../node/setFlexBasis';
-import setAlignSelf from '../node/setAlignSelf';
-import setAlignItems from '../node/setAlignItems';
-import setFlexShrink from '../node/setFlexShrink';
-import setAspectRatio from '../node/setAspectRatio';
-import setAlignContent from '../node/setAlignContent';
-import setPositionType from '../node/setPositionType';
-import setFlexDirection from '../node/setFlexDirection';
-import setJustifyContent from '../node/setJustifyContent';
+import getMargin from "../node/getMargin";
+import getPadding from "../node/getPadding";
+import getPosition from "../node/getPosition";
+import getDimension from "../node/getDimension";
+import getBorderWidth from "../node/getBorderWidth";
+import setDisplay from "../node/setDisplay";
+import setOverflow from "../node/setOverflow";
+import setFlexWrap from "../node/setFlexWrap";
+import setFlexGrow from "../node/setFlexGrow";
+import setFlexBasis from "../node/setFlexBasis";
+import setAlignSelf from "../node/setAlignSelf";
+import setAlignItems from "../node/setAlignItems";
+import setFlexShrink from "../node/setFlexShrink";
+import setAspectRatio from "../node/setAspectRatio";
+import setAlignContent from "../node/setAlignContent";
+import setPositionType from "../node/setPositionType";
+import setFlexDirection from "../node/setFlexDirection";
+import setJustifyContent from "../node/setJustifyContent";
 import {
   setMarginTop,
   setMarginRight,
   setMarginBottom,
   setMarginLeft,
-} from '../node/setMargin';
+} from "../node/setMargin";
 import {
   setPaddingTop,
   setPaddingRight,
   setPaddingBottom,
   setPaddingLeft,
-} from '../node/setPadding';
+} from "../node/setPadding";
 import {
   setBorderTop,
   setBorderRight,
   setBorderBottom,
   setBorderLeft,
-} from '../node/setBorderWidth';
+} from "../node/setBorderWidth";
 import {
   setPositionTop,
   setPositionRight,
   setPositionBottom,
   setPositionLeft,
-} from '../node/setPosition';
+} from "../node/setPosition";
 import {
   setWidth,
   setHeight,
@@ -51,18 +51,18 @@ import {
   setMaxWidth,
   setMinHeight,
   setMaxHeight,
-} from '../node/setDimension';
-import measureSvg from '../svg/measureSvg';
-import measureText from '../text/measureText';
-import measureImage from '../image/measureImage';
-import measureCanvas from '../canvas/measureCanvas';
+} from "../node/setDimension";
+import measureSvg from "../svg/measureSvg";
+import measureText from "../text/measureText";
+import measureImage from "../image/measureImage";
+import measureCanvas from "../canvas/measureCanvas";
 
-const YOGA_NODE = '_yogaNode';
+const YOGA_NODE = "_yogaNode";
 const YOGA_CONFIG = Yoga.Config.create();
 
 YOGA_CONFIG.setPointScaleFactor(0);
 
-const isType = R.propEq('type');
+const isType = R.propEq("type");
 
 const isSvg = isType(P.Svg);
 const isText = isType(P.Text);
@@ -72,7 +72,7 @@ const isImage = isType(P.Image);
 const isCanvas = isType(P.Canvas);
 const isTextInstance = isType(P.TextInstance);
 
-const setNodeHeight = node => {
+const setNodeHeight = (node) => {
   const value = isPage(node) ? node.box.height : node.style.height;
   return setHeight(value);
 };
@@ -83,7 +83,7 @@ const setNodeHeight = node => {
  * @param {Object} node
  * @returns {Object} node
  */
-const setYogaValues = R.tap(node => {
+const setYogaValues = R.tap((node) => {
   R.compose(
     setNodeHeight(node),
     setWidth(node.style.width),
@@ -119,7 +119,7 @@ const setYogaValues = R.tap(node => {
     setAspectRatio(node.style.aspectRatio),
     setFlexBasis(node.style.flexBasis),
     setFlexGrow(node.style.flexGrow),
-    setFlexShrink(node.style.flexShrink),
+    setFlexShrink(node.style.flexShrink)
   )(node);
 });
 
@@ -130,10 +130,12 @@ const setYogaValues = R.tap(node => {
  * @param {Object} node
  * @param {Object} node
  */
-const insertYogaNodes = parent =>
-  R.tap(child => parent.insertChild(child[YOGA_NODE], parent.getChildCount()));
+const insertYogaNodes = (parent) =>
+  R.tap((child) =>
+    parent.insertChild(child[YOGA_NODE], parent.getChildCount())
+  );
 
-const setMeasureFunc = (page, fontStore) => node => {
+const setMeasureFunc = (page, fontStore) => (node) => {
   const yogaNode = node[YOGA_NODE];
 
   if (isText(node)) {
@@ -168,8 +170,17 @@ const isLayoutElement = R.allPass([isNotText, isNotNote, isNotSvg]);
  * @param {Object} node
  * @returns {Object} node with appended yoga node
  */
-const createYogaNodes = (page, fontStore) => node => {
+const createYogaNodes = (page, fontStore) => (node) => {
   const yogaNode = Yoga.Node.createWithConfig(YOGA_CONFIG);
+
+  if (node.style.___recompile) {
+    const box = R.prop("box", page);
+    const style = R.prop("style", page);
+    const container = R.isEmpty(box) ? style : box;
+
+    console.log('recompile styles with:', container)
+    node.style = node.style.___recompile(container);
+  }
 
   return R.compose(
     setMeasureFunc(page, fontStore),
@@ -177,15 +188,12 @@ const createYogaNodes = (page, fontStore) => node => {
       isLayoutElement,
       R.evolve({
         children: R.map(
-          R.compose(
-            insertYogaNodes(yogaNode),
-            createYogaNodes(page, fontStore),
-          ),
+          R.compose(insertYogaNodes(yogaNode), createYogaNodes(page, fontStore))
         ),
-      }),
+      })
     ),
     setYogaValues,
-    R.assoc(YOGA_NODE, yogaNode),
+    R.assoc(YOGA_NODE, yogaNode)
   )(node);
 };
 
@@ -195,7 +203,7 @@ const createYogaNodes = (page, fontStore) => node => {
  * @param {Object} node
  * @returns {Object} node
  */
-const calculateLayout = page => {
+const calculateLayout = (page) => {
   page[YOGA_NODE].calculateLayout();
   return page;
 };
@@ -206,7 +214,7 @@ const calculateLayout = page => {
  * @param {Object} node
  * @returns {Object} node with box data
  */
-const persistDimensions = node => {
+const persistDimensions = (node) => {
   return R.evolve({
     children: R.map(R.when(isNotTextInstance, persistDimensions)),
     box: R.always(
@@ -216,7 +224,7 @@ const persistDimensions = node => {
         getBorderWidth(node),
         getPosition(node),
         getDimension(node),
-      ]),
+      ])
     ),
   })(node);
 };
@@ -227,10 +235,10 @@ const persistDimensions = node => {
  * @param {Object} node
  * @returns {Object} node without yoga node
  */
-const destroyYogaNodes = node => {
+const destroyYogaNodes = (node) => {
   return R.compose(
     R.dissoc(YOGA_NODE),
-    R.evolve({ children: R.map(destroyYogaNodes) }),
+    R.evolve({ children: R.map(destroyYogaNodes) })
   )(node);
 };
 
@@ -240,7 +248,7 @@ const destroyYogaNodes = node => {
  * @param {Object} node
  * @returns {Object} node without yoga node
  */
-const freeYogaNodes = node => {
+const freeYogaNodes = (node) => {
   if (node[YOGA_NODE]) node[YOGA_NODE].freeRecursive();
   return node;
 };
@@ -262,8 +270,8 @@ export const resolvePageDimensions = (page, fontStore) =>
       freeYogaNodes,
       persistDimensions,
       calculateLayout,
-      createYogaNodes(page, fontStore),
-    ),
+      createYogaNodes(page, fontStore)
+    )
   )(page);
 
 /**
@@ -273,7 +281,7 @@ export const resolvePageDimensions = (page, fontStore) =>
  * @returns {Object} root object with correct 'box' layout attributes
  */
 const resolveDimensions = (node, fontStore) => {
-  const mapChild = child => resolvePageDimensions(child, fontStore);
+  const mapChild = (child) => resolvePageDimensions(child, fontStore);
   return R.evolve({ children: R.map(mapChild) })(node);
 };
 
