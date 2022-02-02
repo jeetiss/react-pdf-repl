@@ -31,13 +31,13 @@ const pdf = (initialValue) => {
       displayTitle: true,
       autoFirstPage: false,
     });
-
+    
     const layout = await layoutDocument(container.document, fontStore);
 
     const stream = renderPDF(ctx, layout);
-    stream.__INTERNAL_LAYOUT = layout
+    stream.__INTERNAL_LAYOUT = layout;
 
-    return stream
+    return stream;
   };
 
   const toBlob = async () => {
@@ -54,8 +54,9 @@ const pdf = (initialValue) => {
         stream.on("end", () => {
           const blob = new Blob(chunks, {
             type: "application/pdf",
-          })
-          blob.__SECRET_LAYOUT_DO_NOT_USE_OR_YOU_WILL_BE_FIRED = stream.__INTERNAL_LAYOUT
+          });
+          blob.__SECRET_LAYOUT_DO_NOT_USE_OR_YOU_WILL_BE_FIRED =
+            stream.__INTERNAL_LAYOUT;
           resolve(blob);
         });
       } catch (error) {
@@ -77,7 +78,7 @@ const StyleSheet = {
   create: (s) => s,
 };
 
-const version = '0.0.0-experimental'
+const version = "0.0.0-experimental";
 
 export * from "@react-pdf/primitives";
 export { version, Font, StyleSheet, pdf };

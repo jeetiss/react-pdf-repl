@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { useAtom } from "jotai";
 import { Mosaic, MosaicWindow } from "react-mosaic-component";
 
-import doc from "../code/fizzbuzz";
+import doc from "../code/diff-content";
 import { pdf } from "../exp-layout";
 
 import styles from "../styles/layout.module.css";

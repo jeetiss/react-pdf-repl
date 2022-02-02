@@ -196,6 +196,16 @@ const splitPage = (page, pageNumber, fontStore) => {
   const wrapArea = getWrapArea(page);
   const contentArea = getContentArea(page);
   const height = R.path(["style", "height"], page);
+
+  console.log(
+    "PAGE:",
+    pageNumber,
+    "wrapArea",
+    wrapArea,
+    "contentArea",
+    contentArea
+  );
+
   const dynamicPage = resolveDynamicPage({ pageNumber }, page, fontStore);
 
   const [currentChilds, nextChilds] = splitNodes(
@@ -216,6 +226,10 @@ const splitPage = (page, pageNumber, fontStore) => {
 
   const nextPage = R.compose(
     relayout,
+    (page) => {
+      page.box.pageNumber = pageNumber + 1;
+      return page;
+    },
     assingChildren(nextChilds),
     R.dissocPath(["box", "height"])
   )(page);

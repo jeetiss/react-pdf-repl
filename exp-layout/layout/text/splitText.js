@@ -1,15 +1,15 @@
-import * as R from 'ramda';
+import * as R from "ramda";
 
-import lineIndexAtHeight from './lineIndexAtHeight';
-import heightAtLineIndex from './heightAtLineIndex';
+import lineIndexAtHeight from "./lineIndexAtHeight";
+import heightAtLineIndex from "./heightAtLineIndex";
 
 const zero = R.always(0);
 
-const getTop = R.pathOr(0, ['box', 'top']);
+const getTop = R.pathOr(0, ["box", "top"]);
 
-const getWidows = R.pathOr(2, ['props', 'widows']);
+const getWidows = R.pathOr(2, ["props", "widows"]);
 
-const getOrphans = R.pathOr(2, ['props', 'orphans']);
+const getOrphans = R.pathOr(2, ["props", "orphans"]);
 
 const getLineBreak = (node, height) => {
   const top = getTop(node);
@@ -62,8 +62,20 @@ const splitText = (node, height) => {
         borderBottomWidth: zero,
       },
     },
-    node,
+    node
   );
+
+  const totalIndex = current.lines.reduce(
+    (length, line) => length + line.string.length,
+    0
+  );
+
+  current.children = [
+    {
+      type: "TEXT_INSTANCE",
+      value: current.children[0].value.slice(0, totalIndex),
+    },
+  ];
 
   const next = R.evolve(
     {
@@ -81,8 +93,15 @@ const splitText = (node, height) => {
         borderTopWidth: zero,
       },
     },
-    node,
+    node
   );
+
+  next.children = [
+    {
+      type: "TEXT_INSTANCE",
+      value: next.children[0].value.slice(totalIndex),
+    },
+  ];
 
   return [current, next];
 };

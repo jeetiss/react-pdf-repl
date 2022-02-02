@@ -12,13 +12,13 @@ const falseFunc = () => false;
 const toFunction = (ast) => {
   const first = ({ index }) => index === 1;
 
-  const nth = (step, offset) => {    
+  const nth = (step, offset) => {
     if (offset <= 0 && step <= 0) return falseFunc;
 
     if (step === -1) return ({ index }) => index <= offset;
     if (step === 0) return ({ index }) => index === offset;
-    if (step === 1) return offset <= 0 ? trueFunc : ({ index }) => index >= offset;
-
+    if (step === 1)
+      return offset <= 0 ? trueFunc : ({ index }) => index >= offset;
 
     const absA = Math.abs(step);
     const bMod = ((offset % absA) + absA) % absA;
@@ -110,7 +110,12 @@ const stylesheetWithPseudo = (container) => (style) => {
   let originalStyles = flattenStyles(style);
 
   if (Object.keys(originalStyles).some((key) => key.startsWith("&"))) {
+    let compiledFor = null;
+    let compiledStyles = null;
     const recompile = (container) => {
+      if (compiledFor === container.pageNumber && compiledStyles)
+        return compiledStyles;
+
       let styles = { ...originalStyles };
       for (let [key, value] of Object.entries(styles)) {
         if (key.startsWith("&")) {
@@ -122,8 +127,8 @@ const stylesheetWithPseudo = (container) => (style) => {
         }
       }
 
-      const compiledStyles = stylesheet(container, styles);
-
+      compiledFor = container.pageNumber ?? 1;
+      compiledStyles = stylesheet(container, styles);
       compiledStyles.___recompile = recompile;
 
       return compiledStyles;

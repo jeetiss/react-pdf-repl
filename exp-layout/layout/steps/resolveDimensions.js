@@ -178,8 +178,13 @@ const createYogaNodes = (page, fontStore) => (node) => {
     const style = R.prop("style", page);
     const container = R.isEmpty(box) ? style : box;
 
-    console.log('recompile styles with:', container)
+    page.___reflow = true;
     node.style = node.style.___recompile(container);
+  }
+
+  if (page.___reflow && isText(node)) {
+    delete node.lines
+    delete node.alignOffset
   }
 
   return R.compose(

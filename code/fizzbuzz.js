@@ -1,5 +1,4 @@
 import {
-  pdf,
   Text,
   View,
   Document,
