@@ -196,16 +196,6 @@ const splitPage = (page, pageNumber, fontStore) => {
   const wrapArea = getWrapArea(page);
   const contentArea = getContentArea(page);
   const height = R.path(["style", "height"], page);
-
-  console.log(
-    "PAGE:",
-    pageNumber,
-    "wrapArea",
-    wrapArea,
-    "contentArea",
-    contentArea
-  );
-
   const dynamicPage = resolveDynamicPage({ pageNumber }, page, fontStore);
 
   const [currentChilds, nextChilds] = splitNodes(
