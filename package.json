@@ -21,14 +21,14 @@
     "jotai": "^1.4.6",
     "lz-string": "^1.4.4",
     "monaco-editor-webpack-plugin": "^4.1.2",
-    "next": "11.0.1",
+    "next": "12.0.10",
     "react": "17.0.2",
     "react-compare-slider": "^2.2.0",
     "react-dom": "17.0.2",
     "react-monaco-editor": "^0.46.0",
     "react-mosaic-component": "^5.0.0",
     "react-pdf": "^5.5.0",
-    "ses": "^0.15.1"
+    "ses": "^0.15.7"
   },
   "devDependencies": {
     "eslint": "7.32.0",
