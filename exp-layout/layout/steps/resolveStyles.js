@@ -68,7 +68,7 @@ const toFunction = (ast) => {
         }
 
         case "pseudo_class": {
-          if (node.value === "first") {
+          if (node.value === "first-page") {
             functions.push(first);
           } else if (node.value === "nth-child") {
             const nthNode = node.nodes.find((node) => node.type == "nth");
@@ -90,6 +90,10 @@ const toFunction = (ast) => {
           }
           break;
         }
+
+        default: {
+          console.error("unsuported selector type", node.type);
+        }
       }
     }
 
@@ -100,7 +104,10 @@ const toFunction = (ast) => {
 };
 
 const exec = (selector, options) => {
-  const ast = parse(selector);
+  if (selector.search(/nth-child/) !== -1) {
+    throw new Error("unsuported selector 'nth-child'");
+  }
+  const ast = parse(selector.replaceAll("nth-page", "nth-child"));
   const executor = toFunction(ast);
 
   return executor(options);

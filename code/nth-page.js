@@ -4,10 +4,10 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     border: '1px solid black',
-    '&:first': {
+    '&:first-page': {
       backgroundColor: 'red'
     },
-    '&:nth-child(3)': {
+    '&:nth-page(3)': {
       backgroundColor: 'blue'
     }
   }
@@ -26,4 +26,4 @@ render(
     </Page>
   </Document>
 );
-`
+`;
