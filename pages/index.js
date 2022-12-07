@@ -2,12 +2,14 @@ import { useEffect, useReducer, useState } from "react";
 import LZString from "lz-string";
 
 import { createSingleton } from "../hooks";
-import { WorkerV2 } from "../worker";
+import { Worker } from "../worker";
 
 import dynamic from "next/dynamic";
-import { code as defCode } from "../code/nth-page";
+import { code as defCode } from "../code/text-bug";
 
-// import definitions from "../types/builded.d.ts";
+import { Document, Page, pdfjs } from "react-pdf";
+import workerSrc from "pdfjs-dist/build/pdf.worker.min.js";
+pdfjs.GlobalWorkerOptions.workerSrc = workerSrc;
 
 const compress = (string) =>
   LZString.compressToBase64(string)
@@ -22,28 +24,38 @@ const decompress = (string) =>
       .replace(/_/g, "/") // Convert '_' to '/'
   );
 
-import { Document, Page, pdfjs } from "react-pdf";
-import workerSrc from "pdfjs-dist/build/pdf.worker.min.js";
-pdfjs.GlobalWorkerOptions.workerSrc = workerSrc;
-
 const MonacoEditor = dynamic(import("react-monaco-editor"), { ssr: false });
 
-const useWorkerV2 = createSingleton(
-  () => new WorkerV2(),
+const useWorker = createSingleton(
+  () => new Worker(),
   (worker) => worker.terminate()
 );
+
+const supportedVersions = [
+  "3.0.1",
+  "3.0.0",
+  "2.3.0",
+  "2.2.0",
+  "2.1.2",
+  "2.1.1",
+  "2.1.0",
+  "2.0.21",
+  "1.6.17",
+];
 
 const useMergeState = (initial) =>
   useReducer((s, a) => ({ ...s, ...a }), initial);
 
 const Repl = () => {
-  const [state2, update2] = useMergeState({
+  const [state, update] = useMergeState({
     url: null,
     version: null,
     time: null,
   });
 
   const [page, setPage] = useState(1);
+  const [pickedVersion, pickVersion] = useState(supportedVersions[0]);
+  const [isReady, setReady] = useState(false);
   const [code, setCode] = useState(() => {
     if (typeof window === "undefined") return;
 
@@ -55,18 +67,33 @@ const Repl = () => {
     return defCode;
   });
 
-  const pdfV2 = useWorkerV2();
+  const pdf = useWorker();
 
   useEffect(() => {
-    pdfV2.call("version").then((version) => update2({ version }));
-  }, [pdfV2, update2]);
+    if (pickedVersion !== state.version) {
+      console.log(`load @react-pdf v${pickedVersion}`);
+      setReady(false);
+      pdf
+        .call("init", pickedVersion)
+        .then(() => setReady(true))
+        .catch(console.log);
+    }
+  }, [pickedVersion, pdf, update, state.version]);
 
   useEffect(() => {
-    const startTime = Date.now();
-    pdfV2
-      .call("evaluate", code)
-      .then((url) => update2({ url, time: Date.now() - startTime }));
-  }, [pdfV2, code, update2]);
+    if (isReady) {
+      pdf.call("version").then((version) => update({ version }));
+    }
+  }, [pdf, update, isReady]);
+
+  useEffect(() => {
+    if (isReady) {
+      const startTime = Date.now();
+      pdf
+        .call("evaluate", code)
+        .then((url) => update({ url, time: Date.now() - startTime }));
+    }
+  }, [pdf, code, update, isReady]);
 
   return (
     <div style={{ display: "flex" }}>
@@ -140,14 +167,25 @@ const Repl = () => {
             justifyContent: "space-around",
           }}
         >
+          <select
+            value={pickedVersion}
+            onChange={(e) => {
+              pickVersion(e.target.value);
+            }}
+          >
+            {supportedVersions.map((version) => (
+              <option key={version}>{version}</option>
+            ))}
+          </select>
+
           <div style={{ textAlign: "right" }}>
-            <div>react-pdf v{state2.version}</div>
-            <div>time:{state2.time}</div>
+            <div>react-pdf v{state.version}</div>
+            <div>time:{state.time}</div>
           </div>
         </div>
 
-        {state2.url && (
-          <Document file={state2.url}>
+        {state.url && (
+          <Document file={state.url}>
             <Page
               scale={0.85}
               pageNumber={page}

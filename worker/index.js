@@ -31,9 +31,9 @@ class Wrapper {
   }
 }
 
-const WorkerV2 = Wrapper.bind(
+const CoreWorker = Wrapper.bind(
   Wrapper,
-  () => new Worker(new URL("./source-v2", import.meta.url))
+  () => new Worker(new URL("./multi-source", import.meta.url))
 );
 
-export { WorkerV2 };
+export { CoreWorker as Worker };
