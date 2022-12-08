@@ -172,7 +172,7 @@ export const code = `const Quixote = () => (
         anochecía.
       </Text>
       <Text style={styles.pageNumber} render={({ pageNumber, totalPages }) => (
-        \`${pageNumber} / ${totalPages}\`
+        \`\${pageNumber} / \${totalPages}\`
       )} fixed />
     </Page>
   </Document>
