@@ -50,7 +50,7 @@ render(
         style={styles.title}
         src="https://es.wikipedia.org/wiki/Lorem_ipsum"
       >
-        Lorem Ipsum
+        <Text>Lorem Ipsum</Text>
       </Link>
       <View style={styles.body}>
         <View style={styles.row}>

@@ -1,11 +1,11 @@
 import { useEffect, useReducer, useState } from "react";
+import Editor from "@monaco-editor/react";
 import LZString from "lz-string";
 
 import { createSingleton } from "../hooks";
 import { Worker } from "../worker";
 
-import dynamic from "next/dynamic";
-import { code as defCode } from "../code/text-bug";
+import { code as defCode } from "../code/default-example";
 
 import { Document, Page, pdfjs } from "react-pdf";
 import workerSrc from "pdfjs-dist/build/pdf.worker.min.js";
@@ -23,8 +23,6 @@ const decompress = (string) =>
       .replace(/-/g, "+") // Convert '-' to '+'
       .replace(/_/g, "/") // Convert '_' to '/'
   );
-
-const MonacoEditor = dynamic(import("react-monaco-editor"), { ssr: false });
 
 const useWorker = createSingleton(
   () => new Worker(),
@@ -97,59 +95,41 @@ const Repl = () => {
 
   return (
     <div style={{ display: "flex" }}>
-      <MonacoEditor
+      <Editor
         width="50%"
         height="100vh"
+        defaultLanguage="javascript"
         value={code}
-        onChange={setCode}
-        language="javascript"
-        editorWillMount={(monaco) => {
-          monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
-            jsx: monaco.languages.typescript.JsxEmit.React,
-            lib: [],
+        onChange={(newCode) => {
+          setCode(newCode ?? "");
+        }}
+        beforeMount={(_monaco) => {
+          const defaults =
+            _monaco.languages.typescript.javascriptDefaults.getCompilerOptions();
+          _monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
+            ...defaults,
+            jsx: "react",
           });
-
-          // const fakeDefs = [
-          //   "declare const render: (arg: any) => void;",
-          //   "declare const React: object;",
-          // ].join("\n");
-
-          // const fakeUri = "ts:filename/a.d.ts";
-
-          // monaco.languages.typescript.typescriptDefaults.addExtraLib(
-          //   fakeDefs,
-          //   fakeUri
-          // );
-
-          // monaco.editor.createModel(
-          //   fakeDefs,
-          //   "typescript",
-          //   monaco.Uri.parse(fakeUri)
-          // );
-
-          let model = monaco.editor.createModel(
+          _monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions(
+            { noSemanticValidation: true }
+          );
+        }}
+        onMount={(editor, _monaco) => {
+          const modelUri = _monaco.Uri.file("example.jsx");
+          const codeModel = _monaco.editor.createModel(
             code,
             "javascript",
-            monaco.Uri.file("foo.jsx")
+            modelUri // Pass the file name to the model here.
           );
-          return { model };
+          editor.setModel(codeModel);
         }}
-        editorDidMount={(editor, monaco) => {
-          // console.log(editor, monaco);
-          // monaco.editor.onDidChangeMarkers((uris) => {
-          //   const editorUri = editor.getModel().uri;
-          //   if (editorUri) {
-          //     const currentEditorHasMarkerChanges = uris.find(
-          //       (uri) => uri.path === editorUri.path
-          //     );
-          //     if (currentEditorHasMarkerChanges) {
-          //       const markers = monaco.editor.getModelMarkers({
-          //         resource: editorUri,
-          //       });
-          //       console.log(markers);
-          //     }
-          //   }
-          // });
+        options={{
+          wordWrap: "on",
+          tabSize: 2,
+          minimap: {
+            enabled: false,
+          },
+          contextmenu: false,
         }}
       />
       <div
