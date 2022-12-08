@@ -1,4 +1,5 @@
-import { useEffect, useLayoutEffect } from "react";
+import { useEffect, useLayoutEffect, useRef, useCallback, useState } from "react";
+import useResizeObserver from "@react-hook/resize-observer";
 
 const isDOM = typeof document !== "undefined";
 
@@ -36,16 +37,42 @@ const createSingleton = (constructor, destructor) => {
   };
 };
 
-const useAsyncEffect = (fn, deps) => {
+const useUpdatedRef = (value) => {
+  const ref = useRef(value);
   useEffect(() => {
-    const controller = new AbortController();
-    const dest = fn(controller);
-
-    return () => {
-      controller.abort();
-      dest && dest();
-    };
-  }, deps);
+    ref.current = value;
+  }, [value]);
+  return ref;
 };
 
-export { createSingleton, useAsyncEffect };
+const useEventCallback = (callback) => {
+  const ref = useUpdatedRef(callback);
+  return useCallback((arg) => ref.current && ref.current(arg), [ref]);
+};
+
+const useAsyncEffect = (fn, deps) => {
+  const cb = useEventCallback(fn);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    cb(controller.signal).catch((error) => {
+      if (!error._isAborted) return Promise.reject(error);
+    });
+    return () => controller.abort();
+  }, [cb, ...deps]);
+};
+
+const useSize = (target) => {
+  const [size, setSize] = useState();
+
+  useIsomorphicEffect(() => {
+    setSize(target.current.getBoundingClientRect());
+  }, [target]);
+
+  // Where the magic happens
+  useResizeObserver(target, (entry) => setSize(entry.contentRect));
+
+  return size;
+};
+
+export { createSingleton, useAsyncEffect, useSize };

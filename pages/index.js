@@ -4,12 +4,9 @@ import LZString from "lz-string";
 
 import { createSingleton } from "../hooks";
 import { Worker } from "../worker";
+import Viewer from "../components/viewer";
 
 import { code as defCode } from "../code/default-example";
-
-import { Document, Page, pdfjs } from "react-pdf";
-import workerSrc from "pdfjs-dist/build/pdf.worker.min.js";
-pdfjs.GlobalWorkerOptions.workerSrc = workerSrc;
 
 const compress = (string) =>
   LZString.compressToBase64(string)
@@ -137,6 +134,7 @@ const Repl = () => {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
+          flexGrow: 1,
         }}
       >
         <div
@@ -164,16 +162,7 @@ const Repl = () => {
           </div>
         </div>
 
-        {state.url && (
-          <Document file={state.url}>
-            <Page
-              scale={0.85}
-              pageNumber={page}
-              renderTextLayer={false}
-              renderAnnotationLayer={false}
-            />
-          </Document>
-        )}
+        {state.url && <Viewer url={state.url} page={page} />}
 
         <div>
           <button onClick={() => setPage((page) => page - 1)}>prev</button>
