@@ -162,7 +162,7 @@ const Repl = () => {
           </div>
         </div>
 
-        {state.url && <Viewer url={state.url} page={page} />}
+        <Viewer url={state.url} page={page} />
 
         <div>
           <button onClick={() => setPage((page) => page - 1)}>prev</button>

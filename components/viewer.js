@@ -1,13 +1,10 @@
 import * as pdfjs from "pdfjs-dist";
 import workerSrc from "pdfjs-dist/build/pdf.worker.min.js";
-import { useReducer, useRef, useState } from "react";
+import { useLayoutEffect, useReducer, useRef, useState } from "react";
 import { useAsyncEffect, createSingleton, useSize } from "../hooks";
+import { loader } from "./viewer.module.css";
 
 pdfjs.GlobalWorkerOptions.workerSrc = workerSrc;
-
-const DPR =
-  typeof window !== "undefined" &&
-  Number.parseInt(window.devicePixelRatio || 1, 10);
 
 const useWorker = createSingleton(
   () => new pdfjs.PDFWorker({ name: "pdfjs-worker" }),
@@ -47,25 +44,39 @@ const wrapPage = abortify(
     })
 );
 
+const WIDTH = 210;
+const HEIGHT = 297;
+
 const Viewer = ({ page: pageNumber, url }) => {
+  const dpr = useRef();
   const worker = useWorker();
 
   const blockRef = useRef();
   const canvas1Ref = useRef();
   const canvas2Ref = useRef();
   const [document, setDocument] = useState(null);
+  const [isLoading, setLoadingState] = useState(true);
   const [phase, toggle] = useReducer((v) => !v, true);
 
   const size = useSize(blockRef);
 
+  useLayoutEffect(() => {
+    dpr.current = Number.parseInt(window.devicePixelRatio || 1, 10);
+  }, []);
+
   useAsyncEffect(
     async (signal) => {
-      const doc = await wrapDoc(
-        () => pdfjs.getDocument({ url, worker }),
-        signal
-      );
+      if (url) {
+        const doc = await wrapDoc(
+          () => pdfjs.getDocument({ url, worker }),
+          signal
+        );
 
-      setDocument(doc);
+        setDocument(doc);
+      } else {
+        setLoadingState(true);
+        setDocument(null);
+      }
     },
     [pageNumber, url]
   );
@@ -75,7 +86,7 @@ const Viewer = ({ page: pageNumber, url }) => {
       if (document) {
         const page = await document.getPage(pageNumber);
 
-        let viewport = page.getViewport({ scale: 1 / DPR });
+        let viewport = page.getViewport({ scale: 1 / dpr.current });
 
         const scale = Math.min(
           size.height / viewport.height,
@@ -102,10 +113,13 @@ const Viewer = ({ page: pageNumber, url }) => {
         );
 
         toggle();
+        setLoadingState(false);
       }
     },
     [document, size]
   );
+
+  const ratio = size ? size.height / HEIGHT < size.width / WIDTH : 0;
 
   return (
     <div
@@ -114,17 +128,16 @@ const Viewer = ({ page: pageNumber, url }) => {
         position: "relative",
         height: "100%",
         width: "100%",
-        padding: 10,
+        padding: 20,
       }}
     >
       <div
         style={{
           position: "absolute",
-          border: '1px solid rgba(0, 0, 0, 0.18)',
-          boxSizing: "content-box",
+          border: "1px solid rgba(0, 0, 0, 0.18)",
           top: "50%",
           left: "50%",
-          transform: `translate(-50%, -50%) scale(${1/DPR})`,
+          transform: `translate(-50%, -50%) scale(${1 / dpr.current})`,
         }}
       >
         <canvas ref={canvas1Ref} style={{ display: "block" }} />
@@ -139,6 +152,17 @@ const Viewer = ({ page: pageNumber, url }) => {
           }}
         />
       </div>
+
+      {size && isLoading && (
+        <div
+          className={loader}
+          style={{
+            width: ratio ? "unset" : size.width,
+            height: ratio ? size.height : "unset",
+            aspectRatio: `${WIDTH} / ${HEIGHT}`,
+          }}
+        />
+      )}
     </div>
   );
 };
