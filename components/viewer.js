@@ -5,6 +5,10 @@ import { useAsyncEffect, createSingleton, useSize } from "../hooks";
 
 pdfjs.GlobalWorkerOptions.workerSrc = workerSrc;
 
+const DPR =
+  typeof window !== "undefined" &&
+  Number.parseInt(window.devicePixelRatio || 1, 10);
+
 const useWorker = createSingleton(
   () => new pdfjs.PDFWorker({ name: "pdfjs-worker" }),
   (worker) => worker.destroy()
@@ -71,7 +75,7 @@ const Viewer = ({ page: pageNumber, url }) => {
       if (document) {
         const page = await document.getPage(pageNumber);
 
-        let viewport = page.getViewport({ scale: 1 });
+        let viewport = page.getViewport({ scale: 1 / DPR });
 
         const scale = Math.min(
           size.height / viewport.height,
@@ -104,18 +108,30 @@ const Viewer = ({ page: pageNumber, url }) => {
   );
 
   return (
-    <div ref={blockRef} style={{ height: "100%", width: "100%", padding: 10 }}>
+    <div
+      ref={blockRef}
+      style={{
+        position: "relative",
+        height: "100%",
+        width: "100%",
+        padding: 10,
+      }}
+    >
       <div
         style={{
           position: "absolute",
-          borderRadius: "3px",
-          boxShadow: "0px 1px 5px rgba(0,0,0,0.2)",
+          border: '1px solid rgba(0, 0, 0, 0.18)',
+          boxSizing: "content-box",
+          top: "50%",
+          left: "50%",
+          transform: `translate(-50%, -50%) scale(${1/DPR})`,
         }}
       >
-        <canvas ref={canvas1Ref} />
+        <canvas ref={canvas1Ref} style={{ display: "block" }} />
         <canvas
           ref={canvas2Ref}
           style={{
+            display: "block",
             position: "absolute",
             inset: 0,
             opacity: phase ? 1 : 0,
