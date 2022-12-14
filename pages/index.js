@@ -5,6 +5,7 @@ import LZString from "lz-string";
 import { createSingleton } from "../hooks";
 import { Worker } from "../worker";
 import Viewer from "../components/viewer";
+import { loader } from "../components/viewer.module.css";
 
 import { code as defCode } from "../code/default-example";
 
@@ -38,6 +39,8 @@ const supportedVersions = [
   "1.6.17",
 ];
 
+const Loader = () => <div className={loader} />;
+
 const useMergeState = (initial) =>
   useReducer((s, a) => ({ ...s, ...a }), initial);
 
@@ -66,12 +69,8 @@ const Repl = () => {
 
   useEffect(() => {
     if (pickedVersion !== state.version) {
-      console.log(`load @react-pdf v${pickedVersion}`);
       setReady(false);
-      pdf
-        .call("init", pickedVersion)
-        .then(() => setReady(true))
-        .catch(console.log);
+      pdf.call("init", pickedVersion).then(() => setReady(true));
     }
   }, [pickedVersion, pdf, update, state.version]);
 
@@ -95,7 +94,8 @@ const Repl = () => {
       <Editor
         width="50%"
         height="100vh"
-        defaultLanguage="javascript"
+        loading={<Loader />}
+        language="javascript"
         value={code}
         onChange={(newCode) => {
           setCode(newCode ?? "");
@@ -148,6 +148,7 @@ const Repl = () => {
           <select
             value={pickedVersion}
             onChange={(e) => {
+              update({ url: null });
               pickVersion(e.target.value);
             }}
           >
