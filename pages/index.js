@@ -85,7 +85,9 @@ const Repl = () => {
       const startTime = Date.now();
       pdf
         .call("evaluate", code)
-        .then((url) => update({ url, time: Date.now() - startTime }));
+        .then((url) => {
+          update({ url, time: Date.now() - startTime })
+        });
     }
   }, [pdf, code, update, isReady]);
 

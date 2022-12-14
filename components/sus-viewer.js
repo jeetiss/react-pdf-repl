@@ -1,8 +1,15 @@
 import * as pdfjs from "pdfjs-dist";
 import workerSrc from "pdfjs-dist/build/pdf.worker.min.js";
-import { useLayoutEffect, useReducer, useRef, useState } from "react";
+import {
+  Suspense,
+  useLayoutEffect,
+  useReducer,
+  useRef,
+} from "react";
+import { createFetchStore as createAsyncStore } from "react-suspense-fetch";
 import { useAsyncEffect, createSingleton, useSize } from "../hooks";
-import { loader } from "./viewer.module.css";
+
+// import { loader } from "./viewer.module.css";
 
 pdfjs.GlobalWorkerOptions.workerSrc = workerSrc;
 
@@ -42,42 +49,33 @@ const wrapPage = abortify(
     })
 );
 
+const documentStore = createAsyncStore(
+  async ({ worker, url }, { signal }) => {
+    if (url) {
+      return wrapDoc(() => pdfjs.getDocument({ url, worker }), signal);
+    }
+  },
+  {
+    type: "Map",
+    areEqual: ({ url: urlA }, { url: urlB }) => urlA === urlB,
+  }
+);
+
 const WIDTH = 210;
 const HEIGHT = 297;
 
-const Viewer = ({ page: pageNumber, url }) => {
+const Viewer = ({ page: pageNumber, url, size }) => {
   const dpr = useRef();
   const worker = useWorker();
 
-  const blockRef = useRef();
   const canvas1Ref = useRef();
   const canvas2Ref = useRef();
-  const [document, setDocument] = useState(null);
-  const [isLoading, setLoadingState] = useState(true);
+  const document = documentStore.get({ worker, url }, { forcePrefetch: true });
   const [phase, toggle] = useReducer((v) => !v, true);
-
-  const size = useSize(blockRef);
 
   useLayoutEffect(() => {
     dpr.current = Number.parseInt(window.devicePixelRatio || 1, 10);
   }, []);
-
-  useAsyncEffect(
-    async (signal) => {
-      if (url) {
-        const doc = await wrapDoc(
-          () => pdfjs.getDocument({ url, worker }),
-          signal
-        );
-
-        setDocument(doc);
-      } else {
-        setLoadingState(true);
-        setDocument(null);
-      }
-    },
-    [pageNumber, url]
-  );
 
   useAsyncEffect(
     async (signal) => {
@@ -111,13 +109,39 @@ const Viewer = ({ page: pageNumber, url }) => {
         );
 
         toggle();
-        setLoadingState(false);
       }
     },
-    [document, size]
+    [document, size, pageNumber]
   );
 
-  const ratio = size ? size.height / HEIGHT < size.width / WIDTH : 0;
+  return (
+    <div
+      style={{
+        position: "absolute",
+        border: "1px solid rgba(0, 0, 0, 0.18)",
+        top: "50%",
+        left: "50%",
+        transform: `translate(-50%, -50%) scale(${1 / dpr.current})`,
+      }}
+    >
+      <canvas ref={canvas1Ref} style={{ display: "block" }} />
+      <canvas
+        ref={canvas2Ref}
+        style={{
+          display: "block",
+          position: "absolute",
+          inset: 0,
+          opacity: phase ? 1 : 0,
+          transition: "opacity ease 0.1s",
+        }}
+      />
+    </div>
+  );
+};
+
+const SusViewer = ({ url, page }) => {
+  const blockRef = useRef();
+  // const size = useSize(blockRef);
 
   return (
     <div
@@ -129,40 +153,11 @@ const Viewer = ({ page: pageNumber, url }) => {
         padding: 20,
       }}
     >
-      <div
-        style={{
-          position: "absolute",
-          border: "1px solid rgba(0, 0, 0, 0.18)",
-          top: "50%",
-          left: "50%",
-          transform: `translate(-50%, -50%) scale(${1 / dpr.current})`,
-        }}
-      >
-        <canvas ref={canvas1Ref} style={{ display: "block" }} />
-        <canvas
-          ref={canvas2Ref}
-          style={{
-            display: "block",
-            position: "absolute",
-            inset: 0,
-            opacity: phase ? 1 : 0,
-            transition: "opacity ease 0.1s",
-          }}
-        />
-      </div>
-
-      {size && isLoading && (
-        <div
-          className={loader}
-          style={{
-            width: ratio ? "unset" : size.width,
-            height: ratio ? size.height : "unset",
-            aspectRatio: `${WIDTH} / ${HEIGHT}`,
-          }}
-        />
-      )}
+      <Suspense fallback={<div>Loading...</div>}>
+        <Viewer url={url} page={page} size={{ width: 300, height: 300 }} />
+      </Suspense>
     </div>
   );
 };
 
-export default Viewer;
+export default SusViewer;

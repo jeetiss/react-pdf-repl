@@ -1,4 +1,11 @@
-import { useEffect, useLayoutEffect, useRef, useCallback, useState } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useCallback,
+  useState,
+  startTransition,
+} from "react";
 import useResizeObserver from "@react-hook/resize-observer";
 
 const isDOM = typeof document !== "undefined";
@@ -55,9 +62,7 @@ const useAsyncEffect = (fn, deps) => {
 
   useEffect(() => {
     const controller = new AbortController();
-    cb(controller.signal).catch((error) => {
-      if (!error._isAborted) return Promise.reject(error);
-    });
+    cb(controller.signal);
     return () => controller.abort();
   }, [cb, ...deps]);
 };
@@ -66,11 +71,17 @@ const useSize = (target) => {
   const [size, setSize] = useState();
 
   useIsomorphicEffect(() => {
-    setSize(target.current.getBoundingClientRect());
+    startTransition(() => {
+      setSize(target.current.getBoundingClientRect());
+    });
   }, [target]);
 
   // Where the magic happens
-  useResizeObserver(target, (entry) => setSize(entry.contentRect));
+  useResizeObserver(target, (entry) => {
+    startTransition(() => {
+      setSize(entry.contentRect);
+    });
+  });
 
   return size;
 };
