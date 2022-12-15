@@ -43,6 +43,7 @@
   "devDependencies": {
     "eslint": "7.32.0",
     "eslint-config-next": "11.0.1",
+    "monaco-editor": "^0.34.1",
     "patch-package": "^6.4.7",
     "raw-loader": "^4.0.2"
   }

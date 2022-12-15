@@ -18,8 +18,11 @@ class Wrapper {
     return new Promise((resolve, reject) => {
       const handler = ({ data }) => {
         if (data.key === info.key) {
-          if (data.result) resolve(data.result);
-          else reject(data.error);
+          if (data.error) {
+            reject(data.error);
+          } else {
+            resolve(data.result);
+          }
 
           this.worker.removeEventListener("message", handler);
         }

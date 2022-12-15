@@ -46,6 +46,7 @@ const useMergeState = (initial) =>
 
 const Repl = () => {
   const [state, update] = useMergeState({
+    error: null,
     url: null,
     version: null,
     time: null,
@@ -86,8 +87,9 @@ const Repl = () => {
       pdf
         .call("evaluate", code)
         .then((url) => {
-          update({ url, time: Date.now() - startTime })
-        });
+          update({ url, time: Date.now() - startTime, error: null });
+        })
+        .catch((error) => update({ time: Date.now() - startTime, error }));
     }
   }, [pdf, code, update, isReady]);
 
@@ -103,24 +105,16 @@ const Repl = () => {
           setCode(newCode ?? "");
         }}
         beforeMount={(_monaco) => {
-          const defaults =
-            _monaco.languages.typescript.javascriptDefaults.getCompilerOptions();
           _monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
-            ...defaults,
+            allowNonTsExtensions: true,
+            checkJs: true,
+            allowJs: true,
+            noLib: true,
             jsx: "react",
           });
           _monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions(
             { noSemanticValidation: true }
           );
-        }}
-        onMount={(editor, _monaco) => {
-          const modelUri = _monaco.Uri.file("example.jsx");
-          const codeModel = _monaco.editor.createModel(
-            code,
-            "javascript",
-            modelUri // Pass the file name to the model here.
-          );
-          editor.setModel(codeModel);
         }}
         options={{
           wordWrap: "on",
@@ -137,6 +131,7 @@ const Repl = () => {
           flexDirection: "column",
           alignItems: "center",
           flexGrow: 1,
+          padding: 10,
         }}
       >
         <div
@@ -145,35 +140,34 @@ const Repl = () => {
             flexDirection: "row",
             width: "100%",
             justifyContent: "space-around",
+            alignItems: "center",
           }}
         >
-          <select
-            value={pickedVersion}
-            onChange={(e) => {
-              update({ url: null });
-              pickVersion(e.target.value);
-            }}
-          >
-            {supportedVersions.map((version) => (
-              <option key={version}>{version}</option>
-            ))}
-          </select>
+          <div style={{ position: "relative" }}>
+            <select
+              value={pickedVersion}
+              onChange={(e) => {
+                update({ url: null });
+                pickVersion(e.target.value);
+              }}
+            >
+              {supportedVersions.map((version) => (
+                <option key={version}>{version}</option>
+              ))}
+            </select>
 
-          <div style={{ textAlign: "right" }}>
-            <div>react-pdf v{state.version}</div>
-            <div>time:{state.time}</div>
+            <div
+              style={{
+                position: "absolute",
+                width: 150,
+                fontFamily: "monospace",
+                fontSize: 12,
+              }}
+            >
+              generation time: {state.time}
+            </div>
           </div>
-        </div>
 
-        <Viewer url={state.url} page={page} />
-
-        <div>
-          <button onClick={() => setPage((page) => page - 1)}>prev</button>
-          {page}
-          <button onClick={() => setPage((page) => page + 1)}>next</button>
-        </div>
-
-        <div>
           <button
             onClick={() => {
               const link = new URL(window.location);
@@ -183,7 +177,39 @@ const Repl = () => {
           >
             copy link
           </button>
+
+          <div style={{ display: "flex" }}>
+            <button onClick={() => setPage((page) => page - 1)}>prev</button>
+            <div style={{ textAlign: "center", minWidth: 20 }}>{page}</div>
+            <button onClick={() => setPage((page) => page + 1)}>next</button>
+          </div>
         </div>
+
+        <Viewer url={state.url} page={page} />
+
+        {state.error && (
+          <div
+            style={{
+              position: "fixed",
+              bottom: 0,
+              minHeight: 100,
+              width: "50%",
+              padding: 5,
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                width: "100%",
+                backgroundColor: "#fec1c1",
+                border: "3px solid red",
+                padding: 15,
+              }}
+            >
+              <pre style={{ margin: 0 }}>{state.error}</pre>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

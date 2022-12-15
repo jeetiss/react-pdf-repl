@@ -6,7 +6,6 @@ import "ses";
 let rpGlobals = null;
 const wrap = (factory) => () =>
   factory().then((mod) => {
-    console.log(mod);
     rpGlobals = mod;
   });
 
@@ -33,18 +32,22 @@ const createRender = (callback) => (element) => {
 const evaluate = (code) =>
   new Promise((resolve, reject) => {
     if (!rpGlobals) {
-      console.log("ere");
       reject(Error("react-pdf not found"));
     }
-    const executableCode = preprocessJsx(code);
-    const c = new Compartment({
-      ...rpGlobals,
-      render: createRender((url) => resolve(url)),
-      createElement,
-      Fragment,
-    });
 
-    c.evaluate(executableCode);
+    try {
+      const executableCode = preprocessJsx(code);
+      const c = new Compartment({
+        ...rpGlobals,
+        render: createRender((url) => resolve(url)),
+        createElement,
+        Fragment,
+      });
+
+      c.evaluate(executableCode);
+    } catch (error) {
+      reject(error);
+    }
   });
 
 const version = () => rpGlobals.version;
@@ -70,5 +73,9 @@ self.addEventListener("message", (e) => {
 
   Promise.resolve()
     .then(() => kk(...args))
-    .then((result) => postMessage({ result, key }));
+    .then(
+      (result) => ({ result, key }),
+      (error) => ({ error: error.message, key })
+    )
+    .then((data) => postMessage(data));
 });

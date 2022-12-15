@@ -121,46 +121,53 @@ const Viewer = ({ page: pageNumber, url }) => {
 
   return (
     <div
-      ref={blockRef}
       style={{
-        position: "relative",
         height: "100%",
         width: "100%",
-        padding: 20,
+        padding: "20px 10px 10px 10px",
       }}
     >
       <div
+        ref={blockRef}
         style={{
-          position: "absolute",
-          border: "1px solid rgba(0, 0, 0, 0.18)",
-          top: "50%",
-          left: "50%",
-          transform: `translate(-50%, -50%) scale(${1 / dpr.current})`,
+          position: "relative",
+          height: "100%",
+          width: "100%",
         }}
       >
-        <canvas ref={canvas1Ref} style={{ display: "block" }} />
-        <canvas
-          ref={canvas2Ref}
-          style={{
-            display: "block",
-            position: "absolute",
-            inset: 0,
-            opacity: phase ? 1 : 0,
-            transition: "opacity ease 0.1s",
-          }}
-        />
-      </div>
-
-      {size && isLoading && (
         <div
-          className={loader}
           style={{
-            width: ratio ? "unset" : size.width,
-            height: ratio ? size.height : "unset",
-            aspectRatio: `${WIDTH} / ${HEIGHT}`,
+            position: "absolute",
+            border: "1px solid rgba(0, 0, 0, 0.18)",
+            top: "50%",
+            left: "50%",
+            transform: `translate(-50%, -50%) scale(${1 / dpr.current})`,
           }}
-        />
-      )}
+        >
+          <canvas ref={canvas1Ref} style={{ display: "block" }} />
+          <canvas
+            ref={canvas2Ref}
+            style={{
+              display: "block",
+              position: "absolute",
+              inset: 0,
+              opacity: phase ? 1 : 0,
+              transition: "opacity ease 0.1s",
+            }}
+          />
+        </div>
+
+        {size && isLoading && (
+          <div
+            className={loader}
+            style={{
+              width: ratio ? "unset" : size.width,
+              height: ratio ? size.height : "unset",
+              aspectRatio: `${WIDTH} / ${HEIGHT}`,
+            }}
+          />
+        )}
+      </div>
     </div>
   );
 };
