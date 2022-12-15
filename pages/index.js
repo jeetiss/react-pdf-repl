@@ -132,6 +132,7 @@ const Repl = () => {
           alignItems: "center",
           flexGrow: 1,
           padding: 10,
+          fontFamily: "monospace",
         }}
       >
         <div
@@ -143,7 +144,14 @@ const Repl = () => {
             alignItems: "center",
           }}
         >
-          <div style={{ position: "relative" }}>
+          <div
+            style={{
+              position: "relative",
+              display: "flex",
+              alignItems: "center",
+            }}
+          >
+            version:{" "}
             <select
               value={pickedVersion}
               onChange={(e) => {
@@ -155,17 +163,33 @@ const Repl = () => {
                 <option key={version}>{version}</option>
               ))}
             </select>
-
             <div
               style={{
                 position: "absolute",
                 width: 150,
                 fontFamily: "monospace",
+                bottom: "-80%",
                 fontSize: 12,
+                color: "#101010",
               }}
             >
-              generation time: {state.time}
+              generation time: {state.time ?? "--"}
             </div>
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <button onClick={() => setPage((page) => page - 1)}>{"<"}</button>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                padding: "0px 0px 3px 5px",
+              }}
+            >
+              page:
+              <div style={{ textAlign: "center", minWidth: 20 }}>{page}</div>
+            </div>
+            <button onClick={() => setPage((page) => page + 1)}>{">"}</button>
           </div>
 
           <button
@@ -177,12 +201,6 @@ const Repl = () => {
           >
             copy link
           </button>
-
-          <div style={{ display: "flex" }}>
-            <button onClick={() => setPage((page) => page - 1)}>prev</button>
-            <div style={{ textAlign: "center", minWidth: 20 }}>{page}</div>
-            <button onClick={() => setPage((page) => page + 1)}>next</button>
-          </div>
         </div>
 
         <Viewer url={state.url} page={page} />
