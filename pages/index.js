@@ -1,6 +1,7 @@
 import { useEffect, useReducer, useState } from "react";
 import Editor from "@monaco-editor/react";
 import LZString from "lz-string";
+import useConstant from "use-constant";
 
 import { createSingleton } from "../hooks";
 import { Worker } from "../worker";
@@ -39,10 +40,21 @@ const supportedVersions = [
   "1.6.17",
 ];
 
+const checkRange = (version) => {
+  if (version && supportedVersions.includes(version)) return version;
+
+  return null;
+};
+
 const Loader = () => <div className={loader} />;
 
 const useMergeState = (initial) =>
-  useReducer((s, a) => ({ ...s, ...a }), initial);
+  useReducer.apply(
+    null,
+    typeof initial === "function"
+      ? [(s, a) => ({ ...s, ...a }), null, initial]
+      : [(s, a) => ({ ...s, ...a }), initial]
+  );
 
 const Repl = () => {
   const [state, update] = useMergeState({
@@ -52,28 +64,38 @@ const Repl = () => {
     time: null,
   });
 
-  const [page, setPage] = useState(1);
-  const [pickedVersion, pickVersion] = useState(supportedVersions[0]);
-  const [isReady, setReady] = useState(false);
-  const [code, setCode] = useState(() => {
-    if (typeof window === "undefined") return;
+  const urlParams = useConstant(() => {
+    if (typeof window === "undefined") return {};
 
-    const query = new URLSearchParams(window.location.search);
-    if (query.has("code")) {
-      return decompress(query.get("code"));
-    }
+    return Object.fromEntries(
+      Array.from(new URLSearchParams(window.location.search).entries()).map(
+        ([key, value]) => {
+          if (key.startsWith("cp_")) {
+            return [key.slice(3), decompress(value)];
+          }
 
-    return defCode;
+          return [key, value];
+        }
+      )
+    );
   });
+
+  const [options, updateOptions] = useMergeState(() => ({
+    version: checkRange(urlParams.version) ?? supportedVersions[0],
+  }));
+
+  const [page, setPage] = useState(1);
+  const [isReady, setReady] = useState(false);
+  const [code, setCode] = useState(() => urlParams.code ?? defCode);
 
   const pdf = useWorker();
 
   useEffect(() => {
-    if (pickedVersion !== state.version) {
+    if (options.version !== state.version) {
       setReady(false);
-      pdf.call("init", pickedVersion).then(() => setReady(true));
+      pdf.call("init", options.version).then(() => setReady(true));
     }
-  }, [pickedVersion, pdf, update, state.version]);
+  }, [pdf, update, state.version, options.version]);
 
   useEffect(() => {
     if (isReady) {
@@ -153,10 +175,10 @@ const Repl = () => {
           >
             version:{" "}
             <select
-              value={pickedVersion}
+              value={options.version}
               onChange={(e) => {
                 update({ url: null });
-                pickVersion(e.target.value);
+                updateOptions({ version: e.target.value });
               }}
             >
               {supportedVersions.map((version) => (
@@ -195,7 +217,10 @@ const Repl = () => {
           <button
             onClick={() => {
               const link = new URL(window.location);
-              link.search = `?code=${compress(code)}`;
+              const params = `?version=${options.version}&cp_code=${compress(
+                code
+              )}`;
+              link.search = params;
               navigator.clipboard.writeText(link.toString());
             }}
           >
