@@ -1,6 +1,12 @@
 import * as pdfjs from "pdfjs-dist";
 import workerSrc from "pdfjs-dist/build/pdf.worker.min.js";
-import { useLayoutEffect, useReducer, useRef, useState } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useReducer,
+  useRef,
+  useState,
+} from "react";
 import { useAsyncEffect, createSingleton, useSize } from "../hooks";
 import { loader } from "./viewer.module.css";
 
@@ -116,6 +122,10 @@ const Viewer = ({ page: pageNumber, url }) => {
     },
     [document, size]
   );
+
+  useEffect(() => {
+    console.log(pageNumber);
+  }, [pageNumber]);
 
   const ratio = size ? size.height / HEIGHT < size.width / WIDTH : 0;
 

@@ -69,10 +69,14 @@ const methods = {
 self.addEventListener("message", (e) => {
   const { method, args, key } = e.data || e;
 
-  const kk = methods[method] || ((v) => v);
+  if (method === "__initialize") {
+    postMessage({ result: Object.keys(methods), key });
+  }
+
+  const methodToCall = methods[method];
 
   Promise.resolve()
-    .then(() => kk(...args))
+    .then(() => methodToCall(...args))
     .then(
       (result) => ({ result, key }),
       (error) => ({ error: error.message, key })

@@ -3,8 +3,8 @@ import Editor from "@monaco-editor/react";
 import LZString from "lz-string";
 import useConstant from "use-constant";
 
-import { createSingleton } from "../hooks";
-import { Worker } from "../worker";
+import { createSingleton, useAsyncEffect } from "../hooks";
+import { createWorker } from "../worker";
 import Viewer from "../components/viewer";
 import { loader } from "../components/viewer.module.css";
 
@@ -23,9 +23,13 @@ const decompress = (string) =>
       .replace(/_/g, "/") // Convert '_' to '/'
   );
 
+let abortController = null;
 const useWorker = createSingleton(
-  () => new Worker(),
-  (worker) => worker.terminate()
+  () => {
+    abortController = new AbortController();
+    return createWorker({ signal: abortController.signal });
+  },
+  (worker) => abortController.abort()
 );
 
 const supportedVersions = [
@@ -90,30 +94,37 @@ const Repl = () => {
 
   const pdf = useWorker();
 
-  useEffect(() => {
-    if (options.version !== state.version) {
-      setReady(false);
-      pdf.call("init", options.version).then(() => setReady(true));
-    }
-  }, [pdf, update, state.version, options.version]);
+  useAsyncEffect(
+    async (signal) => {
+      if (options.version !== state.version) {
+        setReady(false);
+        await (await pdf).init(options.version, { signal });
+        update({ version: options.version });
+        setReady(true);
+      }
+    },
+    [pdf, update, state.version, options.version]
+  );
 
-  useEffect(() => {
-    if (isReady) {
-      pdf.call("version").then((version) => update({ version }));
-    }
-  }, [pdf, update, isReady]);
+  useAsyncEffect(
+    async (signal) => {
+      if (isReady) {
+        const startTime = Date.now();
+        try {
+          const url = await (await pdf).evaluate(code, { signal });
 
-  useEffect(() => {
-    if (isReady) {
-      const startTime = Date.now();
-      pdf
-        .call("evaluate", code)
-        .then((url) => {
           update({ url, time: Date.now() - startTime, error: null });
-        })
-        .catch((error) => update({ time: Date.now() - startTime, error }));
-    }
-  }, [pdf, code, update, isReady]);
+        } catch (error) {
+          update({ time: Date.now() - startTime, error: error.message });
+        }
+      }
+    },
+    [pdf, code, update, isReady]
+  );
+
+  useEffect(() => {
+    console.log("root", page);
+  }, [page]);
 
   return (
     <div style={{ display: "flex" }}>
