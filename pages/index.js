@@ -2,11 +2,20 @@ import { useEffect, useReducer, useState } from "react";
 import Editor from "@monaco-editor/react";
 import LZString from "lz-string";
 import useConstant from "use-constant";
+import { useAtom } from "jotai/react";
 
 import { createSingleton } from "../hooks";
 import { Worker } from "../worker";
 import Viewer from "../components/viewer";
 import { loader } from "../components/viewer.module.css";
+import {
+  page,
+  pagesCount,
+  canDecrease,
+  canIncrease,
+  increase,
+  decrease,
+} from "../state/page";
 
 import { code as defCode } from "../code/default-example";
 
@@ -84,9 +93,15 @@ const Repl = () => {
     version: checkRange(urlParams.version) ?? supportedVersions[0],
   }));
 
-  const [page, setPage] = useState(1);
   const [isReady, setReady] = useState(false);
   const [code, setCode] = useState(() => urlParams.code ?? defCode);
+
+  const [pageV] = useAtom(page);
+  const [, setPagesCount] = useAtom(pagesCount);
+  const [canDecreaseV] = useAtom(canDecrease);
+  const [, decreaseS] = useAtom(decrease);
+  const [canIncreaseV] = useAtom(canIncrease);
+  const [, increaseS] = useAtom(increase);
 
   const pdf = useWorker();
 
@@ -200,7 +215,9 @@ const Repl = () => {
           </div>
 
           <div style={{ display: "flex", alignItems: "center" }}>
-            <button onClick={() => setPage((page) => page - 1)}>{"<"}</button>
+            <button disabled={!canDecreaseV} onClick={() => decreaseS()}>
+              {"<"}
+            </button>
             <div
               style={{
                 display: "flex",
@@ -209,26 +226,42 @@ const Repl = () => {
               }}
             >
               page:
-              <div style={{ textAlign: "center", minWidth: 20 }}>{page}</div>
+              <div style={{ textAlign: "center", minWidth: 20 }}>{pageV}</div>
             </div>
-            <button onClick={() => setPage((page) => page + 1)}>{">"}</button>
+            <button disabled={!canIncreaseV} onClick={() => increaseS()}>
+              {">"}
+            </button>
           </div>
 
-          <button
-            onClick={() => {
-              const link = new URL(window.location);
-              const params = `?version=${options.version}&cp_code=${compress(
-                code
-              )}`;
-              link.search = params;
-              navigator.clipboard.writeText(link.toString());
-            }}
-          >
-            copy link
-          </button>
+          <div style={{ display: "flex", gap: "2px", flexWrap: "wrap" }}>
+            <button
+              onClick={() => {
+                const link = new URL(window.location);
+                const params = `?version=${options.version}&cp_code=${compress(
+                  code
+                )}`;
+                link.search = params;
+                navigator.clipboard.writeText(link.toString());
+              }}
+            >
+              copy link
+            </button>
+
+            <button
+              onClick={() => {
+                window.open(state.url);
+              }}
+            >
+              open pdf
+            </button>
+          </div>
         </div>
 
-        <Viewer url={state.url} page={page} />
+        <Viewer
+          url={state.url}
+          page={pageV}
+          onParse={({ pagesCount }) => setPagesCount(pagesCount)}
+        />
 
         {state.error && (
           <div

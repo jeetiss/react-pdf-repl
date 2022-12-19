@@ -1,7 +1,18 @@
 import * as pdfjs from "pdfjs-dist";
 import workerSrc from "pdfjs-dist/build/pdf.worker.min.js";
-import { useLayoutEffect, useReducer, useRef, useState } from "react";
-import { useAsyncEffect, createSingleton, useSize } from "../hooks";
+import {
+  useEffect,
+  useLayoutEffect,
+  useReducer,
+  useRef,
+  useState,
+} from "react";
+import {
+  useAsyncEffect,
+  createSingleton,
+  useSize,
+  useEventCallback,
+} from "../hooks";
 import { loader } from "./viewer.module.css";
 
 pdfjs.GlobalWorkerOptions.workerSrc = workerSrc;
@@ -15,13 +26,16 @@ const abortify = (destroyer, errorHandler) => async (fn, signal) => {
   const task = fn();
   const aborter = () => destroyer(task);
 
+  signal.addEventListener("abort", aborter, { once: true });
+
+  const resultPromise = errorHandler(task.promise);
+
   if (signal.aborted) {
+    signal.removeEventListener("abort", aborter, { once: true });
     return aborter();
   }
 
-  signal.addEventListener("abort", aborter, { once: true });
-
-  const result = await errorHandler(task.promise);
+  const result = await resultPromise;
   signal.removeEventListener("abort", aborter, { once: true });
 
   return result;
@@ -45,9 +59,11 @@ const wrapPage = abortify(
 const WIDTH = 210;
 const HEIGHT = 297;
 
-const Viewer = ({ page: pageNumber, url }) => {
+const Viewer = ({ page: pageNumber, url, onParse }) => {
   const dpr = useRef();
   const worker = useWorker();
+
+  const onParseCallback = useEventCallback(onParse);
 
   const blockRef = useRef();
   const canvas1Ref = useRef();
@@ -79,9 +95,24 @@ const Viewer = ({ page: pageNumber, url }) => {
     [pageNumber, url]
   );
 
-  useAsyncEffect(
-    async (signal) => {
-      if (document) {
+  useEffect(() => {
+    if (document) {
+      onParseCallback({ pagesCount: document.numPages });
+    }
+  }, [document, onParseCallback]);
+
+  const wtfState = useRef({});
+
+  useEffect(() => {
+    const controller = new AbortController();
+    (async () => {
+      if (
+        document &&
+        (wtfState.current.phase !== phase ||
+          wtfState.current.pageNumber !== pageNumber)
+      ) {
+        console.log(`rendering page number: ${pageNumber} in phase ${phase}`);
+
         const page = await document.getPage(pageNumber);
 
         let viewport = page.getViewport({ scale: 1 / dpr.current });
@@ -107,15 +138,19 @@ const Viewer = ({ page: pageNumber, url }) => {
 
         await wrapPage(
           () => page.render({ canvasContext: context, viewport }),
-          signal
+          controller.signal
         );
 
+        wtfState.current = { phase: !phase, pageNumber };
         toggle();
         setLoadingState(false);
       }
-    },
-    [document, size]
-  );
+    })();
+
+    return () => {
+      controller.abort();
+    };
+  }, [document, size, pageNumber, phase]);
 
   const ratio = size ? size.height / HEIGHT < size.width / WIDTH : 0;
 

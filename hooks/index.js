@@ -86,4 +86,4 @@ const useSize = (target) => {
   return size;
 };
 
-export { createSingleton, useAsyncEffect, useSize };
+export { createSingleton, useAsyncEffect, useSize, useEventCallback };
