@@ -7,6 +7,7 @@ import { useAtom } from "jotai/react";
 import { createSingleton } from "../hooks";
 import { Worker } from "../worker";
 import Viewer from "../components/viewer";
+import { Main, Panel, Controls, Buttons } from "../components/repl-layout";
 import { loader } from "../components/viewer.module.css";
 import {
   page,
@@ -131,10 +132,8 @@ const Repl = () => {
   }, [pdf, code, update, isReady]);
 
   return (
-    <div style={{ display: "flex" }}>
+    <Main>
       <Editor
-        width="50%"
-        height="100vh"
         loading={<Loader />}
         language="javascript"
         value={code}
@@ -162,25 +161,8 @@ const Repl = () => {
           contextmenu: false,
         }}
       />
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          flexGrow: 1,
-          padding: 10,
-          fontFamily: "monospace",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            width: "100%",
-            justifyContent: "space-around",
-            alignItems: "center",
-          }}
-        >
+      <Panel>
+        <Controls>
           <div
             style={{
               position: "relative",
@@ -233,7 +215,7 @@ const Repl = () => {
             </button>
           </div>
 
-          <div style={{ display: "flex", gap: "2px", flexWrap: "wrap" }}>
+          <Buttons>
             <button
               onClick={() => {
                 const link = new URL(window.location);
@@ -254,8 +236,8 @@ const Repl = () => {
             >
               open pdf
             </button>
-          </div>
-        </div>
+          </Buttons>
+        </Controls>
 
         <Viewer
           url={state.url}
@@ -286,8 +268,8 @@ const Repl = () => {
             </div>
           </div>
         )}
-      </div>
-    </div>
+      </Panel>
+    </Main>
   );
 };
 

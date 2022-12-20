@@ -72,46 +72,38 @@ const Viewer = ({ page: pageNumber, url, onParse }) => {
 
   return (
     <div
+      ref={blockRef}
       style={{
+        position: "relative",
         height: "100%",
         width: "100%",
-        padding: "20px 10px 10px 10px",
       }}
     >
-      <div
-        ref={blockRef}
-        style={{
-          position: "relative",
-          height: "100%",
-          width: "100%",
-        }}
-      >
-        {document && (
-          <div
-            ref={canvasAnanas}
-            style={{
-              position: "absolute",
-              border: "1px solid rgba(0, 0, 0, 0.18)",
-              top: "50%",
-              left: "50%",
-              transform: `translate(-50%, -50%) scale(${
-                1 / client(() => window.devicePixelRatio) ?? 1
-              })`,
-            }}
-          ></div>
-        )}
+      {document && (
+        <div
+          ref={canvasAnanas}
+          style={{
+            position: "absolute",
+            border: "1px solid rgba(0, 0, 0, 0.18)",
+            top: "50%",
+            left: "50%",
+            transform: `translate(-50%, -50%) scale(${
+              1 / client(() => window.devicePixelRatio) ?? 1
+            })`,
+          }}
+        ></div>
+      )}
 
-        {size && !document && (
-          <div
-            className={loader}
-            style={{
-              width: ratio ? "unset" : size.width,
-              height: ratio ? size.height : "unset",
-              aspectRatio: `${WIDTH} / ${HEIGHT}`,
-            }}
-          />
-        )}
-      </div>
+      {size && !document && (
+        <div
+          className={loader}
+          style={{
+            width: ratio ? "unset" : size.width,
+            height: ratio ? size.height : "unset",
+            aspectRatio: `${WIDTH} / ${HEIGHT}`,
+          }}
+        />
+      )}
     </div>
   );
 };
