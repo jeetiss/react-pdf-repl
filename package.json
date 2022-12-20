@@ -20,7 +20,7 @@
     "astring": "^1.8.3",
     "canvas": "^2.10.2",
     "estree-util-build-jsx": "^2.2.0",
-    "jotai": "^1.11.1",
+    "jotai": "^1.11.2",
     "lz-string": "^1.4.4",
     "next": "^13.0.6",
     "pdfjs-dist": "^3.1.81",

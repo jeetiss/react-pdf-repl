@@ -1,0 +1,78 @@
+.repl {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  height: 100vh;
+}
+
+@supports (-webkit-touch-callout: none) {
+  .repl {
+    /* The hack for Safari */
+    height: -webkit-fill-available;
+  }
+}
+
+@media (max-width: 600px) {
+  .repl {
+    grid-template-columns: 1fr;
+    grid-template-rows: 200px 1fr;
+  }
+
+  .repl > *:first-child {
+    grid-row: 2;
+  }
+
+  .repl > *:last-child {
+    grid-row: 1;
+  }
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  gap: 12px;
+}
+
+@media (max-width: 600px) {
+  .panel {
+    flex-direction: row-reverse;
+    padding: 10px;
+    gap: 10px;
+  }
+}
+
+.controls {
+  display: flex;
+  width: 100%;
+  font-family: monospace;
+  font-size: 15px;
+  justify-content: space-evenly;
+  align-items: flex-start;
+}
+
+@media (max-width: 600px) {
+  .controls {
+    flex-direction: column;
+    align-items: center;
+    width: auto;
+  }
+}
+
+.buttons {
+  display: flex;
+  gap: 3px;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+}
+
+.selectWithInfo {
+  display: flex;
+  flex-direction: column;
+  width: max-content;
+}
+
+.infoTime {
+  font-size: 12px;
+  color: #101010;
+}

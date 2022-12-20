@@ -6,7 +6,6 @@ import {
   useState,
   startTransition,
 } from "react";
-import useResizeObserver from "@react-hook/resize-observer";
 
 const isDOM = typeof document !== "undefined";
 
@@ -67,23 +66,4 @@ const useAsyncEffect = (fn, deps) => {
   }, [cb, ...deps]);
 };
 
-const useSize = (target) => {
-  const [size, setSize] = useState();
-
-  useIsomorphicEffect(() => {
-    startTransition(() => {
-      setSize(target.current.getBoundingClientRect());
-    });
-  }, [target]);
-
-  // Where the magic happens
-  useResizeObserver(target, (entry) => {
-    startTransition(() => {
-      setSize(entry.contentRect);
-    });
-  });
-
-  return size;
-};
-
-export { createSingleton, useAsyncEffect, useSize };
+export { createSingleton, useAsyncEffect, useEventCallback };

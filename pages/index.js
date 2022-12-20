@@ -2,11 +2,27 @@ import { useEffect, useReducer, useState } from "react";
 import Editor from "@monaco-editor/react";
 import LZString from "lz-string";
 import useConstant from "use-constant";
+import { useAtom } from "jotai/react";
 
 import { createSingleton } from "../hooks";
 import { Worker } from "../worker";
 import Viewer from "../components/viewer";
+import {
+  Main,
+  Panel,
+  Controls,
+  Buttons,
+  Select,
+} from "../components/repl-layout";
 import { loader } from "../components/viewer.module.css";
+import {
+  page,
+  pagesCount,
+  canDecrease,
+  canIncrease,
+  increase,
+  decrease,
+} from "../state/page";
 
 import { code as defCode } from "../code/default-example";
 
@@ -84,9 +100,15 @@ const Repl = () => {
     version: checkRange(urlParams.version) ?? supportedVersions[0],
   }));
 
-  const [page, setPage] = useState(1);
   const [isReady, setReady] = useState(false);
   const [code, setCode] = useState(() => urlParams.code ?? defCode);
+
+  const [pageV] = useAtom(page);
+  const [, setPagesCount] = useAtom(pagesCount);
+  const [canDecreaseV] = useAtom(canDecrease);
+  const [, decreaseS] = useAtom(decrease);
+  const [canIncreaseV] = useAtom(canIncrease);
+  const [, increaseS] = useAtom(increase);
 
   const pdf = useWorker();
 
@@ -116,10 +138,8 @@ const Repl = () => {
   }, [pdf, code, update, isReady]);
 
   return (
-    <div style={{ display: "flex" }}>
+    <Main>
       <Editor
-        width="50%"
-        height="100vh"
         loading={<Loader />}
         language="javascript"
         value={code}
@@ -147,60 +167,25 @@ const Repl = () => {
           contextmenu: false,
         }}
       />
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          flexGrow: 1,
-          padding: 10,
-          fontFamily: "monospace",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            width: "100%",
-            justifyContent: "space-around",
-            alignItems: "center",
-          }}
-        >
-          <div
-            style={{
-              position: "relative",
-              display: "flex",
-              alignItems: "center",
+      <Panel>
+        <Controls>
+          <Select
+            time={state.time}
+            value={options.version}
+            onChange={(e) => {
+              update({ url: null });
+              updateOptions({ version: e.target.value });
             }}
           >
-            version:{" "}
-            <select
-              value={options.version}
-              onChange={(e) => {
-                update({ url: null });
-                updateOptions({ version: e.target.value });
-              }}
-            >
-              {supportedVersions.map((version) => (
-                <option key={version}>{version}</option>
-              ))}
-            </select>
-            <div
-              style={{
-                position: "absolute",
-                width: 150,
-                fontFamily: "monospace",
-                bottom: "-80%",
-                fontSize: 12,
-                color: "#101010",
-              }}
-            >
-              generation time: {state.time ?? "--"}
-            </div>
-          </div>
+            {supportedVersions.map((version) => (
+              <option key={version}>{version}</option>
+            ))}
+          </Select>
 
           <div style={{ display: "flex", alignItems: "center" }}>
-            <button onClick={() => setPage((page) => page - 1)}>{"<"}</button>
+            <button disabled={!canDecreaseV} onClick={() => decreaseS()}>
+              {"<"}
+            </button>
             <div
               style={{
                 display: "flex",
@@ -209,26 +194,42 @@ const Repl = () => {
               }}
             >
               page:
-              <div style={{ textAlign: "center", minWidth: 20 }}>{page}</div>
+              <div style={{ textAlign: "center", minWidth: 20 }}>{pageV}</div>
             </div>
-            <button onClick={() => setPage((page) => page + 1)}>{">"}</button>
+            <button disabled={!canIncreaseV} onClick={() => increaseS()}>
+              {">"}
+            </button>
           </div>
 
-          <button
-            onClick={() => {
-              const link = new URL(window.location);
-              const params = `?version=${options.version}&cp_code=${compress(
-                code
-              )}`;
-              link.search = params;
-              navigator.clipboard.writeText(link.toString());
-            }}
-          >
-            copy link
-          </button>
-        </div>
+          <Buttons>
+            <button
+              onClick={() => {
+                const link = new URL(window.location);
+                const params = `?version=${options.version}&cp_code=${compress(
+                  code
+                )}`;
+                link.search = params;
+                navigator.clipboard.writeText(link.toString());
+              }}
+            >
+              copy link
+            </button>
 
-        <Viewer url={state.url} page={page} />
+            <button
+              onClick={() => {
+                window.open(state.url);
+              }}
+            >
+              open pdf
+            </button>
+          </Buttons>
+        </Controls>
+
+        <Viewer
+          url={state.url}
+          page={pageV}
+          onParse={({ pagesCount }) => setPagesCount(pagesCount)}
+        />
 
         {state.error && (
           <div
@@ -253,8 +254,8 @@ const Repl = () => {
             </div>
           </div>
         )}
-      </div>
-    </div>
+      </Panel>
+    </Main>
   );
 };
 
