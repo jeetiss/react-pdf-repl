@@ -1,18 +1,9 @@
 import * as pdfjs from "pdfjs-dist";
 import workerSrc from "pdfjs-dist/build/pdf.worker.min.js";
-import {
-  useEffect,
-  useLayoutEffect,
-  useReducer,
-  useRef,
-  useState,
-} from "react";
-import {
-  useAsyncEffect,
-  createSingleton,
-  useSize,
-  useEventCallback,
-} from "../hooks";
+import { useEffect, useRef } from "react";
+import useResizeObserver from "@react-hook/resize-observer";
+import { createSingleton, useSize, useEventCallback } from "../hooks";
+import { useViewerMegaState } from "../state/pdf-view";
 import { loader } from "./viewer.module.css";
 
 pdfjs.GlobalWorkerOptions.workerSrc = workerSrc;
@@ -22,78 +13,44 @@ const useWorker = createSingleton(
   (worker) => worker.destroy()
 );
 
-const abortify = (destroyer, errorHandler) => async (fn, signal) => {
-  const task = fn();
-  const aborter = () => destroyer(task);
-
-  signal.addEventListener("abort", aborter, { once: true });
-
-  const resultPromise = errorHandler(task.promise);
-
-  if (signal.aborted) {
-    signal.removeEventListener("abort", aborter, { once: true });
-    return aborter();
-  }
-
-  const result = await resultPromise;
-  signal.removeEventListener("abort", aborter, { once: true });
-
-  return result;
-};
-
-const wrapDoc = abortify(
-  (task) => task.destroy(),
-  (promise) => promise.catch((error) => console.error(error))
-);
-
-const wrapPage = abortify(
-  (task) => task.cancel(),
-  (promise) =>
-    promise.catch((error) => {
-      if (error.name !== "RenderingCancelledException") {
-        return Promise.reject(error);
-      }
-    })
-);
-
 const WIDTH = 210;
 const HEIGHT = 297;
 
+const client = (fn) => typeof window !== "undefined" && fn();
+
 const Viewer = ({ page: pageNumber, url, onParse }) => {
-  const dpr = useRef();
   const worker = useWorker();
+  const {
+    document,
+    size,
+    setUrl,
+    setSize,
+    setPage,
+    setWorker,
+    pageCanvas,
+    freeCanvas,
+  } = useViewerMegaState();
 
   const onParseCallback = useEventCallback(onParse);
 
   const blockRef = useRef();
-  const canvas1Ref = useRef();
-  const canvas2Ref = useRef();
-  const [document, setDocument] = useState(null);
-  const [isLoading, setLoadingState] = useState(true);
-  const [phase, toggle] = useReducer((v) => !v, true);
+  const canvasAnanas = useRef();
 
-  const size = useSize(blockRef);
+  useEffect(() => {
+    setUrl(url);
+  }, [setUrl, url]);
 
-  useLayoutEffect(() => {
-    dpr.current = Number.parseInt(window.devicePixelRatio || 1, 10);
-  }, []);
+  useEffect(() => {
+    setPage(pageNumber);
+  }, [setPage, pageNumber]);
 
-  useAsyncEffect(
-    async (signal) => {
-      if (url) {
-        const doc = await wrapDoc(
-          () => pdfjs.getDocument({ url, worker }),
-          signal
-        );
+  useEffect(() => {
+    setWorker(worker);
+  }, [setWorker, worker]);
 
-        setDocument(doc);
-      } else {
-        setLoadingState(true);
-        setDocument(null);
-      }
-    },
-    [pageNumber, url]
-  );
+  useResizeObserver(blockRef, (entry) => {
+    setSize(entry.contentRect);
+  });
 
   useEffect(() => {
     if (document) {
@@ -101,56 +58,15 @@ const Viewer = ({ page: pageNumber, url, onParse }) => {
     }
   }, [document, onParseCallback]);
 
-  const wtfState = useRef({});
-
   useEffect(() => {
-    const controller = new AbortController();
-    (async () => {
-      if (
-        document &&
-        (wtfState.current.phase !== phase ||
-          wtfState.current.pageNumber !== pageNumber)
-      ) {
-        console.log(`rendering page number: ${pageNumber} in phase ${phase}`);
-
-        const page = await document.getPage(pageNumber);
-
-        let viewport = page.getViewport({ scale: 1 / dpr.current });
-
-        const scale = Math.min(
-          size.height / viewport.height,
-          size.width / viewport.width
-        );
-
-        viewport = page.getViewport({ scale });
-
-        const canvas = phase ? canvas1Ref.current : canvas2Ref.current;
-
-        if (viewport.width !== canvas.width) {
-          canvas.width = viewport.width;
-        }
-
-        if (viewport.height !== canvas.height) {
-          canvas.height = viewport.height;
-        }
-
-        const context = canvas.getContext("2d");
-
-        await wrapPage(
-          () => page.render({ canvasContext: context, viewport }),
-          controller.signal
-        );
-
-        wtfState.current = { phase: !phase, pageNumber };
-        toggle();
-        setLoadingState(false);
-      }
-    })();
-
-    return () => {
-      controller.abort();
-    };
-  }, [document, size, pageNumber, phase]);
+    if (pageCanvas) {
+      canvasAnanas.current.append(pageCanvas);
+      return () => {
+        pageCanvas.remove();
+        freeCanvas(pageCanvas);
+      };
+    }
+  }, [freeCanvas, pageCanvas]);
 
   const ratio = size ? size.height / HEIGHT < size.width / WIDTH : 0;
 
@@ -170,29 +86,22 @@ const Viewer = ({ page: pageNumber, url, onParse }) => {
           width: "100%",
         }}
       >
-        <div
-          style={{
-            position: "absolute",
-            border: "1px solid rgba(0, 0, 0, 0.18)",
-            top: "50%",
-            left: "50%",
-            transform: `translate(-50%, -50%) scale(${1 / dpr.current})`,
-          }}
-        >
-          <canvas ref={canvas1Ref} style={{ display: "block" }} />
-          <canvas
-            ref={canvas2Ref}
+        {document && (
+          <div
+            ref={canvasAnanas}
             style={{
-              display: "block",
               position: "absolute",
-              inset: 0,
-              opacity: phase ? 1 : 0,
-              transition: "opacity ease 0.1s",
+              border: "1px solid rgba(0, 0, 0, 0.18)",
+              top: "50%",
+              left: "50%",
+              transform: `translate(-50%, -50%) scale(${
+                1 / client(() => window.devicePixelRatio) ?? 1
+              })`,
             }}
-          />
-        </div>
+          ></div>
+        )}
 
-        {size && isLoading && (
+        {size && !document && (
           <div
             className={loader}
             style={{
