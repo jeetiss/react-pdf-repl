@@ -7,7 +7,13 @@ import { useAtom } from "jotai/react";
 import { createSingleton } from "../hooks";
 import { Worker } from "../worker";
 import Viewer from "../components/viewer";
-import { Main, Panel, Controls, Buttons } from "../components/repl-layout";
+import {
+  Main,
+  Panel,
+  Controls,
+  Buttons,
+  Select,
+} from "../components/repl-layout";
 import { loader } from "../components/viewer.module.css";
 import {
   page,
@@ -163,38 +169,18 @@ const Repl = () => {
       />
       <Panel>
         <Controls>
-          <div
-            style={{
-              position: "relative",
-              display: "flex",
-              alignItems: "center",
+          <Select
+            time={state.time}
+            value={options.version}
+            onChange={(e) => {
+              update({ url: null });
+              updateOptions({ version: e.target.value });
             }}
           >
-            version:{" "}
-            <select
-              value={options.version}
-              onChange={(e) => {
-                update({ url: null });
-                updateOptions({ version: e.target.value });
-              }}
-            >
-              {supportedVersions.map((version) => (
-                <option key={version}>{version}</option>
-              ))}
-            </select>
-            <div
-              style={{
-                position: "absolute",
-                width: 150,
-                fontFamily: "monospace",
-                bottom: "-80%",
-                fontSize: 12,
-                color: "#101010",
-              }}
-            >
-              generation time: {state.time ?? "--"}
-            </div>
-          </div>
+            {supportedVersions.map((version) => (
+              <option key={version}>{version}</option>
+            ))}
+          </Select>
 
           <div style={{ display: "flex", alignItems: "center" }}>
             <button disabled={!canDecreaseV} onClick={() => decreaseS()}>
