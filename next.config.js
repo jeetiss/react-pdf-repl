@@ -16,6 +16,8 @@ module.exports = withBundleAnalyzer({
       },
     });
 
+    config.resolve.alias["iconv-lite"] = false;
+
     return config;
   },
 });
