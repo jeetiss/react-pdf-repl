@@ -1,8 +1,8 @@
 import * as pdfjs from "pdfjs-dist";
 import workerSrc from "pdfjs-dist/build/pdf.worker.min.js";
-import { useEffect, useRef } from "react";
+import { forwardRef, useEffect, useRef } from "react";
 import useResizeObserver from "@react-hook/resize-observer";
-import { createSingleton, useSize, useEventCallback } from "../hooks";
+import { createSingleton, useEventCallback } from "../hooks";
 import { useViewerMegaState } from "../state/pdf-view";
 import { loader } from "./viewer.module.css";
 
@@ -17,6 +17,25 @@ const WIDTH = 210;
 const HEIGHT = 297;
 
 const client = (fn) => typeof window !== "undefined" && fn();
+
+const Canvas = ({ className, style, canvas, before, after }) => {
+  const ref = useRef();
+  const beforeCallback = useEventCallback(before);
+  const afterCallback = useEventCallback(after);
+
+  useEffect(() => {
+    if (canvas) {
+      ref.current.append(canvas);
+      beforeCallback(canvas);
+      return () => {
+        canvas.remove();
+        afterCallback(canvas);
+      };
+    }
+  }, [canvas, ref, beforeCallback, afterCallback]);
+
+  return <div ref={ref} className={className} style={style} />;
+};
 
 const Viewer = ({ page: pageNumber, url, onParse }) => {
   const worker = useWorker();
@@ -34,7 +53,6 @@ const Viewer = ({ page: pageNumber, url, onParse }) => {
   const onParseCallback = useEventCallback(onParse);
 
   const blockRef = useRef();
-  const canvasAnanas = useRef();
 
   useEffect(() => {
     setUrl(url);
@@ -58,16 +76,6 @@ const Viewer = ({ page: pageNumber, url, onParse }) => {
     }
   }, [document, onParseCallback]);
 
-  useEffect(() => {
-    if (pageCanvas) {
-      canvasAnanas.current.append(pageCanvas);
-      return () => {
-        pageCanvas.remove();
-        freeCanvas(pageCanvas);
-      };
-    }
-  }, [freeCanvas, pageCanvas]);
-
   const ratio = size ? size.height / HEIGHT < size.width / WIDTH : 0;
 
   return (
@@ -80,8 +88,9 @@ const Viewer = ({ page: pageNumber, url, onParse }) => {
       }}
     >
       {document && (
-        <div
-          ref={canvasAnanas}
+        <Canvas
+          canvas={pageCanvas}
+          after={(canvas) => freeCanvas(canvas)}
           style={{
             position: "absolute",
             border: "1px solid rgba(0, 0, 0, 0.18)",
@@ -91,7 +100,7 @@ const Viewer = ({ page: pageNumber, url, onParse }) => {
               1 / client(() => window.devicePixelRatio) ?? 1
             })`,
           }}
-        ></div>
+        />
       )}
 
       {size && !document && (
