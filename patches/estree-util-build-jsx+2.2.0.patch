@@ -1,0 +1,13 @@
+diff --git a/node_modules/estree-util-build-jsx/lib/index.js b/node_modules/estree-util-build-jsx/lib/index.js
+index c7f6149..6902d69 100644
+--- a/node_modules/estree-util-build-jsx/lib/index.js
++++ b/node_modules/estree-util-build-jsx/lib/index.js
+@@ -189,6 +189,8 @@ export function buildJsx(tree, options = {}) {
+             .replace(/\n+/g, '\n')
+             // Drop final line feeds.
+             .replace(/\n+$/, '')
++            // Drop first line feeds.
++            .replace(/^\n+/, '')
+             // Replace line feeds with spaces.
+             .replace(/\n/g, ' ')
+ 
