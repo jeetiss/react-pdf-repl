@@ -1,9 +1,8 @@
 import * as pdfjs from "pdfjs-dist";
 import workerSrc from "pdfjs-dist/build/pdf.worker.min.js";
-import { forwardRef, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import useResizeObserver from "@react-hook/resize-observer";
-import { createSingleton, useEventCallback } from "../hooks";
-import { useViewerMegaState } from "../state/pdf-view";
+import { createSingleton, useEventCallback, useSetState } from "../hooks";
 import { loader } from "./viewer.module.css";
 
 pdfjs.GlobalWorkerOptions.workerSrc = workerSrc;
@@ -17,6 +16,27 @@ const WIDTH = 210;
 const HEIGHT = 297;
 
 const client = (fn) => typeof window !== "undefined" && fn();
+
+let canvases = [];
+const getCanvas = (viewport) => {
+  const canvas = canvases.length
+    ? canvases.pop()
+    : document.createElement("canvas");
+
+  if (viewport.width !== canvas.width) {
+    canvas.width = viewport.width;
+  }
+
+  if (viewport.height !== canvas.height) {
+    canvas.height = viewport.height;
+  }
+
+  return canvas;
+};
+
+const freeCanvas = (canvas) => {
+  canvases.push(canvas);
+};
 
 const Canvas = ({ className, style, canvas, before, after }) => {
   const ref = useRef();
@@ -39,44 +59,84 @@ const Canvas = ({ className, style, canvas, before, after }) => {
 
 const Viewer = ({ page: pageNumber, url, onParse }) => {
   const worker = useWorker();
-  const {
-    document,
-    size,
-    setUrl,
-    setSize,
-    setPage,
-    setWorker,
-    pageCanvas,
-    freeCanvas,
-  } = useViewerMegaState();
 
-  const onParseCallback = useEventCallback(onParse);
-
-  const blockRef = useRef();
-
-  useEffect(() => {
-    setUrl(url);
-  }, [setUrl, url]);
-
-  useEffect(() => {
-    setPage(pageNumber);
-  }, [setPage, pageNumber]);
-
-  useEffect(() => {
-    setWorker(worker);
-  }, [setWorker, worker]);
-
-  useResizeObserver(blockRef, (entry) => {
-    setSize(entry.contentRect);
+  const [state, set] = useSetState({
+    document: null,
+    size: null,
+    canvas: null,
   });
 
+  const onParseCallback = useEventCallback(onParse);
   useEffect(() => {
-    if (document) {
-      onParseCallback({ pagesCount: document.numPages });
+    if (state.document) {
+      onParseCallback({ pagesCount: state.document.numPages });
     }
-  }, [document, onParseCallback]);
+  }, [state.document, onParseCallback]);
 
-  const ratio = size ? size.height / HEIGHT < size.width / WIDTH : 0;
+  useEffect(() => {
+    const getDocument = ({ signal }) => {
+      const task = pdfjs.getDocument({ url, worker });
+      signal.addEventListener("abort", () => task.destroy());
+      return task.promise.then((document) => {
+        if (!signal.aborted) {
+          set({ document });
+        }
+      });
+    };
+
+    if (url) {
+      const controller = new AbortController();
+      getDocument({ signal: controller.signal });
+
+      return () => controller.abort();
+    }
+  }, [set, url, worker]);
+
+  useEffect(() => {
+    const getRenderedPage = ({ signal }) =>
+      state.document
+        .getPage(pageNumber)
+        .then((page) => {
+          let viewport = page.getViewport({
+            scale: 1 / window.devicePixelRatio,
+          });
+          const size = state.size;
+          const scale = Math.min(
+            size.height / viewport.height,
+            size.width / viewport.width
+          );
+
+          viewport = page.getViewport({ scale });
+
+          const canvas = getCanvas(viewport);
+          const context = canvas.getContext("2d");
+
+          const task = page.render({ canvasContext: context, viewport });
+
+          return task.promise.then(() => canvas);
+        })
+        .then((canvas) => {
+          if (!signal.aborted) {
+            set({ canvas });
+          }
+        });
+
+    if (state.document && state.size) {
+      const controller = new AbortController();
+      getRenderedPage({ signal: controller.signal });
+
+      return () => controller.abort();
+    }
+  }, [pageNumber, set, state.document, state.size]);
+
+  const blockRef = useRef();
+  useResizeObserver(blockRef, (entry) => {
+    set({ size: entry.contentRect });
+  });
+
+  const ratio = state.size
+    ? state.size.height / HEIGHT < state.size.width / WIDTH
+    : 0;
 
   return (
     <div
@@ -87,9 +147,9 @@ const Viewer = ({ page: pageNumber, url, onParse }) => {
         width: "100%",
       }}
     >
-      {document && (
+      {state.document && (
         <Canvas
-          canvas={pageCanvas}
+          canvas={state.canvas}
           after={(canvas) => freeCanvas(canvas)}
           style={{
             position: "absolute",
@@ -103,12 +163,12 @@ const Viewer = ({ page: pageNumber, url, onParse }) => {
         />
       )}
 
-      {size && !document && (
+      {state.size && !state.document && (
         <div
           className={loader}
           style={{
-            width: ratio ? "unset" : size.width,
-            height: ratio ? size.height : "unset",
+            width: ratio ? "unset" : state.size.width,
+            height: ratio ? state.size.height : "unset",
             aspectRatio: `${WIDTH} / ${HEIGHT}`,
           }}
         />

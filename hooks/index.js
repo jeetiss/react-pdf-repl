@@ -3,8 +3,7 @@ import {
   useLayoutEffect,
   useRef,
   useCallback,
-  useState,
-  startTransition,
+  useReducer,
 } from "react";
 
 const isDOM = typeof document !== "undefined";
@@ -66,4 +65,12 @@ const useAsyncEffect = (fn, deps) => {
   }, [cb, ...deps]);
 };
 
-export { createSingleton, useAsyncEffect, useEventCallback };
+const useSetState = (initial) =>
+  useReducer.apply(
+    null,
+    typeof initial === "function"
+      ? [(s, a) => ({ ...s, ...a }), null, initial]
+      : [(s, a) => ({ ...s, ...a }), initial]
+  );
+
+export { createSingleton, useAsyncEffect, useEventCallback, useSetState };

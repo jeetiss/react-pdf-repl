@@ -4,7 +4,7 @@ import LZString from "lz-string";
 import useConstant from "use-constant";
 import { useAtom } from "jotai/react";
 
-import { createSingleton } from "../hooks";
+import { createSingleton, useSetState } from "../hooks";
 import { Worker } from "../worker";
 import Viewer from "../components/viewer";
 import {
@@ -64,16 +64,8 @@ const checkRange = (version) => {
 
 const Loader = () => <div className={loader} />;
 
-const useMergeState = (initial) =>
-  useReducer.apply(
-    null,
-    typeof initial === "function"
-      ? [(s, a) => ({ ...s, ...a }), null, initial]
-      : [(s, a) => ({ ...s, ...a }), initial]
-  );
-
 const Repl = () => {
-  const [state, update] = useMergeState({
+  const [state, update] = useSetState({
     error: null,
     url: null,
     version: null,
@@ -96,7 +88,7 @@ const Repl = () => {
     );
   });
 
-  const [options, updateOptions] = useMergeState(() => ({
+  const [options, updateOptions] = useSetState(() => ({
     version: checkRange(urlParams.version) ?? supportedVersions[0],
   }));
 
