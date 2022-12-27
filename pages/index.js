@@ -175,24 +175,26 @@ const Repl = () => {
             ))}
           </Select>
 
-          <div style={{ display: "flex", alignItems: "center" }}>
-            <button disabled={!canDecreaseV} onClick={() => decreaseS()}>
-              {"<"}
-            </button>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                padding: "0px 0px 3px 5px",
-              }}
-            >
-              page:
-              <div style={{ textAlign: "center", minWidth: 20 }}>{pageV}</div>
+          {pageV && (
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <button disabled={!canDecreaseV} onClick={() => decreaseS()}>
+                {"<"}
+              </button>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  padding: "0px 0px 3px 5px",
+                }}
+              >
+                page:
+                <div style={{ textAlign: "center", minWidth: 20 }}>{pageV}</div>
+              </div>
+              <button disabled={!canIncreaseV} onClick={() => increaseS()}>
+                {">"}
+              </button>
             </div>
-            <button disabled={!canIncreaseV} onClick={() => increaseS()}>
-              {">"}
-            </button>
-          </div>
+          )}
 
           <Buttons>
             <button

@@ -93,7 +93,7 @@ const Viewer = ({ page: pageNumber, url, onParse }) => {
   }, [set, url, worker]);
 
   useEffect(() => {
-    const getRenderedPage = ({ signal }) =>
+    const getRenderedPage = ({ pageNumber, signal }) =>
       state.document
         .getPage(pageNumber)
         .then((page) => {
@@ -121,9 +121,14 @@ const Viewer = ({ page: pageNumber, url, onParse }) => {
           }
         });
 
-    if (state.document && state.size) {
+    if (
+      state.document &&
+      state.size &&
+      pageNumber &&
+      state.document.numPages >= pageNumber
+    ) {
       const controller = new AbortController();
-      getRenderedPage({ signal: controller.signal });
+      getRenderedPage({ pageNumber, signal: controller.signal });
 
       return () => controller.abort();
     }
@@ -147,7 +152,7 @@ const Viewer = ({ page: pageNumber, url, onParse }) => {
         width: "100%",
       }}
     >
-      {state.document && (
+      {state.document && pageNumber && (
         <Canvas
           canvas={state.canvas}
           after={(canvas) => freeCanvas(canvas)}
@@ -161,6 +166,19 @@ const Viewer = ({ page: pageNumber, url, onParse }) => {
             })`,
           }}
         />
+      )}
+
+      {state.document && !pageNumber && (
+        <div
+          style={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+          }}
+        >
+          Blank PDF Document
+        </div>
       )}
 
       {state.size && !state.document && (

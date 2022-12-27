@@ -45,7 +45,9 @@ const evaluate = (code) =>
         ...rpGlobals,
         render: createRender((error, url) => {
           if (error) reject(error);
-          else resolve(url);
+          else {
+            resolve(url);
+          }
         }),
         createElement,
         Fragment,
