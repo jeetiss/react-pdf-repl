@@ -77,11 +77,17 @@ const Viewer = ({ page: pageNumber, url, onParse }) => {
     const getDocument = ({ signal }) => {
       const task = pdfjs.getDocument({ url, worker });
       signal.addEventListener("abort", () => task.destroy());
-      return task.promise.then((document) => {
-        if (!signal.aborted) {
-          set({ document });
-        }
-      });
+      return task.promise
+        .then((document) => {
+          if (!signal.aborted) {
+            set({ document });
+          }
+        })
+        .catch((error) => {
+          if (!signal.aborted) {
+            throw error;
+          }
+        });
     };
 
     if (url) {
@@ -118,6 +124,11 @@ const Viewer = ({ page: pageNumber, url, onParse }) => {
         .then((canvas) => {
           if (!signal.aborted) {
             set({ canvas });
+          }
+        })
+        .catch((error) => {
+          if (!signal.aborted) {
+            throw error;
           }
         });
 

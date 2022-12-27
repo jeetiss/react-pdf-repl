@@ -28,6 +28,7 @@
     "react-compare-slider": "^2.2.0",
     "react-dom": "18.2.0",
     "react-mosaic-component": "^5.3.0",
+    "react-resizable-panels": "^0.0.17",
     "react-suspense-fetch": "^0.6.0",
     "rpr1.6.17": "npm:@react-pdf/renderer@1.6.17",
     "rpr2.0.21": "npm:@react-pdf/renderer@2.0.21",

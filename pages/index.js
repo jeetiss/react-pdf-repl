@@ -4,6 +4,8 @@ import LZString from "lz-string";
 import useConstant from "use-constant";
 import { useAtom } from "jotai/react";
 
+import { Panel as ResizablePanel, PanelGroup } from "react-resizable-panels";
+
 import { createSingleton, useSetState } from "../hooks";
 import { Worker } from "../worker";
 import Viewer from "../components/viewer";
@@ -13,6 +15,7 @@ import {
   Controls,
   Buttons,
   Select,
+  ResizeHandle,
 } from "../components/repl-layout";
 import { loader } from "../components/viewer.module.css";
 import {
@@ -63,6 +66,45 @@ const checkRange = (version) => {
   return null;
 };
 
+function useMediaQuery(query) {
+  const getMatches = (query) => {
+    if (typeof window !== "undefined") {
+      return window.matchMedia(query).matches;
+    }
+    return false;
+  };
+
+  const [matches, setMatches] = useState(() => getMatches(query));
+
+  useEffect(() => {
+    function handleChange() {
+      console.log("! CHAnGE !");
+      setMatches(getMatches(query));
+    }
+
+    const matchMedia = window.matchMedia(query);
+
+    // Triggered at the first client-side load and if query changes
+    handleChange();
+
+    matchMedia.addEventListener("change", handleChange);
+
+    return () => {
+      matchMedia.removeEventListener("change", handleChange);
+    };
+  }, [query]);
+
+  return matches;
+}
+
+const ClientOnly = ({ children }) => {
+  const [isClient, set] = useState(false);
+
+  useEffect(() => set(true), []);
+
+  return isClient ? children : null;
+};
+
 const Loader = () => <div className={loader} />;
 
 const Repl = () => {
@@ -88,6 +130,8 @@ const Repl = () => {
       )
     );
   });
+
+  const isMobile = useMediaQuery("(max-width: 600px)");
 
   const [options, updateOptions] = useSetState(() => ({
     version: checkRange(urlParams.version) ?? supportedVersions[0],
@@ -130,8 +174,8 @@ const Repl = () => {
     }
   }, [pdf, code, update, isReady]);
 
-  return (
-    <Main>
+  const editorPanel = (
+    <ResizablePanel defaultSize={50} minSize={20}>
       <Editor
         loading={<Loader />}
         language="javascript"
@@ -160,6 +204,11 @@ const Repl = () => {
           contextmenu: false,
         }}
       />
+    </ResizablePanel>
+  );
+
+  const viewerPanel = (
+    <ResizablePanel minSize={20}>
       <Panel>
         <Controls>
           <Select
@@ -250,6 +299,26 @@ const Repl = () => {
           </div>
         )}
       </Panel>
+    </ResizablePanel>
+  );
+
+  return (
+    <Main>
+      <ClientOnly>
+        {isMobile ? (
+          <PanelGroup autoSaveId="react-pdf-repl-mobile" direction="vertical">
+            {viewerPanel}
+            <ResizeHandle />
+            {editorPanel}
+          </PanelGroup>
+        ) : (
+          <PanelGroup autoSaveId="react-pdf-repl" direction="horizontal">
+            {editorPanel}
+            <ResizeHandle />
+            {viewerPanel}
+          </PanelGroup>
+        )}
+      </ClientOnly>
     </Main>
   );
 };

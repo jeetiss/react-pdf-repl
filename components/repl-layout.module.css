@@ -1,6 +1,6 @@
 .repl {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  /* display: grid;
+  grid-template-columns: 1fr 1fr; */
   height: 100vh;
 }
 
@@ -11,10 +11,10 @@
   }
 }
 
-@media (max-width: 600px) {
+/* @media (max-width: 600px) {
   .repl {
     grid-template-columns: 1fr;
-    grid-template-rows: 200px 1fr;
+    grid-template-rows: 200px 1fr; 
   }
 
   .repl > *:first-child {
@@ -24,13 +24,14 @@
   .repl > *:last-child {
     grid-row: 1;
   }
-}
+} */
 
 .panel {
   display: flex;
   flex-direction: column;
   padding: 24px;
   gap: 12px;
+  height: 100%;
 }
 
 @media (max-width: 600px) {
@@ -75,4 +76,29 @@
 .infoTime {
   font-size: 12px;
   color: #101010;
+}
+
+.resizeHandleOuter {
+  flex: 0 0 15px;
+  position: relative;
+  outline: none;
+
+  --background-color: transparent;
+}
+
+.resizeHandleOuter[data-resize-handle-active],
+.resizeHandleOuter[data-resize-handle-active] > .resizeHandleInner:hover {
+  --background-color: rgba(0, 0, 0, 0.6);
+}
+
+.resizeHandleInner:hover {
+  --background-color: rgba(100, 100, 100, 0.7);
+}
+
+.resizeHandleInner {
+  position: absolute;
+  inset: 3px;
+  border-radius: 10px;
+  background-color: var(--background-color);
+  transition: background-color 0.2s linear;
 }

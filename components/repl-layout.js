@@ -1,3 +1,4 @@
+import { PanelResizeHandle } from "react-resizable-panels";
 import {
   repl,
   panel,
@@ -5,6 +6,8 @@ import {
   buttons,
   selectWithInfo,
   infoTime,
+  resizeHandleOuter,
+  resizeHandleInner,
 } from "./repl-layout.module.css";
 
 const Main = ({ children }) => <main className={repl}>{children}</main>;
@@ -24,4 +27,12 @@ const Select = ({ time, value, onChange, children }) => (
   </div>
 );
 
-export { Main, Panel, Controls, Buttons, Select };
+function ResizeHandle({ className = "" }) {
+  return (
+    <PanelResizeHandle className={[resizeHandleOuter, className].join(" ")}>
+      <div className={resizeHandleInner} />
+    </PanelResizeHandle>
+  );
+}
+
+export { Main, Panel, Controls, Buttons, Select, ResizeHandle };
