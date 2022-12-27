@@ -1,4 +1,4 @@
-import { createElement, Fragment } from "react";
+import * as React from "react";
 import preprocessJsx from "./process-jsx";
 
 import "ses";
@@ -43,14 +43,13 @@ const evaluate = (code) =>
       const executableCode = preprocessJsx(code);
       const c = new Compartment({
         ...rpGlobals,
+        ...React,
         render: createRender((error, url) => {
           if (error) reject(error);
           else {
             resolve(url);
           }
         }),
-        createElement,
-        Fragment,
       });
 
       c.evaluate(executableCode);
