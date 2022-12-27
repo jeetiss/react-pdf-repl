@@ -10,7 +10,6 @@ import { createSingleton, useSetState } from "../hooks";
 import { Worker } from "../worker";
 import Viewer from "../components/viewer";
 import {
-  Main,
   Panel,
   Controls,
   Buttons,
@@ -78,7 +77,6 @@ function useMediaQuery(query) {
 
   useEffect(() => {
     function handleChange() {
-      console.log("! CHAnGE !");
       setMatches(getMatches(query));
     }
 
@@ -87,18 +85,10 @@ function useMediaQuery(query) {
     // Triggered at the first client-side load and if query changes
     handleChange();
 
-    if (matchMedia.addListener) {
-      matchMedia.addListener(handleChange);
-    } else {
-      matchMedia.addEventListener("change", handleChange);
-    }
+    matchMedia.addEventListener("change", handleChange);
 
     return () => {
-      if (matchMedia.removeListener) {
-        matchMedia.removeListener(handleChange);
-      } else {
-        matchMedia.removeEventListener("change", handleChange);
-      }
+      matchMedia.removeEventListener("change", handleChange);
     };
   }, [query]);
 
@@ -311,23 +301,21 @@ const Repl = () => {
   );
 
   return (
-    <Main>
-      <ClientOnly>
-        {isMobile ? (
-          <PanelGroup autoSaveId="react-pdf-repl-mobile" direction="vertical">
-            {viewerPanel}
-            <ResizeHandle />
-            {editorPanel}
-          </PanelGroup>
-        ) : (
-          <PanelGroup autoSaveId="react-pdf-repl" direction="horizontal">
-            {editorPanel}
-            <ResizeHandle />
-            {viewerPanel}
-          </PanelGroup>
-        )}
-      </ClientOnly>
-    </Main>
+    <ClientOnly>
+      {isMobile ? (
+        <PanelGroup autoSaveId="react-pdf-repl-mobile" direction="vertical">
+          {viewerPanel}
+          <ResizeHandle />
+          {editorPanel}
+        </PanelGroup>
+      ) : (
+        <PanelGroup autoSaveId="react-pdf-repl" direction="horizontal">
+          {editorPanel}
+          <ResizeHandle />
+          {viewerPanel}
+        </PanelGroup>
+      )}
+    </ClientOnly>
   );
 };
 

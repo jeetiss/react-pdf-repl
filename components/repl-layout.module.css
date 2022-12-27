@@ -1,31 +1,3 @@
-.repl {
-  /* display: grid;
-  grid-template-columns: 1fr 1fr; */
-  height: 100vh;
-}
-
-@supports (-webkit-touch-callout: none) {
-  .repl {
-    /* The hack for Safari */
-    height: -webkit-fill-available;
-  }
-}
-
-/* @media (max-width: 600px) {
-  .repl {
-    grid-template-columns: 1fr;
-    grid-template-rows: 200px 1fr; 
-  }
-
-  .repl > *:first-child {
-    grid-row: 2;
-  }
-
-  .repl > *:last-child {
-    grid-row: 1;
-  }
-} */
-
 .panel {
   display: flex;
   flex-direction: column;
