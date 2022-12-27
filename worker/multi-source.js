@@ -27,7 +27,10 @@ const createRender = (callback) => (element) => {
     .pdf(element)
     .toBlob()
     .then((res) => URL.createObjectURL(res))
-    .then(callback);
+    .then(
+      (result) => callback(null, result),
+      (error) => callback(error)
+    );
 };
 
 const evaluate = (code) =>
@@ -40,7 +43,10 @@ const evaluate = (code) =>
       const executableCode = preprocessJsx(code);
       const c = new Compartment({
         ...rpGlobals,
-        render: createRender((url) => resolve(url)),
+        render: createRender((error, url) => {
+          if (error) reject(error);
+          else resolve(url);
+        }),
         createElement,
         Fragment,
       });
