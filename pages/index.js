@@ -45,6 +45,7 @@ const useWorker = createSingleton(
 );
 
 const supportedVersions = [
+  "3.0.2",
   "3.0.1",
   "3.0.0",
   "2.3.0",

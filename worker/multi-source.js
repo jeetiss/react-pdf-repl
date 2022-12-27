@@ -19,6 +19,7 @@ const versions = {
   "2.3.0": wrap(() => import("rpr2.3.0")),
   "3.0.0": wrap(() => import("rpr3.0.0")),
   "3.0.1": wrap(() => import("rpr3.0.1")),
+  "3.0.2": wrap(() => import("rpr3.0.2")),
 };
 
 const createRender = (callback) => (element) => {
