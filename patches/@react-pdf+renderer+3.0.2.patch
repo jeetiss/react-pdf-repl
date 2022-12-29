@@ -1,0 +1,31 @@
+diff --git a/node_modules/@react-pdf/renderer/lib/react-pdf.browser.es.js b/node_modules/@react-pdf/renderer/lib/react-pdf.browser.es.js
+index 2057567..fc49af3 100644
+--- a/node_modules/@react-pdf/renderer/lib/react-pdf.browser.es.js
++++ b/node_modules/@react-pdf/renderer/lib/react-pdf.browser.es.js
+@@ -203,6 +203,8 @@ var pdf = function pdf(initialValue) {
+     renderer.updateContainer(doc, mountNode, null);
+   };
+   
++  var _GLOBAL_LAYOUT_ = null
++
+   if (initialValue) updateContainer(initialValue);
+ 
+   var render = /*#__PURE__*/function () {
+@@ -232,6 +234,7 @@ var pdf = function pdf(initialValue) {
+ 
+             case 6:
+               layout = _context.sent;
++              _GLOBAL_LAYOUT_ = layout
+               return _context.abrupt("return", renderPDF(ctx, layout));
+ 
+             case 8:
+@@ -280,7 +283,8 @@ var pdf = function pdf(initialValue) {
+                       type: 'application/pdf'
+                     });
+                     callOnRender({
+-                      blob: blob
++                      blob: blob,
++                      layout: _GLOBAL_LAYOUT_
+                     });
+                     resolve(blob);
+                   } catch (error) {

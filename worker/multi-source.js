@@ -19,7 +19,7 @@ const versions = {
   "2.3.0": wrap(() => import("rpr2.3.0")),
   "3.0.0": wrap(() => import("rpr3.0.0")),
   "3.0.1": wrap(() => import("rpr3.0.1")),
-  "3.0.2": wrap(() => import("rpr3.0.2")),
+  "3.0.2": wrap(() => import("@react-pdf/renderer")),
 };
 
 const createRender = (callback) => (element) => {
@@ -44,6 +44,7 @@ const evaluate = (code) =>
       const c = new Compartment({
         ...rpGlobals,
         ...React,
+        console,
         render: createRender((error, url) => {
           if (error) reject(error);
           else {
