@@ -1,7 +1,7 @@
 import "ses";
 import * as React from "react";
 import { StaticModuleRecord } from "./better-static-module-record.mjs";
-import { jsx } from "react/jsx-runtime";
+import * as jsx from "react/jsx-runtime";
 
 // q, to quote strings in error messages.
 const q = JSON.stringify;
@@ -89,7 +89,7 @@ const wrap = (factory) => () =>
 const reactModule = createVirtualModuleFromVariable("react", React);
 const reactRuntimeModule = createVirtualModuleFromVariable(
   "react/jsx-runtime",
-  { jsx }
+  jsx
 );
 
 const versions = {
