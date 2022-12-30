@@ -2,6 +2,7 @@ import "ses";
 import * as React from "react";
 import { jsx, jsxs, Fragment } from "react/jsx-runtime";
 import { StaticModuleRecord } from "./better-static-module-record.mjs";
+import preprocessJsx from "./process-jsx";
 
 // q, to quote strings in error messages.
 const q = JSON.stringify;
@@ -166,6 +167,43 @@ const evaluate = (code) =>
     }
   });
 
+const createRender = (callback) => (element) => {
+  rpGlobals
+    .pdf(element)
+    .toBlob()
+    .then((res) => URL.createObjectURL(res))
+    .then(
+      (result) => callback(null, result),
+      (error) => callback(error)
+    );
+};
+
+const legacyEvaluate = (code) =>
+  new Promise((resolve, reject) => {
+    if (!rpGlobals) {
+      reject(Error("react-pdf not found"));
+    }
+
+    try {
+      const executableCode = preprocessJsx(code);
+      const c = new Compartment({
+        ...rpGlobals,
+        ...React,
+        console,
+        render: createRender((error, url) => {
+          if (error) reject(error);
+          else {
+            resolve(url);
+          }
+        }),
+      });
+
+      c.evaluate(executableCode);
+    } catch (error) {
+      reject(error);
+    }
+  });
+
 const version = () => rpGlobals.version;
 
 const init = (version) => {
@@ -178,7 +216,13 @@ const init = (version) => {
 
 const methods = {
   init,
-  evaluate,
+  evaluate: ({ code, options }) => {
+    if (options.modules) {
+      return evaluate(code);
+    }
+
+    return legacyEvaluate(code);
+  },
   version,
 };
 

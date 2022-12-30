@@ -133,6 +133,7 @@ const Repl = () => {
 
   const [options, updateOptions] = useSetState(() => ({
     version: checkRange(urlParams.version) ?? supportedVersions[0],
+    modules: urlParams.code ? Boolean(urlParams.modules) : true,
   }));
 
   const [isReady, setReady] = useState(false);
@@ -164,13 +165,13 @@ const Repl = () => {
     if (isReady) {
       const startTime = Date.now();
       pdf
-        .call("evaluate", code)
+        .call("evaluate", { code, options: { modules: options.modules } })
         .then((url) => {
           update({ url, time: Date.now() - startTime, error: null });
         })
         .catch((error) => update({ time: Date.now() - startTime, error }));
     }
-  }, [pdf, code, update, isReady]);
+  }, [pdf, code, update, isReady, options.modules]);
 
   const editorPanel = (
     <ResizablePanel defaultSize={50} minSize={20}>
@@ -247,9 +248,9 @@ const Repl = () => {
             <button
               onClick={() => {
                 const link = new URL(window.location);
-                const params = `?version=${options.version}&cp_code=${compress(
-                  code
-                )}`;
+                const params = `?modules=1version=${
+                  options.version
+                }&cp_code=${compress(code)}`;
                 link.search = params;
                 navigator.clipboard.writeText(link.toString());
               }}
