@@ -1,6 +1,10 @@
 import { Parser } from "acorn";
 import { generate } from "astring";
 import { walk } from "estree-walker";
+import { buildJsx } from "estree-util-build-jsx";
+import jsx from "acorn-jsx";
+
+const parser = Parser.extend(jsx());
 
 const checkDefault = (value) => ("__default" === value ? "default" : value);
 
@@ -236,16 +240,21 @@ const exportDefaultReplacement = (value) => ({
 });
 
 export class StaticModuleRecord {
-  constructor(source, location) {
+  constructor(source, location, { jsx } = {}) {
+    this.jsx = jsx;
     this.source = source;
+    this.location = location;
   }
 
   init() {
-    console.log("PARSING THIS", this.source);
-    const ast = Parser.parse(this.source, {
+    const ast = parser.parse(this.source, {
       sourceType: "module",
       ecmaVersion: 2020,
     });
+
+    if (this.jsx) {
+      buildJsx(ast, { runtime: "automatic" });
+    }
 
     const staticImports = [];
     const staticExports = [];
@@ -362,21 +371,3 @@ export class StaticModuleRecord {
     return this._exportMap;
   }
 }
-
-// const source = `
-// import * as pdf from 'module';
-
-// const a = 1;
-// const b = 1;
-
-// export { a as b$4, b as a$4 };
-// export const lil = 1;
-// export default 12;
-// `;
-
-// const record = new StaticModuleRecord(source);
-
-// console.log(record.__syncModuleProgram__);
-// console.log(record.exports);
-// console.log(record.imports);
-// console.log(record.__fixedExportMap__);

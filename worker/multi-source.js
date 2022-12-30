@@ -1,7 +1,7 @@
 import "ses";
 import * as React from "react";
 import { StaticModuleRecord } from "./better-static-module-record.mjs";
-import preprocessJsx from "./process-jsx";
+import { jsx } from "react/jsx-runtime";
 
 // q, to quote strings in error messages.
 const q = JSON.stringify;
@@ -26,18 +26,21 @@ export const makeStaticRetriever = (sources) => {
 export const makeImporter = (locate, retrieve) => async (moduleSpecifier) => {
   const moduleLocation = locate(moduleSpecifier);
   const string = await retrieve(moduleLocation);
-  const wtfIsThis = new StaticModuleRecord(string, moduleLocation);
-  return wtfIsThis;
+  return new StaticModuleRecord(string, moduleLocation, {
+    jsx: true,
+  });
 };
 
-const createVirtualModuleFromVariable = (name, exports, options) => {
+const createVirtualModuleFromVariable = (name, exports, options = {}) => {
   const { ignoreDefault, jsx } = options;
 
   const exportsList = Object.keys(exports).filter(
     (exp) => !ignoreDefault || exp !== "default"
   );
 
-  const declarations = exportsList.map((singleExport, index) => `__v$$${index}$$__`);
+  const declarations = exportsList.map(
+    (singleExport, index) => `__v$$${index}$$__`
+  );
   const declarationString = declarations
     .map((id, index) => `${id} = ${exportsList[index]}`)
     .join(",");
@@ -55,6 +58,7 @@ const createVirtualModuleFromVariable = (name, exports, options) => {
     exports,
     {},
     {
+      name,
       resolveHook: (spec) => spec,
       importHook: (moduleSpecifier) => {
         if (moduleSpecifier !== name) {
@@ -82,7 +86,11 @@ const wrap = (factory) => () =>
     );
   });
 
-let currentVersion = null;
+const reactModule = createVirtualModuleFromVariable("react", React);
+const reactRuntimeModule = createVirtualModuleFromVariable(
+  "react/jsx-runtime",
+  { jsx }
+);
 
 const versions = {
   "1.6.17": wrap(() => import("rpr1.6.17")),
@@ -119,19 +127,18 @@ const evaluate = (code) =>
     }
 
     try {
-      const executableCode = preprocessJsx(code);
-
       const retrieve = makeStaticRetriever({
-        "file://internal/user-code.js": executableCode,
+        "file://internal/user-code.js": code,
       });
       const importHook = makeImporter(locate, retrieve);
 
       const compartment = new Compartment(
         {
-          ...React,
           console,
         },
         {
+          react: reactModule,
+          "react/jsx-runtime": reactRuntimeModule,
           "@react-pdf/renderer": reactPdfModule,
         },
         {
@@ -165,8 +172,6 @@ const evaluate = (code) =>
 const version = () => rpGlobals.version;
 
 const init = (version) => {
-  currentVersion = version;
-
   const initiator = versions[version];
 
   if (!initiator) console.log(version, versions);
