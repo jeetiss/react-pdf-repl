@@ -1,6 +1,6 @@
 import "ses";
 import * as React from "react";
-import { StaticModuleRecord } from "../_sb/better-static-module-record.mjs";
+import { StaticModuleRecord } from "./better-static-module-record.mjs";
 import preprocessJsx from "./process-jsx";
 
 // q, to quote strings in error messages.
@@ -30,10 +30,56 @@ export const makeImporter = (locate, retrieve) => async (moduleSpecifier) => {
   return wtfIsThis;
 };
 
+const createVirtualModuleFromVariable = (name, exports, options) => {
+  const { ignoreDefault, jsx } = options;
+
+  const exportsList = Object.keys(exports).filter(
+    (exp) => !ignoreDefault || exp !== "default"
+  );
+
+  const declarations = exportsList.map((singleExport, index) => `__v$$${index}$$__`);
+  const declarationString = declarations
+    .map((id, index) => `${id} = ${exportsList[index]}`)
+    .join(",");
+  const exportString = declarations
+    .map((id, index) => `${id} as ${exportsList[index]}`)
+    .join(",");
+
+  const moduleRecord = new StaticModuleRecord(
+    `const ${declarationString};export { ${exportString} }`,
+    name,
+    { jsx }
+  );
+
+  const compartment = new Compartment(
+    exports,
+    {},
+    {
+      resolveHook: (spec) => spec,
+      importHook: (moduleSpecifier) => {
+        if (moduleSpecifier !== name) {
+          throw new ReferenceError(
+            `Cannot retrieve module at location ${q(moduleSpecifier)}.`
+          );
+        }
+        return moduleRecord;
+      },
+    }
+  );
+
+  return compartment.module(name);
+};
+
 let rpGlobals = null;
+let reactPdfModule = null;
 const wrap = (factory) => () =>
-  factory().then((mod) => {
-    rpGlobals = mod;
+  factory().then((moduleExports) => {
+    rpGlobals = moduleExports;
+    reactPdfModule = createVirtualModuleFromVariable(
+      "@react-pdf/renderer",
+      moduleExports,
+      { ignoreDefault: true }
+    );
   });
 
 let currentVersion = null;
@@ -68,7 +114,7 @@ const resolveHook = (spec, referrer) => {
 
 const evaluate = (code) =>
   new Promise(async (resolve, reject) => {
-    if (!rpGlobals) {
+    if (!reactPdfModule) {
       reject(Error("react-pdf not found"));
     }
 
@@ -82,11 +128,12 @@ const evaluate = (code) =>
 
       const compartment = new Compartment(
         {
-          ...rpGlobals,
           ...React,
           console,
         },
-        {},
+        {
+          "@react-pdf/renderer": reactPdfModule,
+        },
         {
           name: "repl",
           resolveHook,

@@ -241,6 +241,7 @@ export class StaticModuleRecord {
   }
 
   init() {
+    console.log("PARSING THIS", this.source);
     const ast = Parser.parse(this.source, {
       sourceType: "module",
       ecmaVersion: 2020,
