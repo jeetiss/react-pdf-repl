@@ -88,7 +88,9 @@ const wrap = (factory) => () =>
     );
   });
 
-const reactModule = createVirtualModuleFromVariable("react", React);
+const reactModule = createVirtualModuleFromVariable("react", React, {
+  ignoreDefault: true,
+});
 const reactRuntimeModule = createVirtualModuleFromVariable(
   "react/jsx-runtime",
   { jsx, jsxs, Fragment }
