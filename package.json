@@ -10,6 +10,7 @@
     "postinstall": "patch-package"
   },
   "dependencies": {
+    "@endo/static-module-record": "^0.7.16",
     "@monaco-editor/react": "^4.4.6",
     "@react-hook/resize-observer": "^1.2.6",
     "@react-pdf/renderer": "3.0.2",

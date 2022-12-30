@@ -1,4 +1,6 @@
-export const code = `const styles = StyleSheet.create({
+export const code = `import { StyleSheet, Document, Page, View, Text } from '@react-pdf/renderer';
+
+const styles = StyleSheet.create({
   body: {
     flexGrow: 1,
   },
@@ -18,7 +20,7 @@ export const code = `const styles = StyleSheet.create({
   },
 });
 
-const Example = () => (
+export default () => (
   <Document>
     <Page size="A4">
       <View style={styles.body}>
@@ -29,7 +31,6 @@ const Example = () => (
           </Text>
           <View style={styles.fill1} />
         </View>
-
         <View style={styles.row}>
           <View style={styles.fill1} />
           <Text style={styles.text}>
@@ -37,7 +38,6 @@ const Example = () => (
             Lorem ipsum dolor sita met cons ecte tur ad ip
           </Text>
         </View>
-
         <View style={styles.row}>
           <Text style={styles.text}>
             Lorem ipsum dolor sita met cons ecte tur ad ip
@@ -45,7 +45,6 @@ const Example = () => (
           </Text>
           <View style={styles.fill1} />
         </View>
-
         <View style={styles.row}>
           <View style={styles.fill1} />
           <Text style={styles.text}>
@@ -58,6 +57,4 @@ const Example = () => (
     </Page>
   </Document>
 );
-
-render(<Example />);
 `

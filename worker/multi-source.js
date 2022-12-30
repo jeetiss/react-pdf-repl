@@ -1,13 +1,94 @@
+import "ses";
 import * as React from "react";
+import { jsx, jsxs, Fragment } from "react/jsx-runtime";
+import { StaticModuleRecord } from "./better-static-module-record.mjs";
 import preprocessJsx from "./process-jsx";
 
-import "ses";
+// q, to quote strings in error messages.
+const q = JSON.stringify;
+
+// makeStaticRetriever mocks the behavior of a real retriever, like HTTP fetch
+// or a file system fetch function, using an in memory map of sources to file
+// text.
+export const makeStaticRetriever = (sources) => {
+  return async (moduleLocation) => {
+    const string = sources[moduleLocation];
+    if (string === undefined) {
+      throw new ReferenceError(
+        `Cannot retrieve module at location ${q(moduleLocation)}.`
+      );
+    }
+    return string;
+  };
+};
+
+// makeImporter combines a locator and retriever to make an importHook suitable
+// for a Compartment.
+export const makeImporter = (locate, retrieve) => async (moduleSpecifier) => {
+  const moduleLocation = locate(moduleSpecifier);
+  const string = await retrieve(moduleLocation);
+  return new StaticModuleRecord(string, moduleLocation, {
+    jsx: true,
+  });
+};
+
+const createVirtualModuleFromVariable = (name, exports, options = {}) => {
+  const { jsx } = options;
+  const exportsList = Object.keys(exports).filter((exp) => exp !== "default");
+  const declarations = exportsList.map((_, index) => `__v$${index}$__`);
+  const declarationString = declarations
+    .map((id, index) => `${id} = ${exportsList[index]}`)
+    .join(",");
+  const exportString = declarations
+    .map((id, index) => `${id} as ${exportsList[index]}`)
+    .join(",");
+
+  const moduleRecord = new StaticModuleRecord(
+    `const ${declarationString};export { ${exportString} }`,
+    name,
+    { jsx }
+  );
+
+  const compartment = new Compartment(
+    exports,
+    {},
+    {
+      name,
+      resolveHook: (spec) => spec,
+      importHook: (moduleSpecifier) => {
+        if (moduleSpecifier !== name) {
+          throw new ReferenceError(
+            `Cannot retrieve module at location ${q(moduleSpecifier)}.`
+          );
+        }
+        return moduleRecord;
+      },
+    }
+  );
+
+  return compartment.module(name);
+};
 
 let rpGlobals = null;
+let reactPdfModule = null;
 const wrap = (factory) => () =>
-  factory().then((mod) => {
-    rpGlobals = mod;
+  factory().then((moduleExports) => {
+    rpGlobals = moduleExports;
+    reactPdfModule = createVirtualModuleFromVariable(
+      "@react-pdf/renderer",
+      moduleExports
+    );
   });
+
+const reactModule = createVirtualModuleFromVariable("react", React);
+const reactRuntimeModule = createVirtualModuleFromVariable(
+  "react/jsx-runtime",
+  {
+    jsx,
+    jsxs,
+    Fragment,
+  }
+);
 
 const versions = {
   "1.6.17": wrap(() => import("rpr1.6.17")),
@@ -22,6 +103,70 @@ const versions = {
   "3.0.2": wrap(() => import("@react-pdf/renderer")),
 };
 
+const isRelative = (spec) =>
+  spec.startsWith("./") ||
+  spec.startsWith("../") ||
+  spec === "." ||
+  spec === "..";
+
+const locate = (moduleSpecifier) => moduleSpecifier;
+const resolveHook = (spec, referrer) => {
+  if (isRelative(spec)) {
+    return new URL(spec, referrer).toString();
+  }
+
+  return spec;
+};
+
+const evaluate = (code) =>
+  new Promise(async (resolve, reject) => {
+    if (!reactPdfModule) {
+      reject(Error("react-pdf not found"));
+    }
+
+    try {
+      const retrieve = makeStaticRetriever({
+        "file://internal/user-code.js": code,
+      });
+      const importHook = makeImporter(locate, retrieve);
+
+      const compartment = new Compartment(
+        {
+          console,
+        },
+        {
+          react: reactModule,
+          "react/jsx-runtime": reactRuntimeModule,
+          "@react-pdf/renderer": reactPdfModule,
+        },
+        {
+          name: "repl",
+          resolveHook,
+          importHook,
+        }
+      );
+
+      const { namespace } = await compartment.import(
+        "file://internal/user-code.js"
+      );
+
+      rpGlobals
+        .pdf(React.createElement(namespace.default))
+        .toBlob()
+        .then((res) => URL.createObjectURL(res))
+        .then(
+          (result) => resolve(result),
+          (error) => {
+            console.error(error.stack);
+            reject(error);
+          }
+        );
+    } catch (error) {
+      console.error(error.stack);
+      reject(error);
+    }
+  });
+
 const createRender = (callback) => (element) => {
   rpGlobals
     .pdf(element)
@@ -33,7 +178,7 @@ const createRender = (callback) => (element) => {
     );
 };
 
-const evaluate = (code) =>
+const legacyEvaluate = (code) =>
   new Promise((resolve, reject) => {
     if (!rpGlobals) {
       reject(Error("react-pdf not found"));
@@ -71,7 +216,13 @@ const init = (version) => {
 
 const methods = {
   init,
-  evaluate,
+  evaluate: ({ code, options }) => {
+    if (options.modules) {
+      return evaluate(code);
+    }
+
+    return legacyEvaluate(code);
+  },
   version,
 };
 
