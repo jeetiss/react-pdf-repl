@@ -1,7 +1,7 @@
 import "ses";
 import * as React from "react";
-import { StaticModuleRecord } from "./better-static-module-record.mjs";
 import { jsx, jsxs, Fragment } from "react/jsx-runtime";
+import { StaticModuleRecord } from "./better-static-module-record.mjs";
 
 // q, to quote strings in error messages.
 const q = JSON.stringify;
@@ -32,17 +32,9 @@ export const makeImporter = (locate, retrieve) => async (moduleSpecifier) => {
 };
 
 const createVirtualModuleFromVariable = (name, exports, options = {}) => {
-  const { ignoreDefault, jsx } = options;
-
-  console.log(exports);
-
-  const exportsList = Object.keys(exports).filter(
-    (exp) => !ignoreDefault || exp !== "default"
-  );
-
-  const declarations = exportsList.map(
-    (singleExport, index) => `__v$$${index}$$__`
-  );
+  const { jsx } = options;
+  const exportsList = Object.keys(exports).filter((exp) => exp !== "default");
+  const declarations = exportsList.map((_, index) => `__v$${index}$__`);
   const declarationString = declarations
     .map((id, index) => `${id} = ${exportsList[index]}`)
     .join(",");
@@ -83,17 +75,18 @@ const wrap = (factory) => () =>
     rpGlobals = moduleExports;
     reactPdfModule = createVirtualModuleFromVariable(
       "@react-pdf/renderer",
-      moduleExports,
-      { ignoreDefault: true }
+      moduleExports
     );
   });
 
-const reactModule = createVirtualModuleFromVariable("react", React, {
-  ignoreDefault: true,
-});
+const reactModule = createVirtualModuleFromVariable("react", React);
 const reactRuntimeModule = createVirtualModuleFromVariable(
   "react/jsx-runtime",
-  { jsx, jsxs, Fragment }
+  {
+    jsx,
+    jsxs,
+    Fragment,
+  }
 );
 
 const versions = {
