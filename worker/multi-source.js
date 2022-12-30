@@ -1,7 +1,7 @@
 import "ses";
 import * as React from "react";
 import { StaticModuleRecord } from "./better-static-module-record.mjs";
-import * as jsx from "react/jsx-runtime";
+import { jsx, jsxs, Fragment } from "react/jsx-runtime";
 
 // q, to quote strings in error messages.
 const q = JSON.stringify;
@@ -33,6 +33,8 @@ export const makeImporter = (locate, retrieve) => async (moduleSpecifier) => {
 
 const createVirtualModuleFromVariable = (name, exports, options = {}) => {
   const { ignoreDefault, jsx } = options;
+
+  console.log(exports);
 
   const exportsList = Object.keys(exports).filter(
     (exp) => !ignoreDefault || exp !== "default"
@@ -89,7 +91,7 @@ const wrap = (factory) => () =>
 const reactModule = createVirtualModuleFromVariable("react", React);
 const reactRuntimeModule = createVirtualModuleFromVariable(
   "react/jsx-runtime",
-  jsx
+  { jsx, jsxs, Fragment }
 );
 
 const versions = {
