@@ -9,6 +9,7 @@ import { Panel as ResizablePanel, PanelGroup } from "react-resizable-panels";
 import { createSingleton, useSetState } from "../hooks";
 import { Worker } from "../worker";
 import Viewer from "../components/viewer";
+import Tree from "../components/elements-tree";
 import {
   Panel,
   Controls,
@@ -25,6 +26,8 @@ import {
   increase,
   decrease,
 } from "../state/page";
+
+import { layoutAtom } from "../state/debugger";
 
 import { code as defCode } from "../code/default-example";
 
@@ -105,12 +108,26 @@ const ClientOnly = ({ children }) => {
 
 const Loader = () => <div className={loader} />;
 
+const addId = (node, parent, prefix, postfix) => {
+  if (parent) node.parent = parent;
+  node._id = [prefix, node.type, postfix].filter((v) => v).join("__");
+
+  if (node.children)
+    node.children.forEach((child, index) => {
+      addId(child, node, node._id, index + 1);
+    });
+
+  return node;
+};
+
 const Repl = () => {
   const [state, update] = useSetState({
-    error: null,
     url: null,
+    layout: null,
     version: null,
     time: null,
+    error: null,
+    isDebugging: false,
   });
 
   const urlParams = useConstant(() => {
@@ -146,6 +163,14 @@ const Repl = () => {
   const [canIncreaseV] = useAtom(canIncrease);
   const [, increaseS] = useAtom(increase);
 
+  const [, setLayout] = useAtom(layoutAtom);
+
+  useEffect(() => {
+    if (state.layout) {
+      setLayout(addId(state.layout));
+    }
+  }, [setLayout, state.layout]);
+
   const pdf = useWorker();
 
   useEffect(() => {
@@ -166,10 +191,12 @@ const Repl = () => {
       const startTime = Date.now();
       pdf
         .call("evaluate", { code, options: { modules: options.modules } })
-        .then((url) => {
-          update({ url, time: Date.now() - startTime, error: null });
+        .then(({ url, layout }) => {
+          update({ url, layout, time: Date.now() - startTime, error: null });
         })
-        .catch((error) => update({ time: Date.now() - startTime, error }));
+        .catch((error) =>
+          update({ layout: null, time: Date.now() - startTime, error })
+        );
     }
   }, [pdf, code, update, isReady, options.modules]);
 
@@ -208,96 +235,132 @@ const Repl = () => {
 
   const viewerPanel = (
     <ResizablePanel minSize={20}>
-      <Panel>
-        <Controls>
-          <Select
-            time={state.time}
-            value={options.version}
-            onChange={(e) => {
-              update({ url: null });
-              updateOptions({ version: e.target.value });
-            }}
-          >
-            {supportedVersions.map((version) => (
-              <option key={version}>{version}</option>
-            ))}
-          </Select>
+      <PanelGroup autoSaveId="react-pdf-repl-debug" direction="vertical">
+        <ResizablePanel minSize={20} order={1}>
+          <Panel>
+            <Controls>
+              <Select
+                time={state.time}
+                value={options.version}
+                onChange={(e) => {
+                  update({ url: null });
+                  updateOptions({ version: e.target.value });
+                }}
+              >
+                {supportedVersions.map((version) => (
+                  <option key={version}>{version}</option>
+                ))}
+              </Select>
 
-          {pageV && (
-            <div style={{ display: "flex", alignItems: "center" }}>
-              <button disabled={!canDecreaseV} onClick={() => decreaseS()}>
-                {"<"}
+              {pageV && (
+                <div style={{ display: "flex", alignItems: "center" }}>
+                  <button disabled={!canDecreaseV} onClick={() => decreaseS()}>
+                    {"<"}
+                  </button>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      padding: "0px 0px 3px 5px",
+                    }}
+                  >
+                    page:
+                    <div style={{ textAlign: "center", minWidth: 20 }}>
+                      {pageV}
+                    </div>
+                  </div>
+                  <button disabled={!canIncreaseV} onClick={() => increaseS()}>
+                    {">"}
+                  </button>
+                </div>
+              )}
+
+              <Buttons>
+                <button
+                  onClick={() => {
+                    const link = new URL(window.location);
+                    const params = `?modules=1version=${
+                      options.version
+                    }&cp_code=${compress(code)}`;
+                    link.search = params;
+                    navigator.clipboard.writeText(link.toString());
+                  }}
+                >
+                  copy link
+                </button>
+
+                <button
+                  onClick={() => {
+                    window.open(state.url);
+                  }}
+                >
+                  open pdf
+                </button>
+              </Buttons>
+            </Controls>
+
+            <Viewer
+              url={state.url}
+              page={pageV}
+              isDebugging={state.isDebugging}
+              layout={state.layout}
+              onParse={({ pagesCount }) => setPagesCount(pagesCount)}
+            />
+
+            <Controls>
+              <button
+                onClick={() => update({ isDebugging: !state.isDebugging })}
+              >
+                debugger
               </button>
+            </Controls>
+
+            {state.error && (
+              <div
+                style={{
+                  position: "fixed",
+                  bottom: 0,
+                  minHeight: 100,
+                  width: "50%",
+                  padding: 5,
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    width: "100%",
+                    backgroundColor: "#fec1c1",
+                    border: "3px solid red",
+                    padding: 15,
+                  }}
+                >
+                  <pre style={{ margin: 0 }}>{state.error}</pre>
+                </div>
+              </div>
+            )}
+          </Panel>
+        </ResizablePanel>
+
+        {state.isDebugging && (
+          <>
+            <ResizeHandle />
+            <ResizablePanel order={2}>
               <div
                 style={{
                   display: "flex",
-                  alignItems: "center",
-                  padding: "0px 0px 3px 5px",
+                  flexDirection: "column",
+                  overflow: "auto",
+                  width: "100%",
+                  height: "100%",
+                  fontSize: 12,
                 }}
               >
-                page:
-                <div style={{ textAlign: "center", minWidth: 20 }}>{pageV}</div>
+                <Tree nodes={[state.layout]} />
               </div>
-              <button disabled={!canIncreaseV} onClick={() => increaseS()}>
-                {">"}
-              </button>
-            </div>
-          )}
-
-          <Buttons>
-            <button
-              onClick={() => {
-                const link = new URL(window.location);
-                const params = `?modules=1version=${
-                  options.version
-                }&cp_code=${compress(code)}`;
-                link.search = params;
-                navigator.clipboard.writeText(link.toString());
-              }}
-            >
-              copy link
-            </button>
-
-            <button
-              onClick={() => {
-                window.open(state.url);
-              }}
-            >
-              open pdf
-            </button>
-          </Buttons>
-        </Controls>
-
-        <Viewer
-          url={state.url}
-          page={pageV}
-          onParse={({ pagesCount }) => setPagesCount(pagesCount)}
-        />
-
-        {state.error && (
-          <div
-            style={{
-              position: "fixed",
-              bottom: 0,
-              minHeight: 100,
-              width: "50%",
-              padding: 5,
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                width: "100%",
-                backgroundColor: "#fec1c1",
-                border: "3px solid red",
-                padding: 15,
-              }}
-            >
-              <pre style={{ margin: 0 }}>{state.error}</pre>
-            </div>
-          </div>
+            </ResizablePanel>
+          </>
         )}
-      </Panel>
+      </PanelGroup>
     </ResizablePanel>
   );
 

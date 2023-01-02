@@ -1,4 +1,4 @@
-import { atom } from "jotai";
+import { atom } from "jotai/vanilla";
 
 const findNode = (nodeTree, predicate) => {
   if (predicate(nodeTree)) return nodeTree;

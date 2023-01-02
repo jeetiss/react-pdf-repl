@@ -69,14 +69,42 @@ const createVirtualModuleFromVariable = (name, exports, options = {}) => {
   return compartment.module(name);
 };
 
+const LayoutContext = React.createContext({
+  fn: (a) => {
+    console.log(a);
+  },
+});
+
+const createDocumentWithCallback = (ReactPDF) =>
+  function DocumentWithCallback(props) {
+    const context = React.useContext(LayoutContext);
+
+    return React.createElement(ReactPDF.Document, {
+      ...props,
+      onRender: context.fn,
+    });
+  };
+
+const Provider = (props) =>
+  React.createElement(
+    LayoutContext.Provider,
+    { value: { fn: props.fn } },
+    props.children
+  );
+
 let rpGlobals = null;
 let reactPdfModule = null;
 const wrap = (factory) => () =>
   factory().then((moduleExports) => {
     rpGlobals = moduleExports;
+
+    let exports = { ...moduleExports };
+    if (rpGlobals.version === Object.keys(versions).at(-1)) {
+      exports["Document"] = createDocumentWithCallback(rpGlobals);
+    }
     reactPdfModule = createVirtualModuleFromVariable(
       "@react-pdf/renderer",
-      moduleExports
+      exports
     );
   });
 
@@ -118,12 +146,30 @@ const resolveHook = (spec, referrer) => {
   return spec;
 };
 
-const evaluate = (code) =>
-  new Promise(async (resolve, reject) => {
-    if (!reactPdfModule) {
-      reject(Error("react-pdf not found"));
+const serializeLayout = (layout) => {
+  const serializeNode = (node) => {
+    const sNode = {
+      box: node.box,
+      style: node.style,
+      type: node.type,
+      lines: node?.lines?.map((line) => ({ string: line.string })),
+      children: [],
+    };
+
+    if (node.children) {
+      for (let child of node.children) {
+        sNode.children.push(serializeNode(child));
+      }
     }
 
+    return sNode;
+  };
+
+  return serializeNode(layout);
+};
+
+const evaluate = (code) =>
+  new Promise(async (resolve, reject) => {
     try {
       const retrieve = makeStaticRetriever({
         "file://internal/user-code.js": code,
@@ -150,12 +196,24 @@ const evaluate = (code) =>
         "file://internal/user-code.js"
       );
 
+      let layout = null;
+
       rpGlobals
-        .pdf(React.createElement(namespace.default))
+        .pdf(
+          React.createElement(
+            Provider,
+            { fn: (info) => (layout = info.layout) },
+            React.createElement(namespace.default)
+          )
+        )
         .toBlob()
         .then((res) => URL.createObjectURL(res))
         .then(
-          (result) => resolve(result),
+          (result) =>
+            resolve({
+              url: result,
+              layout: serializeLayout(layout),
+            }),
           (error) => {
             console.error(error.stack);
             reject(error);
@@ -193,7 +251,7 @@ const legacyEvaluate = (code) =>
         render: createRender((error, url) => {
           if (error) reject(error);
           else {
-            resolve(url);
+            resolve({ url });
           }
         }),
       });
@@ -239,3 +297,17 @@ self.addEventListener("message", (e) => {
     )
     .then((data) => postMessage(data));
 });
+
+// (async () => {
+//   const fetchPackage = async (packageName) => {
+//     const url = `https://cdn.skypack.dev/-/lodash@v4.17.21-K6GEbP02mWFnLA45zAmi/dist=es2019,mode=imports/unoptimized/snakeCase.js`;
+//     const response = await fetch(url);
+//     const text = await response.text();
+
+//     console.log(text);
+
+//     return new SMR(text, url);
+//   };
+
+//   console.log(await fetchPackage("lodash"));
+// })();

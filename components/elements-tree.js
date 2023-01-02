@@ -1,4 +1,4 @@
-import { useAtom } from "jotai";
+import { useAtom } from "jotai/react";
 import { useCallback, useMemo, useState } from "react";
 import { useEffect } from "react";
 
@@ -6,9 +6,9 @@ import {
   selectedAtom,
   hoverAtom,
   hoverPathAtom,
-  pageNumberAtom,
   layoutAtom,
-} from "../code/store";
+} from "../state/debugger";
+import { page as pageNumberAtom } from "../state/page";
 
 import styles from "../styles/elements-tree.module.css";
 
@@ -91,18 +91,19 @@ const Leaf = ({ node, indent }) => {
     onClick: () => select(node),
   };
 
-  if (node.type === "TEXT_INSTANCE") {
-    return (
+  if (node.type === "TEXT_INSTANCE" && node.parent && node.parent.lines) {
+    return node.parent.lines.map((line, index) => (
       <div
+        key={index}
         className={getClassName(node.parent)}
         style={{ "--indent": indent, "--addition": "17px" }}
         onMouseEnter={() => setHover({ id: node.parent._id, pathable: false })}
         onMouseLeave={() => setHover(null)}
         onClick={() => select(node.parent)}
       >
-        {node.value}
+        {line.string}
       </div>
-    );
+    ));
   } else if (node.children && node.children.length > 0 && !expanded) {
     return (
       <OpenTag
@@ -110,7 +111,7 @@ const Leaf = ({ node, indent }) => {
         expand={expand}
         expanded={expanded}
         indent={indent}
-        hover={hover === node._id}
+        hover={hover === node._id ? "true" : undefined}
         {...props}
       >{`<${tagWithAttrs}>...</${node.type}>`}</OpenTag>
     );
@@ -122,7 +123,7 @@ const Leaf = ({ node, indent }) => {
           expand={expand}
           expanded={expanded}
           indent={indent}
-          hover={hover === node._id}
+          hover={hover === node._id ? "true" : undefined}
           {...props}
         >{`<${tagWithAttrs}>`}</OpenTag>
         <Tree nodes={node.children} indent={indent + 1} />

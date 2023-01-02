@@ -3,6 +3,7 @@ import workerSrc from "pdfjs-dist/build/pdf.worker.min.js";
 import { useEffect, useRef } from "react";
 import useResizeObserver from "@react-hook/resize-observer";
 import { createSingleton, useEventCallback, useSetState } from "../hooks";
+import TreeCore from "./debug-tree";
 import { loader } from "./viewer.module.css";
 
 pdfjs.GlobalWorkerOptions.workerSrc = workerSrc;
@@ -31,6 +32,8 @@ const getCanvas = (viewport) => {
     canvas.height = viewport.height;
   }
 
+  canvas.style.display = "block";
+
   return canvas;
 };
 
@@ -54,10 +57,10 @@ const Canvas = ({ className, style, canvas, before, after }) => {
     }
   }, [canvas, ref, beforeCallback, afterCallback]);
 
-  return <div ref={ref} className={className} style={style} />;
+  return <div ref={ref} className={className} style={style}></div>;
 };
 
-const Viewer = ({ page: pageNumber, url, onParse }) => {
+const Viewer = ({ page: pageNumber, url, isDebugging, layout, onParse }) => {
   const worker = useWorker();
 
   const [state, set] = useSetState({
@@ -176,8 +179,10 @@ const Viewer = ({ page: pageNumber, url, onParse }) => {
               1 / client(() => window.devicePixelRatio) ?? 1
             })`,
           }}
-        />
+        ></Canvas>
       )}
+
+      {isDebugging && <TreeCore nodes={[layout]} size={state.size} />}
 
       {state.document && !pageNumber && (
         <div
