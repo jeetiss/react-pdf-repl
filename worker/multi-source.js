@@ -165,7 +165,7 @@ const serializeLayout = (layout) => {
     return sNode;
   };
 
-  return serializeNode(layout);
+  return layout && serializeNode(layout);
 };
 
 const evaluate = (code) =>
