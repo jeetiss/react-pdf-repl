@@ -345,18 +345,20 @@ const Repl = () => {
           <>
             <ResizeHandle />
             <ResizablePanel order={2}>
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  overflow: "auto",
-                  width: "100%",
-                  height: "100%",
-                  fontSize: 12,
-                }}
-              >
-                <Tree nodes={[state.layout]} />
-              </div>
+              {state.layout && (
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    overflow: "auto",
+                    width: "100%",
+                    height: "100%",
+                    fontSize: 12,
+                  }}
+                >
+                  <Tree nodes={[state.layout]} />
+                </div>
+              )}
             </ResizablePanel>
           </>
         )}

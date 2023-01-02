@@ -182,7 +182,7 @@ const Viewer = ({ page: pageNumber, url, isDebugging, layout, onParse }) => {
         ></Canvas>
       )}
 
-      {isDebugging && <TreeCore nodes={[layout]} size={state.size} />}
+      {isDebugging && layout && <TreeCore nodes={[layout]} size={state.size} />}
 
       {state.document && !pageNumber && (
         <div
