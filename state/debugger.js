@@ -54,7 +54,9 @@ const hoverPath = atom((get) => {
 
 const selected = atom(null);
 const protectSelected = atom(
-  (get) => get(selected),
+  (get) => {
+    return get(selected);
+  },
   (get, set, value) => {
     if (typeof value === "string") {
       if (value === get(selected)?._id) return;
@@ -67,8 +69,26 @@ const protectSelected = atom(
   }
 );
 
+const derivedLayout = atom(
+  (get) => get(layout),
+  (get, set, nodeTree) => {
+    set(layout, nodeTree);
+
+    const selectedNode = get(selected);
+    if (selectedNode) {
+      const newSelectedNode = findNode(
+        nodeTree,
+        (node) => node._id === selectedNode._id
+      );
+      if (newSelectedNode) {
+        set(selected, newSelectedNode);
+      }
+    }
+  }
+);
+
 export {
-  layout as layoutAtom,
+  derivedLayout as layoutAtom,
   url as urlAtom,
   hoverPath as hoverPathAtom,
   hover as hoverAtom,

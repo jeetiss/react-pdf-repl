@@ -76,7 +76,7 @@ const Leaf = ({ node, indent }) => {
     if (hoverPath.includes(node._id)) {
       expand(true);
     }
-  }, [hoverPath, node._id]);
+  }, [expand, hoverPath, node._id]);
 
   const getClassName = (node) =>
     cn(

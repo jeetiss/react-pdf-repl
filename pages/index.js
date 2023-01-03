@@ -167,12 +167,6 @@ const Repl = () => {
   const [, setLayout] = useAtom(layoutAtom);
   const [selectedNode] = useAtom(selectedAtom);
 
-  useEffect(() => {
-    if (state.layout) {
-      setLayout(addId(state.layout));
-    }
-  }, [setLayout, state.layout]);
-
   const pdf = useWorker();
 
   useEffect(() => {
@@ -194,13 +188,16 @@ const Repl = () => {
       pdf
         .call("evaluate", { code, options: { modules: options.modules } })
         .then(({ url, layout }) => {
+          if (layout) {
+            setLayout(addId(layout));
+          }
           update({ url, layout, time: Date.now() - startTime, error: null });
         })
         .catch((error) =>
           update({ layout: null, time: Date.now() - startTime, error })
         );
     }
-  }, [pdf, code, update, isReady, options.modules]);
+  }, [pdf, code, update, isReady, options.modules, setLayout]);
 
   const editorPanel = (
     <ResizablePanel defaultSize={50} minSize={20}>
