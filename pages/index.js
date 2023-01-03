@@ -375,12 +375,16 @@ const Repl = () => {
                       fontSize: 12,
                     }}
                   >
-                    <div>computed styles:</div>
-                    {selectedNode && (
-                      <pre>{JSON.stringify(selectedNode.style, null, 2)}</pre>
+                    <div>computed styles</div>
+                    {selectedNode && selectedNode.style && (
+                      <pre>
+                        {Object.entries(selectedNode.style)
+                          .map(([key, value]) => `${key}: ${value}`)
+                          .join("\n")}
+                      </pre>
                     )}
 
-                    <div>box:</div>
+                    <div>box</div>
                     {selectedNode && <BoxSizing box={selectedNode.box} />}
                   </div>
                 </ResizablePanel>
