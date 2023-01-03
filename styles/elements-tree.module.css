@@ -1,6 +1,7 @@
 .line {
   padding-left: calc(var(--indent) * 16px + var(--addition, 0px));
   width: 100%;
+  min-width: 250px;
   display: flex;
 }
 

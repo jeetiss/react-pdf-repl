@@ -172,7 +172,7 @@ const evaluate = (code) =>
   new Promise(async (resolve, reject) => {
     try {
       const retrieve = makeStaticRetriever({
-        "file://internal/user-code.js": code,
+        "file://internal/code.js": code,
       });
       const importHook = makeImporter(locate, retrieve);
 
@@ -192,9 +192,7 @@ const evaluate = (code) =>
         }
       );
 
-      const { namespace } = await compartment.import(
-        "file://internal/user-code.js"
-      );
+      const { namespace } = await compartment.import("file://internal/code.js");
 
       let layout = null;
 

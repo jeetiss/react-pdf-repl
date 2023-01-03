@@ -10,6 +10,7 @@ import { createSingleton, useSetState } from "../hooks";
 import { Worker } from "../worker";
 import Viewer from "../components/viewer";
 import Tree from "../components/elements-tree";
+import BoxSizing from "../components/box-sizing";
 import {
   Panel,
   Controls,
@@ -27,7 +28,7 @@ import {
   decrease,
 } from "../state/page";
 
-import { layoutAtom } from "../state/debugger";
+import { layoutAtom, selectedAtom } from "../state/debugger";
 
 import { code as defCode } from "../code/default-example";
 
@@ -164,6 +165,7 @@ const Repl = () => {
   const [, increaseS] = useAtom(increase);
 
   const [, setLayout] = useAtom(layoutAtom);
+  const [selectedNode] = useAtom(selectedAtom);
 
   useEffect(() => {
     if (state.layout) {
@@ -345,20 +347,47 @@ const Repl = () => {
           <>
             <ResizeHandle />
             <ResizablePanel order={2}>
-              {state.layout && (
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    overflow: "auto",
-                    width: "100%",
-                    height: "100%",
-                    fontSize: 12,
-                  }}
-                >
-                  <Tree nodes={[state.layout]} />
-                </div>
-              )}
+              <PanelGroup direction="horizontal">
+                <ResizablePanel>
+                  {state.layout && (
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        overflow: "auto",
+                        width: "100%",
+                        height: "100%",
+                        fontSize: 12,
+                      }}
+                    >
+                      <Tree nodes={[state.layout]} />
+                    </div>
+                  )}
+                </ResizablePanel>
+                <ResizeHandle />
+                <ResizablePanel>
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      fontFamily: "monospace",
+                      alignItems: "flex-start",
+                      overflow: "auto",
+                      width: "100%",
+                      height: "100%",
+                      fontSize: 12,
+                    }}
+                  >
+                    <div>computed styles:</div>
+                    {selectedNode && (
+                      <pre>{JSON.stringify(selectedNode.style, null, 2)}</pre>
+                    )}
+
+                    <div>box:</div>
+                    {selectedNode && <BoxSizing box={selectedNode.box} />}
+                  </div>
+                </ResizablePanel>
+              </PanelGroup>
             </ResizablePanel>
           </>
         )}
