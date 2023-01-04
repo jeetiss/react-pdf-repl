@@ -12,7 +12,8 @@ class Wrapper {
     return this.worker.terminate();
   }
 
-  call(method, ...args) {
+  __call(method, ...args) {
+    if (this.workerIsDead) return Promise.reject("fatal_error");
     const info = { method, args, key: `_${this.index++}_` };
 
     return new Promise((resolve, reject) => {
@@ -30,6 +31,22 @@ class Wrapper {
 
       this.worker.addEventListener("message", handler);
       this.worker.postMessage(info);
+    });
+  }
+
+  call(...args) {
+    return Promise.race([
+      this.__call(...args),
+      new Promise((resolve, reject) =>
+        setTimeout(() => reject("fatal_error"), 20_000)
+      ),
+    ]).catch((error) => {
+      if (error === "fatal_error") {
+        this.terminate();
+        this.workerIsDead = true;
+      }
+
+      return Promise.reject(error);
     });
   }
 }
