@@ -82,6 +82,8 @@ const derivedLayout = atom(
       );
       if (newSelectedNode) {
         set(selected, newSelectedNode);
+      } else {
+        set(selected, nodeTree);
       }
     }
   }
