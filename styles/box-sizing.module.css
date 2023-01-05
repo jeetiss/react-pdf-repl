@@ -2,21 +2,39 @@
   font-size: 12px;
 }
 
+.sizingWrapper {
+  position: relative;
+  display: grid;
+  grid-template: repeat(3, min-content) / repeat(3, max-content);
+  justify-items: center;
+  align-items: center;
+  gap: 5px;
+}
+
 .size {
+  border: 1px solid black;
   padding: 10px 14px;
-  font-weight: bold;
-  background-color: rgb(168, 168, 252);
+  background-color: rgb(129 171 185);
+  min-width: 90px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .padding {
-  background-color: rgb(168, 235, 168);
-  font-weight: bold;
+  border: 1px dashed black;
+  background-color: rgb(196 207 140);
   padding: 1px 8px;
 }
 
-
 .margin {
-  background-color: rgb(255, 207, 180);
-  font-weight: bold;
+  border: 1px dashed black;
+  background-color: rgb(248 204 158);
   padding: 1px 8px;
+}
+
+.text {
+  position: absolute;
+  top: 3px;
+  left: 3px;
 }

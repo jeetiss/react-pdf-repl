@@ -12,11 +12,18 @@ import Viewer from "../components/viewer";
 import Tree from "../components/elements-tree";
 import BoxSizing from "../components/box-sizing";
 import {
-  Panel,
-  Controls,
   Buttons,
   Select,
   ResizeHandle,
+  ScrollBox,
+  DebugFont,
+  DebugInfo,
+  Styles,
+  BoxInfo,
+  PreviewPanel,
+  HeaderControls,
+  FooterControls,
+  Preview,
 } from "../components/repl-layout";
 import { loader } from "../components/viewer.module.css";
 import {
@@ -236,8 +243,8 @@ const Repl = () => {
     <ResizablePanel minSize={20}>
       <PanelGroup autoSaveId="react-pdf-repl-debug" direction="vertical">
         <ResizablePanel minSize={20} order={1}>
-          <Panel>
-            <Controls>
+          <PreviewPanel>
+            <HeaderControls>
               <Select
                 time={state.time}
                 value={options.version}
@@ -296,29 +303,32 @@ const Repl = () => {
                   open pdf
                 </button>
               </Buttons>
-            </Controls>
+            </HeaderControls>
 
-            <Viewer
-              url={state.url}
-              page={pageV}
-              isDebugging={state.isDebugging}
-              layout={state.layout}
-              onParse={({ pagesCount }) => setPagesCount(pagesCount)}
-            />
+            <Preview>
+              <Viewer
+                url={state.url}
+                page={pageV}
+                isDebugging={state.isDebugging}
+                layout={state.layout}
+                onParse={({ pagesCount }) => setPagesCount(pagesCount)}
+              />
+            </Preview>
 
-            <Controls>
+            <FooterControls>
               <button
                 onClick={() => update({ isDebugging: !state.isDebugging })}
               >
                 debugger
               </button>
-            </Controls>
+            </FooterControls>
 
             {state.error && (
               <div
                 style={{
                   position: "fixed",
                   bottom: 0,
+                  zIndex: 10,
                   minHeight: 100,
                   width: "50%",
                   padding: 5,
@@ -328,16 +338,21 @@ const Repl = () => {
                   style={{
                     display: "flex",
                     width: "100%",
+                    overflow: "scroll",
                     backgroundColor: "#fec1c1",
                     border: "3px solid red",
                     padding: 15,
                   }}
                 >
-                  <pre style={{ margin: 0 }}>{state.error}</pre>
+                  <pre style={{ margin: 0 }}>
+                    {typeof state.error === "string"
+                      ? state.error
+                      : state.error.stack || state.error.message}
+                  </pre>
                 </div>
               </div>
             )}
-          </Panel>
+          </PreviewPanel>
         </ResizablePanel>
 
         {state.isDebugging && (
@@ -347,46 +362,34 @@ const Repl = () => {
               <PanelGroup direction="horizontal">
                 <ResizablePanel>
                   {state.layout && (
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        overflow: "auto",
-                        width: "100%",
-                        height: "100%",
-                        fontSize: 12,
-                      }}
-                    >
-                      <Tree nodes={[state.layout]} />
-                    </div>
+                    <ScrollBox>
+                      <DebugFont>
+                        <Tree nodes={[state.layout]} />
+                      </DebugFont>
+                    </ScrollBox>
                   )}
                 </ResizablePanel>
                 <ResizeHandle />
                 <ResizablePanel>
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      fontFamily: "monospace",
-                      alignItems: "flex-start",
-                      overflow: "auto",
-                      width: "100%",
-                      height: "100%",
-                      fontSize: 12,
-                    }}
-                  >
-                    <div>computed styles</div>
-                    {selectedNode && selectedNode.style && (
-                      <pre>
-                        {Object.entries(selectedNode.style)
-                          .map(([key, value]) => `${key}: ${value}`)
-                          .join("\n")}
-                      </pre>
-                    )}
+                  <ScrollBox>
+                    <DebugInfo>
+                      {selectedNode && selectedNode.style && (
+                        <Styles>
+                          <pre>
+                            {Object.entries(selectedNode.style)
+                              .map(([key, value]) => `${key}: ${value}`)
+                              .join("\n")}
+                          </pre>
+                        </Styles>
+                      )}
 
-                    <div>box</div>
-                    {selectedNode && <BoxSizing box={selectedNode.box} />}
-                  </div>
+                      {selectedNode && (
+                        <BoxInfo>
+                          <BoxSizing box={selectedNode.box} />
+                        </BoxInfo>
+                      )}
+                    </DebugInfo>
+                  </ScrollBox>
                 </ResizablePanel>
               </PanelGroup>
             </ResizablePanel>

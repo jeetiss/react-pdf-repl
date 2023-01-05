@@ -150,7 +150,9 @@ const Viewer = ({ page: pageNumber, url, isDebugging, layout, onParse }) => {
 
   const blockRef = useRef();
   useResizeObserver(blockRef, (entry) => {
-    set({ size: entry.contentRect });
+    const { width = 0, height = 0 } = entry.contentRect;
+    // borders
+    set({ size: { width: width - 2, height: height - 2 } });
   });
 
   const ratio = state.size
@@ -164,6 +166,8 @@ const Viewer = ({ page: pageNumber, url, isDebugging, layout, onParse }) => {
         position: "relative",
         height: "100%",
         width: "100%",
+        minHeight: 200,
+        minWidth: 200,
       }}
     >
       {state.document && pageNumber && (

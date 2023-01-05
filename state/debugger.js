@@ -74,17 +74,21 @@ const derivedLayout = atom(
   (get, set, nodeTree) => {
     set(layout, nodeTree);
 
+    // update selectedNode
     const selectedNode = get(selected);
-    if (selectedNode) {
-      const newSelectedNode = findNode(
-        nodeTree,
-        (node) => node._id === selectedNode._id
-      );
-      if (newSelectedNode) {
-        set(selected, newSelectedNode);
-      } else {
-        set(selected, nodeTree);
-      }
+    if (!selectedNode) {
+      return set(selected, nodeTree);
+    }
+
+    const newSelectedNode = findNode(
+      nodeTree,
+      (node) => node._id === selectedNode._id
+    );
+
+    if (newSelectedNode) {
+      set(selected, newSelectedNode);
+    } else {
+      set(selected, nodeTree);
     }
   }
 );
