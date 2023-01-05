@@ -1,4 +1,4 @@
-import { atom } from "jotai";
+import { atom } from "jotai/vanilla";
 
 const findNode = (nodeTree, predicate) => {
   if (predicate(nodeTree)) return nodeTree;
@@ -54,7 +54,9 @@ const hoverPath = atom((get) => {
 
 const selected = atom(null);
 const protectSelected = atom(
-  (get) => get(selected),
+  (get) => {
+    return get(selected);
+  },
   (get, set, value) => {
     if (typeof value === "string") {
       if (value === get(selected)?._id) return;
@@ -67,89 +69,34 @@ const protectSelected = atom(
   }
 );
 
-const atomWithLocalStorage = (key, initialValue) => {
-  const baseAtom = atom(initialValue);
-  baseAtom.onMount = (set) => {
-    try {
-      const item = localStorage.getItem(key);
-      if (item !== null) {
-        set(JSON.parse(item));
-      }
-    } catch (error) {
-      console.log(error);
+const derivedLayout = atom(
+  (get) => get(layout),
+  (get, set, nodeTree) => {
+    set(layout, nodeTree);
+
+    // update selectedNode
+    const selectedNode = get(selected);
+    if (!selectedNode) {
+      return set(selected, nodeTree);
     }
-  };
 
-  const derivedAtom = atom(
-    (get) => get(baseAtom),
-    (get, set, update) => {
-      const nextValue =
-        typeof update === "function" ? update(get(baseAtom)) : update;
-      if (get(baseAtom) !== nextValue) {
-        set(baseAtom, nextValue);
-        typeof localStorage !== "undefined" &&
-          localStorage.setItem(key, JSON.stringify(nextValue));
-      }
-    }
-  );
-  return derivedAtom;
-};
+    const newSelectedNode = findNode(
+      nodeTree,
+      (node) => node._id === selectedNode._id
+    );
 
-const usedMosaic = atomWithLocalStorage("MOSAIC_DEBUG_DISABLED", true);
-const mosaicPreview = atom("preview");
-
-const mosaicDebug = atomWithLocalStorage("MOSAIC_DEBUG_LAYOUT", {
-  direction: "row",
-  first: "preview",
-  second: "debugger",
-  splitPercentage: 50,
-});
-
-const mosaic = atom(
-  (get) => {
-    const value = get(usedMosaic);
-
-    if (value) {
-      return get(mosaicPreview);
+    if (newSelectedNode) {
+      set(selected, newSelectedNode);
     } else {
-      return get(mosaicDebug);
+      set(selected, nodeTree);
     }
-  },
-  (get, set, update) => {
-    const value = get(usedMosaic);
-
-    if (value) {
-      set(mosaicPreview, update);
-    } else {
-      set(mosaicDebug, update);
-    }
-  }
-);
-
-const toggle = atom(
-  (get) => get(usedMosaic),
-  (get, set) => set(usedMosaic, !get(usedMosaic))
-);
-
-const pageCount = atom(0);
-const pageNumber = atom(1);
-
-const pageNumberDerived = atom(
-  (get) => get(pageNumber),
-  (get, set, update) => {
-    const max = get(pageCount);
-    set(pageNumber, ((update - 1 + max) % max) + 1);
   }
 );
 
 export {
-  layout as layoutAtom,
+  derivedLayout as layoutAtom,
   url as urlAtom,
   hoverPath as hoverPathAtom,
   hover as hoverAtom,
   protectSelected as selectedAtom,
-  mosaic as mosaicAtom,
-  toggle as toggleAtom,
-  pageCount as pageCountAtom,
-  pageNumberDerived as pageNumberAtom,
 };

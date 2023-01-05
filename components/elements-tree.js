@@ -1,37 +1,41 @@
-import { useAtom } from "jotai";
-import { useCallback, useMemo, useState } from "react";
-import { useEffect } from "react";
+import { useAtom } from "jotai/react";
+import {
+  forwardRef,
+  useCallback,
+  useMemo,
+  useEffect,
+  useState,
+  useRef,
+} from "react";
 
 import {
   selectedAtom,
   hoverAtom,
   hoverPathAtom,
-  pageNumberAtom,
   layoutAtom,
-} from "../code/store";
+} from "../state/debugger";
+import { page as pageNumberAtom } from "../state/page";
 
 import styles from "../styles/elements-tree.module.css";
 
 const cn = (...styles) => styles.filter((v) => v).join(" ");
 
-const OpenTag = ({
-  children,
-  className,
-  indent,
-  expand,
-  expanded,
-  ...props
-}) => (
-  <div className={className} style={{ "--indent": indent }}>
-    <span className={styles.expbutton} onClick={() => expand((v) => !v)}>
-      {expanded ? "▼" : "▶"}
-    </span>
+const OpenTag = forwardRef(function OpenTag(
+  { children, className, indent, expand, expanded, ...props },
+  ref
+) {
+  return (
+    <div ref={ref} className={className} style={{ "--indent": indent }}>
+      <span className={styles.expbutton} onClick={() => expand((v) => !v)}>
+        {expanded ? "▼" : "▶"}
+      </span>
 
-    <span className={styles.tagName} {...props}>
-      {children}
-    </span>
-  </div>
-);
+      <span className={styles.tagName} {...props}>
+        {children}
+      </span>
+    </div>
+  );
+});
 
 const Leaf = ({ node, indent }) => {
   const attrs = node.props
@@ -42,6 +46,7 @@ const Leaf = ({ node, indent }) => {
 
   const tagWithAttrs = [node.type, attrs].filter(Boolean).join(" ");
 
+  const elementRef = useRef();
   const [, select] = useAtom(selectedAtom);
   const [hover, setHover] = useAtom(hoverAtom);
   const [selected] = useAtom(selectedAtom);
@@ -76,7 +81,16 @@ const Leaf = ({ node, indent }) => {
     if (hoverPath.includes(node._id)) {
       expand(true);
     }
-  }, [hoverPath, node._id]);
+  }, [expand, hoverPath, node._id]);
+
+  useEffect(() => {
+    if (selected?._id === node._id && elementRef.current) {
+      elementRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }
+  }, [node._id, selected?._id]);
 
   const getClassName = (node) =>
     cn(
@@ -91,26 +105,29 @@ const Leaf = ({ node, indent }) => {
     onClick: () => select(node),
   };
 
-  if (node.type === "TEXT_INSTANCE") {
-    return (
+  if (node.type === "TEXT_INSTANCE" && node.parent && node.parent.lines) {
+    return node.parent.lines.map((line, index) => (
       <div
+        ref={elementRef}
+        key={index}
         className={getClassName(node.parent)}
         style={{ "--indent": indent, "--addition": "17px" }}
         onMouseEnter={() => setHover({ id: node.parent._id, pathable: false })}
         onMouseLeave={() => setHover(null)}
         onClick={() => select(node.parent)}
       >
-        {node.value}
+        {line.string}
       </div>
-    );
+    ));
   } else if (node.children && node.children.length > 0 && !expanded) {
     return (
       <OpenTag
+        ref={elementRef}
         className={getClassName(node)}
         expand={expand}
         expanded={expanded}
         indent={indent}
-        hover={hover === node._id}
+        hover={hover === node._id ? "true" : undefined}
         {...props}
       >{`<${tagWithAttrs}>...</${node.type}>`}</OpenTag>
     );
@@ -118,11 +135,12 @@ const Leaf = ({ node, indent }) => {
     return (
       <>
         <OpenTag
+          ref={elementRef}
           className={getClassName(node)}
           expand={expand}
           expanded={expanded}
           indent={indent}
-          hover={hover === node._id}
+          hover={hover === node._id ? "true" : undefined}
           {...props}
         >{`<${tagWithAttrs}>`}</OpenTag>
         <Tree nodes={node.children} indent={indent + 1} />
@@ -136,6 +154,7 @@ const Leaf = ({ node, indent }) => {
   } else {
     return (
       <div
+        ref={elementRef}
         className={getClassName(node)}
         style={{ "--indent": indent, "--addition": "17px" }}
         {...props}

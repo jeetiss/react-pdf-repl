@@ -1,16 +1,22 @@
 import { PanelResizeHandle } from "react-resizable-panels";
 import {
-  panel,
-  controls,
   buttons,
   selectWithInfo,
   infoTime,
   resizeHandleOuter,
+  resizeHandleHoverArea,
   resizeHandleInner,
+  scrollBox,
+  debugFont,
+  debugInfo,
+  nodeStyles,
+  boxInfo,
+  panelGrid,
+  footerControls,
+  headerControls,
+  preview,
 } from "./repl-layout.module.css";
 
-const Panel = ({ children }) => <section className={panel}>{children}</section>;
-const Controls = ({ children }) => <div className={controls}>{children}</div>;
 const Buttons = ({ children }) => <div className={buttons}>{children}</div>;
 
 const Select = ({ time, value, onChange, children }) => (
@@ -28,9 +34,41 @@ const Select = ({ time, value, onChange, children }) => (
 function ResizeHandle({ className = "" }) {
   return (
     <PanelResizeHandle className={[resizeHandleOuter, className].join(" ")}>
+      <div className={resizeHandleHoverArea} />
       <div className={resizeHandleInner} />
     </PanelResizeHandle>
   );
 }
 
-export { Panel, Controls, Buttons, Select, ResizeHandle };
+const ScrollBox = ({ children }) => <div className={scrollBox}>{children}</div>;
+const DebugFont = ({ children }) => <div className={debugFont}>{children}</div>;
+
+const DebugInfo = ({ children }) => <div className={debugInfo}>{children}</div>;
+const Styles = ({ children }) => <div className={nodeStyles}>{children}</div>;
+const BoxInfo = ({ children }) => <div className={boxInfo}>{children}</div>;
+
+const PreviewPanel = ({ children }) => (
+  <section className={panelGrid}>{children}</section>
+);
+const HeaderControls = ({ children }) => (
+  <div className={headerControls}>{children}</div>
+);
+const FooterControls = ({ children }) => (
+  <div className={footerControls}>{children}</div>
+);
+const Preview = ({ children }) => <div className={preview}>{children}</div>;
+
+export {
+  Buttons,
+  Select,
+  ResizeHandle,
+  ScrollBox,
+  DebugFont,
+  DebugInfo,
+  Styles,
+  BoxInfo,
+  PreviewPanel,
+  HeaderControls,
+  FooterControls,
+  Preview,
+};

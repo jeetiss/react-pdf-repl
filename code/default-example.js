@@ -1,4 +1,22 @@
-export const code = `import { StyleSheet, Document, Page, View, Text } from '@react-pdf/renderer';
+const small = `import { Document, Page, Text } from '@react-pdf/renderer';
+
+const center = {
+  alignItems: 'center',
+  justifyContent: 'center'
+}
+
+export default () => (
+  <Document>
+    <Page style={center} size="A4">
+      <Text>
+        HELLO WORLD !!!
+      </Text>
+    </Page>
+  </Document>
+);
+`;
+
+const big = `import { StyleSheet, Document, Page, View, Text } from '@react-pdf/renderer';
 
 const styles = StyleSheet.create({
   body: {
@@ -57,4 +75,6 @@ export default () => (
     </Page>
   </Document>
 );
-`
+`;
+
+export { big as code };

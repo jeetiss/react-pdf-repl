@@ -1,12 +1,8 @@
-import { useAtom } from "jotai";
+import { useAtom } from "jotai/react";
 import { useMemo } from "react";
 
-import {
-  hoverAtom,
-  selectedAtom,
-  layoutAtom,
-  pageNumberAtom,
-} from "../code/store";
+import { hoverAtom, selectedAtom, layoutAtom } from "../state/debugger";
+import { page as pageNumberAtom } from "../state/page";
 
 const Box = ({ box, children, active, minPresenceAhead, ...props }) => (
   <div
@@ -77,9 +73,15 @@ const DebugLeaf = ({ node }) => {
 const DebugTree = ({ nodes }) =>
   nodes.map((node, index) => <DebugLeaf node={node} key={index} />);
 
-const TreeCore = ({ nodes }) => {
+const TreeCore = ({ nodes, size }) => {
   const [, select] = useAtom(selectedAtom);
   const [, hover] = useAtom(hoverAtom);
+  const [page] = useAtom(pageNumberAtom);
+
+  if (!nodes[0].children.length) return null;
+
+  const { height, width } = nodes[0].children[page - 1].box;
+  const scale = Math.min(size.height / height, size.width / width);
 
   return (
     <div
@@ -87,6 +89,14 @@ const TreeCore = ({ nodes }) => {
       onMouseEnter={(e) => hover(e.target.dataset.id)}
       onMouseMove={(e) => hover(e.target.dataset.id)}
       onMouseLeave={() => hover(null)}
+      style={{
+        position: "absolute",
+        top: "50%",
+        left: "50%",
+        transform: `translate(-${(width / 2) * scale}px, -${
+          (height / 2) * scale
+        }px) scale(${scale})`,
+      }}
     >
       <DebugTree nodes={nodes}></DebugTree>
     </div>

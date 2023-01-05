@@ -5,6 +5,7 @@ const BoxSizing = ({ box }) => {
     <div className={styles.container}>
       <SizingWrapper
         className={styles.margin}
+        text={<div className={styles.text}>margin</div>}
         numbers={[
           box.marginTop,
           box.marginLeft,
@@ -14,6 +15,7 @@ const BoxSizing = ({ box }) => {
       >
         <SizingWrapper
           className={styles.padding}
+          text={<div className={styles.text}>padding</div>}
           numbers={[
             box.paddingTop,
             box.paddingLeft,
@@ -31,17 +33,9 @@ const BoxSizing = ({ box }) => {
   );
 };
 
-const SizingWrapper = ({ className, numbers = [], children }) => (
-  <div
-    className={className}
-    style={{
-      display: "grid",
-      gridTemplate: "repeat(3, min-content) / repeat(3, max-content)",
-      justifyItems: "center",
-      alignItems: "center",
-      gap: "5px",
-    }}
-  >
+const SizingWrapper = ({ className, numbers = [], children, text }) => (
+  <div className={[styles.sizingWrapper, className].join(" ")}>
+    {text && text}
     <div style={{ gridRow: "1", gridColumn: "2" }}>{numbers[0] || "-"}</div>
     <div style={{ gridRow: "2", gridColumn: "1" }}>{numbers[1] || "-"}</div>
 
