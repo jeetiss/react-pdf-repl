@@ -1,4 +1,4 @@
-import { useEffect, useReducer, useState } from "react";
+import { useEffect, useReducer, useRef, useState } from "react";
 import Editor from "@monaco-editor/react";
 import LZString from "lz-string";
 import useConstant from "use-constant";
@@ -129,14 +129,25 @@ const addId = (node, parent, prefix, postfix) => {
 };
 
 const Repl = () => {
-  const [state, update] = useSetState({
+  const [state, update] = useSetState(() => ({
     url: null,
     layout: null,
     version: null,
     time: null,
     error: null,
-    isDebugging: false,
-  });
+    isDebugging:
+      typeof window !== "undefined" &&
+      (() => {
+        // HARD COOODEEEE
+        try {
+          return !!JSON.parse(
+            window.localStorage.getItem("PanelGroup:sizes:react-pdf-repl-debug")
+          )["20,20"].at(-1);
+        } catch (error) {
+          return false;
+        }
+      })(),
+  }));
 
   const urlParams = useConstant(() => {
     if (typeof window === "undefined") return {};
@@ -175,6 +186,8 @@ const Repl = () => {
   const [selectedNode] = useAtom(selectedAtom);
 
   const pdf = useWorker();
+
+  const debuggerAPI = useRef();
 
   useEffect(() => {
     if (options.version !== state.version) {
@@ -242,7 +255,7 @@ const Repl = () => {
   const viewerPanel = (
     <ResizablePanel minSize={20}>
       <PanelGroup autoSaveId="react-pdf-repl-debug" direction="vertical">
-        <ResizablePanel minSize={20} order={1}>
+        <ResizablePanel minSize={20}>
           <PreviewPanel>
             <HeaderControls>
               <Select
@@ -317,7 +330,16 @@ const Repl = () => {
 
             <FooterControls>
               <button
-                onClick={() => update({ isDebugging: !state.isDebugging })}
+                onClick={() => {
+                  const panel = debuggerAPI.current;
+                  if (panel) {
+                    if (state.isDebugging) {
+                      panel.collapse();
+                    } else {
+                      panel.expand();
+                    }
+                  }
+                }}
               >
                 debugger
               </button>
@@ -355,46 +377,48 @@ const Repl = () => {
           </PreviewPanel>
         </ResizablePanel>
 
-        {state.isDebugging && (
-          <>
-            <ResizeHandle />
-            <ResizablePanel order={2}>
-              <PanelGroup direction="horizontal">
-                <ResizablePanel>
-                  {state.layout && (
-                    <ScrollBox>
-                      <DebugFont>
-                        <Tree nodes={[state.layout]} />
-                      </DebugFont>
-                    </ScrollBox>
-                  )}
-                </ResizablePanel>
-                <ResizeHandle />
-                <ResizablePanel>
-                  <ScrollBox>
-                    <DebugInfo>
-                      {selectedNode && selectedNode.style && (
-                        <Styles>
-                          <pre>
-                            {Object.entries(selectedNode.style)
-                              .map(([key, value]) => `${key}: ${value}`)
-                              .join("\n")}
-                          </pre>
-                        </Styles>
-                      )}
+        <ResizeHandle />
 
-                      {selectedNode && (
-                        <BoxInfo>
-                          <BoxSizing box={selectedNode.box} />
-                        </BoxInfo>
-                      )}
-                    </DebugInfo>
-                  </ScrollBox>
-                </ResizablePanel>
-              </PanelGroup>
+        <ResizablePanel
+          minSize={20}
+          collapsible
+          onCollapse={(collapsed) => update({ isDebugging: !collapsed })}
+          ref={debuggerAPI}
+        >
+          <PanelGroup direction="horizontal">
+            <ResizablePanel>
+              {state.layout && (
+                <ScrollBox>
+                  <DebugFont>
+                    <Tree nodes={[state.layout]} />
+                  </DebugFont>
+                </ScrollBox>
+              )}
             </ResizablePanel>
-          </>
-        )}
+            <ResizeHandle />
+            <ResizablePanel>
+              <ScrollBox>
+                <DebugInfo>
+                  {selectedNode && selectedNode.style && (
+                    <Styles>
+                      <pre>
+                        {Object.entries(selectedNode.style)
+                          .map(([key, value]) => `${key}: ${value}`)
+                          .join("\n")}
+                      </pre>
+                    </Styles>
+                  )}
+
+                  {selectedNode && (
+                    <BoxInfo>
+                      <BoxSizing box={selectedNode.box} />
+                    </BoxInfo>
+                  )}
+                </DebugInfo>
+              </ScrollBox>
+            </ResizablePanel>
+          </PanelGroup>
+        </ResizablePanel>
       </PanelGroup>
     </ResizablePanel>
   );

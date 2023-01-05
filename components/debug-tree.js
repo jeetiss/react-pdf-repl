@@ -78,7 +78,7 @@ const TreeCore = ({ nodes, size }) => {
   const [, hover] = useAtom(hoverAtom);
   const [page] = useAtom(pageNumberAtom);
 
-  if (!nodes[0].children.length) return null;
+  if (!nodes[0].children.length || !page) return null;
 
   const { height, width } = nodes[0].children[page - 1].box;
   const scale = Math.min(size.height / height, size.width / width);
