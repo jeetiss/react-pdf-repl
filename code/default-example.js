@@ -1,4 +1,4 @@
-export const code = `import { Document, Page, Text } from '@react-pdf/renderer';
+const small = `import { Document, Page, Text } from '@react-pdf/renderer';
 
 const center = {
   alignItems: 'center',
@@ -76,3 +76,5 @@ export default () => (
   </Document>
 );
 `;
+
+export { big as code };
