@@ -123,6 +123,8 @@
 
   font-family: monospace;
   font-size: 14px;
+
+  padding: 10px;
 }
 
 .debugInfo {
