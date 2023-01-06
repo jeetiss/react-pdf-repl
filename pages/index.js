@@ -142,11 +142,13 @@ const Repl = () => {
       (() => {
         // HARD COOODEEEE
         try {
-          return !!JSON.parse(
-            window.localStorage.getItem("PanelGroup:sizes:react-pdf-repl-debug")
-          )["20,20"].at(-1);
+          const sizes = window.localStorage.getItem(
+            "PanelGroup:sizes:react-pdf-repl-debug"
+          );
+          if (!sizes) return true;
+          return !!JSON.parse(sizes)["20,20"].at(-1);
         } catch (error) {
-          return false;
+          return true;
         }
       })(),
   }));
@@ -396,7 +398,7 @@ const Repl = () => {
           ref={debuggerAPI}
         >
           {state.isDebuggingSupported ? (
-            <PanelGroup direction="horizontal">
+            <PanelGroup autoSaveId="react-pdf-repl-debug-info" direction="horizontal">
               <ResizablePanel>
                 {state.layout && (
                   <ScrollBox>
