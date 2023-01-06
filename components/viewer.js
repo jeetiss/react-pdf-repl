@@ -97,7 +97,11 @@ const Viewer = ({ page: pageNumber, url, isDebugging, layout, onParse }) => {
       const controller = new AbortController();
       getDocument({ signal: controller.signal });
 
-      return () => controller.abort();
+      return () => {
+        controller.abort();
+      };
+    } else {
+      set({ document: null });
     }
   }, [set, url, worker]);
 
@@ -144,7 +148,9 @@ const Viewer = ({ page: pageNumber, url, isDebugging, layout, onParse }) => {
       const controller = new AbortController();
       getRenderedPage({ pageNumber, signal: controller.signal });
 
-      return () => controller.abort();
+      return () => {
+        controller.abort();
+      };
     }
   }, [pageNumber, set, state.document, state.size]);
 
