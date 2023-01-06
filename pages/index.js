@@ -298,7 +298,7 @@ const Repl = () => {
                 <button
                   onClick={() => {
                     const link = new URL(window.location);
-                    const params = `?modules=1version=${
+                    const params = `?modules=1&version=${
                       options.version
                     }&cp_code=${compress(code)}`;
                     link.search = params;
