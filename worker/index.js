@@ -35,10 +35,16 @@ class Wrapper {
   }
 
   call(...args) {
+    const timeout = args.at(-1)?.timeout ?? false;
+    if (!timeout) {
+      return this.__call(...args);
+    }
+
     return Promise.race([
       this.__call(...args),
+
       new Promise((resolve, reject) =>
-        setTimeout(() => reject("fatal_error"), 20_000)
+        setTimeout(() => reject("fatal_error"), timeout)
       ),
     ]).catch((error) => {
       if (error === "fatal_error") {

@@ -212,7 +212,11 @@ const Repl = () => {
     if (isReady) {
       const startTime = Date.now();
       pdf
-        .call("evaluate", { code, options: { modules: options.modules } })
+        .call("evaluate", {
+          code,
+          options: { modules: options.modules },
+          timeout: 20_000,
+        })
         .then(({ url, layout }) => {
           if (layout) {
             setLayout(addId(layout));
