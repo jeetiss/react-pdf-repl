@@ -260,7 +260,10 @@ const legacyEvaluate = (code) =>
     }
   });
 
-const version = () => rpGlobals.version;
+const version = () => ({
+  version: rpGlobals.version,
+  isDebuggingSupported: rpGlobals.version === "3.0.2",
+});
 
 const init = (version) => {
   const initiator = versions[version];
@@ -295,17 +298,3 @@ self.addEventListener("message", (e) => {
     )
     .then((data) => postMessage(data));
 });
-
-// (async () => {
-//   const fetchPackage = async (packageName) => {
-//     const url = `https://cdn.skypack.dev/-/lodash@v4.17.21-K6GEbP02mWFnLA45zAmi/dist=es2019,mode=imports/unoptimized/snakeCase.js`;
-//     const response = await fetch(url);
-//     const text = await response.text();
-
-//     console.log(text);
-
-//     return new SMR(text, url);
-//   };
-
-//   console.log(await fetchPackage("lodash"));
-// })();

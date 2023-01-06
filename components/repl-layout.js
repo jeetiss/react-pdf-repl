@@ -8,6 +8,7 @@ import {
   resizeHandleInner,
   scrollBox,
   debugFont,
+  emptyDebugger,
   debugInfo,
   nodeStyles,
   boxInfo,
@@ -42,6 +43,7 @@ function ResizeHandle({ className = "" }) {
 
 const ScrollBox = ({ children }) => <div className={scrollBox}>{children}</div>;
 const DebugFont = ({ children }) => <div className={debugFont}>{children}</div>;
+const EmptyDebugger = ({ children }) => <div className={emptyDebugger}>{children}</div>;
 
 const DebugInfo = ({ children }) => <div className={debugInfo}>{children}</div>;
 const Styles = ({ children }) => <div className={nodeStyles}>{children}</div>;
@@ -64,6 +66,7 @@ export {
   ResizeHandle,
   ScrollBox,
   DebugFont,
+  EmptyDebugger,
   DebugInfo,
   Styles,
   BoxInfo,

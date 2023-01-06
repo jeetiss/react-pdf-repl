@@ -23,6 +23,7 @@ import {
   PreviewPanel,
   HeaderControls,
   FooterControls,
+  EmptyDebugger,
   Preview,
 } from "../components/repl-layout";
 import { loader } from "../components/viewer.module.css";
@@ -135,6 +136,7 @@ const Repl = () => {
     version: null,
     time: null,
     error: null,
+    isDebuggingSupported: true,
     isDebugging:
       typeof window !== "undefined" &&
       (() => {
@@ -198,7 +200,11 @@ const Repl = () => {
 
   useEffect(() => {
     if (isReady) {
-      pdf.call("version").then((version) => update({ version }));
+      pdf
+        .call("version")
+        .then(({ version, isDebuggingSupported }) =>
+          update({ version, isDebuggingSupported })
+        );
     }
   }, [pdf, update, isReady]);
 
@@ -385,39 +391,43 @@ const Repl = () => {
           onCollapse={(collapsed) => update({ isDebugging: !collapsed })}
           ref={debuggerAPI}
         >
-          <PanelGroup direction="horizontal">
-            <ResizablePanel>
-              {state.layout && (
+          {state.isDebuggingSupported ? (
+            <PanelGroup direction="horizontal">
+              <ResizablePanel>
+                {state.layout && (
+                  <ScrollBox>
+                    <DebugFont>
+                      <Tree nodes={[state.layout]} />
+                    </DebugFont>
+                  </ScrollBox>
+                )}
+              </ResizablePanel>
+              <ResizeHandle />
+              <ResizablePanel>
                 <ScrollBox>
-                  <DebugFont>
-                    <Tree nodes={[state.layout]} />
-                  </DebugFont>
-                </ScrollBox>
-              )}
-            </ResizablePanel>
-            <ResizeHandle />
-            <ResizablePanel>
-              <ScrollBox>
-                <DebugInfo>
-                  {selectedNode && selectedNode.style && (
-                    <Styles>
-                      <pre>
-                        {Object.entries(selectedNode.style)
-                          .map(([key, value]) => `${key}: ${value}`)
-                          .join("\n")}
-                      </pre>
-                    </Styles>
-                  )}
+                  <DebugInfo>
+                    {selectedNode && selectedNode.style && (
+                      <Styles>
+                        <pre>
+                          {Object.entries(selectedNode.style)
+                            .map(([key, value]) => `${key}: ${value}`)
+                            .join("\n")}
+                        </pre>
+                      </Styles>
+                    )}
 
-                  {selectedNode && (
-                    <BoxInfo>
-                      <BoxSizing box={selectedNode.box} />
-                    </BoxInfo>
-                  )}
-                </DebugInfo>
-              </ScrollBox>
-            </ResizablePanel>
-          </PanelGroup>
+                    {selectedNode && (
+                      <BoxInfo>
+                        <BoxSizing box={selectedNode.box} />
+                      </BoxInfo>
+                    )}
+                  </DebugInfo>
+                </ScrollBox>
+              </ResizablePanel>
+            </PanelGroup>
+          ) : (
+            <EmptyDebugger>{`Debugger doesn't supported by this @react-pdf/renderer version`}</EmptyDebugger>
+          )}
         </ResizablePanel>
       </PanelGroup>
     </ResizablePanel>
