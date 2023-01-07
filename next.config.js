@@ -1,4 +1,6 @@
-module.exports = {
+const { withAxiom } = require("next-axiom");
+
+module.exports = withAxiom({
   reactStrictMode: true,
   outputFileTracing: false,
   async redirects() {
@@ -30,4 +32,4 @@ module.exports = {
 
     return config;
   },
-};
+});
