@@ -29,6 +29,7 @@ module.exports = withAxiom({
     });
 
     config.resolve.alias["iconv-lite"] = false;
+    config.resolve.alias["whatwg-fetch"] = false;
 
     return config;
   },
