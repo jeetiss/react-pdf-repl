@@ -3,7 +3,6 @@ import * as React from "react";
 import { jsx, jsxs, Fragment } from "react/jsx-runtime";
 import { StaticModuleRecord } from "./better-static-module-record.mjs";
 import preprocessJsx from "./process-jsx";
-import { log } from "next-axiom";
 
 // q, to quote strings in error messages.
 const q = JSON.stringify;
@@ -214,12 +213,10 @@ const evaluate = (code) =>
               layout: serializeLayout(layout),
             }),
           (error) => {
-            console.error(error.stack);
             reject(error);
           }
         );
     } catch (error) {
-      console.error(error.stack);
       reject(error);
     }
   });
@@ -285,8 +282,6 @@ const methods = {
   },
   version,
 };
-
-log.info("test logger in worker scope");
 
 self.addEventListener("message", (e) => {
   const { method, args, key } = e.data || e;

@@ -3,6 +3,7 @@ import Editor from "@monaco-editor/react";
 import LZString from "lz-string";
 import useConstant from "use-constant";
 import { useAtom } from "jotai/react";
+import { log } from "next-axiom";
 
 import { Panel as ResizablePanel, PanelGroup } from "react-resizable-panels";
 
@@ -132,7 +133,6 @@ const addId = (node, parent, prefix, postfix) => {
 const Repl = () => {
   const [state, update] = useSetState(() => ({
     url: null,
-    layout: null,
     version: null,
     time: null,
     error: null,
@@ -186,7 +186,7 @@ const Repl = () => {
   const [canIncreaseV] = useAtom(canIncrease);
   const [, increaseS] = useAtom(increase);
 
-  const [, setLayout] = useAtom(layoutAtom);
+  const [layout, setLayout] = useAtom(layoutAtom);
   const [selectedNode] = useAtom(selectedAtom);
 
   const pdf = useWorker();
@@ -223,11 +223,14 @@ const Repl = () => {
           if (layout) {
             setLayout(addId(layout));
           }
-          update({ url, layout, time: Date.now() - startTime, error: null });
+          update({ url, time: Date.now() - startTime, error: null });
         })
-        .catch((error) =>
-          update({ layout: null, time: Date.now() - startTime, error })
-        );
+        .catch((error) => {
+          if (error === "fatal_error") {
+            log.error("worker fatal error", { code });
+          }
+          update({ time: Date.now() - startTime, error });
+        });
     }
   }, [pdf, code, update, isReady, options.modules, setLayout]);
 
@@ -335,7 +338,7 @@ const Repl = () => {
                 url={state.url}
                 page={pageV}
                 isDebugging={state.isDebugging}
-                layout={state.layout}
+                layout={layout}
                 onParse={({ pagesCount }) => setPagesCount(pagesCount)}
               />
             </Preview>
@@ -398,12 +401,15 @@ const Repl = () => {
           ref={debuggerAPI}
         >
           {state.isDebuggingSupported ? (
-            <PanelGroup autoSaveId="react-pdf-repl-debug-info" direction="horizontal">
+            <PanelGroup
+              autoSaveId="react-pdf-repl-debug-info"
+              direction="horizontal"
+            >
               <ResizablePanel>
-                {state.layout && (
+                {layout && (
                   <ScrollBox>
                     <DebugFont>
-                      <Tree nodes={[state.layout]} />
+                      <Tree nodes={[layout]} />
                     </DebugFont>
                   </ScrollBox>
                 )}
