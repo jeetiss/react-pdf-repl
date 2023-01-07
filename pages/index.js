@@ -3,7 +3,7 @@ import Editor from "@monaco-editor/react";
 import LZString from "lz-string";
 import useConstant from "use-constant";
 import { useAtom } from "jotai/react";
-import { log } from "next-axiom";
+import { log } from "next-axiom/dist/logger";
 
 import { Panel as ResizablePanel, PanelGroup } from "react-resizable-panels";
 
@@ -227,7 +227,7 @@ const Repl = () => {
         })
         .catch((error) => {
           if (error === "fatal_error") {
-            log.error("worker fatal error", { code });
+            log.error("worker fatal error", { code: false });
           }
           update({ time: Date.now() - startTime, error });
         });

@@ -1,7 +1,7 @@
 import { Analytics } from "@vercel/analytics/react";
 import { Component } from "react";
 import GlobalError from "next/dist/client/components/error-boundary";
-import { log } from "next-axiom";
+import { log } from "next-axiom/dist/logger";
 
 import "../styles/globals.css";
 import "../styles/mosaic.css";
