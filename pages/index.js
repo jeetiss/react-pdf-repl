@@ -227,7 +227,7 @@ const Repl = () => {
         })
         .catch((error) => {
           if (error === "fatal_error") {
-            log.error("worker fatal error", { code: false });
+            log.error("worker fatal error", { code: compress(code) });
           }
           update({ time: Date.now() - startTime, error });
         });
