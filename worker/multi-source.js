@@ -70,8 +70,8 @@ const createVirtualModuleFromVariable = (name, exports, options = {}) => {
 };
 
 const LayoutContext = React.createContext({
-  fn: (a) => {
-    console.log(a);
+  createOnRender: (originalCallback) => (info) => {
+    console.log(originalCallback, info);
   },
 });
 
@@ -81,16 +81,30 @@ const createDocumentWithCallback = (ReactPDF) =>
 
     return React.createElement(ReactPDF.Document, {
       ...props,
-      onRender: context.fn,
+      onRender: context.createOnRender(props.onRender),
     });
   };
 
-const Provider = (props) =>
-  React.createElement(
+const Provider = (props) => {
+  const createOnRender = (originalCallback) => {
+    if (!originalCallback) return props.fn;
+
+    const handler = (info) => {
+      const { layout, ...other } = info;
+      props.fn({ layout });
+      originalCallback(other);
+    };
+
+    handler._originalFunction = originalCallback;
+
+    return handler;
+  };
+  return React.createElement(
     LayoutContext.Provider,
-    { value: { fn: props.fn } },
+    { value: { createOnRender } },
     props.children
   );
+};
 
 let rpGlobals = null;
 let reactPdfModule = null;
@@ -146,12 +160,55 @@ const resolveHook = (spec, referrer) => {
   return spec;
 };
 
+const fitInto = (string, size) => {
+  if (string.length <= size) return string;
+  const halfOfSize = Math.floor((size - 3) / 2);
+  return [
+    string.substring(0, halfOfSize),
+    string.substring(string.length - halfOfSize, string.length),
+  ].join("...");
+};
+
+const fnName = (fn) => fn.name ?? "anonymous function";
+
+const serializeProps = (props) => {
+  if (!props) return;
+
+  return Object.fromEntries(
+    Object.entries(props)
+      .map(([key, value]) => {
+        if (key === "onRender") {
+          return value._originalFunction
+            ? [key, fnName(value._originalFunction)]
+            : false;
+        }
+
+        if (value === null) return [key, "null"];
+        if (value === undefined) return [key, "undefined"];
+
+        switch (typeof value) {
+          case "number":
+          case "boolean":
+            return [key, value.toString()];
+          case "string":
+            return [key, fitInto(value.trim(), 100)];
+          case "function":
+            return [key, fnName(value)];
+          default:
+            return [key, typeof value];
+        }
+      })
+      .filter(Boolean)
+  );
+};
+
 const serializeLayout = (layout) => {
   const serializeNode = (node) => {
     const sNode = {
       box: node.box,
       style: node.style,
       type: node.type,
+      props: serializeProps(node.props),
       lines: node?.lines?.map((line) => ({ string: line.string })),
       children: [],
     };
