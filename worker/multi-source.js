@@ -186,6 +186,8 @@ const serializeProps = (props) => {
         if (value === null) return [key, "null"];
         if (value === undefined) return [key, "undefined"];
 
+        if (Array.isArray(value)) return [key, `[${value.join(', ')}]`]
+
         switch (typeof value) {
           case "number":
           case "boolean":
@@ -221,6 +223,8 @@ const serializeLayout = (layout) => {
 
     return sNode;
   };
+
+  console.log(layout)
 
   return layout && serializeNode(layout);
 };
