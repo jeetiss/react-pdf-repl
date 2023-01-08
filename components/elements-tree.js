@@ -8,6 +8,8 @@ import {
   useRef,
 } from "react";
 
+import scrollIntoView from "scroll-into-view-if-needed";
+
 import {
   selectedAtom,
   hoverAtom,
@@ -85,9 +87,10 @@ const Leaf = ({ node, indent }) => {
 
   useEffect(() => {
     if (selected?._id === node._id && elementRef.current) {
-      elementRef.current.scrollIntoView({
+      scrollIntoView(elementRef.current, {
         behavior: "smooth",
         block: "center",
+        scrollMode: 'if-needed',
       });
     }
   }, [node._id, selected?._id]);

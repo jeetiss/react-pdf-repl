@@ -39,7 +39,9 @@
     "rpr2.3.0": "npm:@react-pdf/renderer@2.3.0",
     "rpr3.0.0": "npm:@react-pdf/renderer@3.0.0",
     "rpr3.0.1": "npm:@react-pdf/renderer@3.0.1",
+    "scroll-into-view-if-needed": "^3.0.4",
     "ses": "^0.18.1",
+    "smooth-scroll-into-view-if-needed": "^1.1.33",
     "use-constant": "^1.1.1"
   },
   "devDependencies": {
