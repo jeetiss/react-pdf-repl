@@ -102,8 +102,8 @@ const BoxOnCanvas = ({ box }) => {
     }
     ctx.canvas.style.opacity = 0.75;
     ctx.canvas.style.position = "absolute";
-    ctx.canvas.style.top = CSS.px(-box.marginTop);
-    ctx.canvas.style.left = CSS.px(-box.marginLeft);
+    ctx.canvas.style.top = `${-box.marginTop}px`;
+    ctx.canvas.style.left = `${-box.marginLeft}px`;
     ctx.canvas.style.pointerEvents = "none";
   }, [box]);
 
