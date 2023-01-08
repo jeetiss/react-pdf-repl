@@ -1,23 +1,129 @@
 import { useAtom } from "jotai/react";
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 
 import { hoverAtom, selectedAtom, layoutAtom } from "../state/debugger";
 import { page as pageNumberAtom } from "../state/page";
+
+const scale = (box, dpr) =>
+  dpr > 1
+    ? Object.fromEntries(
+        Object.entries(box).map(([key, value]) => [key, value * dpr])
+      )
+    : box;
+
+const BoxOnCanvas = ({ box }) => {
+  const ref = useRef();
+
+  useEffect(() => {
+    const ctx = ref.current.getContext("2d");
+    const dpr = window.devicePixelRatio || 1;
+
+    const {
+      borderBottomWidth,
+      borderLeftWidth,
+      borderRightWidth,
+      borderTopWidth,
+
+      marginBottom,
+      marginLeft,
+      marginRight,
+      marginTop,
+
+      paddingBottom,
+      paddingLeft,
+      paddingRight,
+      paddingTop,
+
+      right,
+      top,
+      bottom,
+      left,
+
+      width,
+      height,
+    } = scale(box, dpr);
+
+    const canvasWidth = width + marginLeft + marginRight;
+    const canvasHeight = height + marginBottom + marginTop;
+
+    ctx.canvas.width = canvasWidth;
+    ctx.canvas.height = canvasHeight;
+
+    // margin
+    if (
+      marginBottom !== 0 ||
+      marginLeft !== 0 ||
+      marginRight !== 0 ||
+      marginTop !== 0
+    ) {
+      ctx.fillStyle = "rgb(248 204 158)";
+      ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+    }
+
+    if (
+      borderBottomWidth !== 0 ||
+      borderLeftWidth !== 0 ||
+      borderRightWidth !== 0 ||
+      borderTopWidth !== 0
+    ) {
+      // border
+      ctx.fillStyle = "rgb(250 220 160)";
+      ctx.fillRect(marginLeft, marginTop, width, height);
+    }
+
+    if (
+      paddingBottom !== 0 ||
+      paddingLeft !== 0 ||
+      paddingRight !== 0 ||
+      paddingTop !== 0
+    ) {
+      // padding
+      ctx.fillStyle = "rgb(196 207 140)";
+      ctx.fillRect(
+        marginLeft + borderLeftWidth,
+        marginTop + borderTopWidth,
+        width - borderLeftWidth - borderRightWidth,
+        height - borderTopWidth - borderBottomWidth
+      );
+    }
+
+    // body
+    ctx.fillStyle = "rgb(172 201 255)";
+    ctx.fillRect(
+      marginLeft + paddingLeft + borderLeftWidth,
+      marginTop + paddingTop + borderTopWidth,
+      width - paddingLeft - paddingRight - borderLeftWidth - borderRightWidth,
+      height - paddingBottom - paddingTop - borderTopWidth - borderBottomWidth
+    );
+
+    if (dpr > 1) {
+      ctx.canvas.style.transformOrigin = "0 0";
+      ctx.canvas.style.transform = `scale(${1 / dpr})`;
+    }
+    ctx.canvas.style.opacity = 0.75;
+    ctx.canvas.style.position = "absolute";
+    ctx.canvas.style.top = CSS.px(-box.marginTop);
+    ctx.canvas.style.left = CSS.px(-box.marginLeft);
+    ctx.canvas.style.pointerEvents = "none";
+  }, [box]);
+
+  return <canvas ref={ref} />;
+};
 
 const Box = ({ box, children, active, minPresenceAhead, ...props }) => (
   <div
     {...props}
     style={{
-      position: children ? "absolute" : "relative",
+      position: "absolute",
       top: box.top,
       left: box.left,
       right: box.right,
       bottom: box.bottom,
       width: box.width,
       height: box.height,
-      backgroundColor: active ? "#80acff79" : "transparent",
     }}
   >
+    {active && <BoxOnCanvas box={box} />}
     {minPresenceAhead && (
       <div
         style={{

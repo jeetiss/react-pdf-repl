@@ -14,7 +14,7 @@
 .size {
   border: 1px solid black;
   padding: 10px 14px;
-  background-color: rgb(129 171 185);
+  background-color: rgb(172 201 255);
   min-width: 90px;
   display: flex;
   justify-content: center;
