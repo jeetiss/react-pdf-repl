@@ -77,8 +77,7 @@ export default () => (
 );
 `;
 
-const resume = `import * as React from "react";
-import {
+const resume = `import {
   Link,
   Text,
   Font,
