@@ -124,14 +124,14 @@ const Box = ({ box, children, active, minPresenceAhead, ...props }) => (
     }}
   >
     {active && <BoxOnCanvas box={box} />}
-    {minPresenceAhead && (
+    {minPresenceAhead && active && (
       <div
         style={{
           position: "absolute",
           bottom: -(minPresenceAhead + box.marginBottom),
           width: "100%",
           height: minPresenceAhead,
-          borderBottom: active ? "1px solid red" : "none",
+          borderBottom: "1px dashed red",
           pointerEvents: "none",
         }}
       ></div>
@@ -158,7 +158,9 @@ const DebugLeaf = ({ node }) => {
     "data-id": node._id,
     box: node.box,
     active: node._id === hover,
-    minPresenceAhead: node.props?.minPresenceAhead,
+    minPresenceAhead: node.props?.minPresenceAhead
+      ? Number.parseFloat(node.props?.minPresenceAhead)
+      : null,
   };
 
   if (skip || node.type === "TEXT_INSTANCE") {
@@ -184,7 +186,13 @@ const TreeCore = ({ nodes, size }) => {
   const [, hover] = useAtom(hoverAtom);
   const [page] = useAtom(pageNumberAtom);
 
-  if (!nodes[0].children.length || !page || !size) return null;
+  if (
+    !nodes[0].children.length ||
+    !page ||
+    !nodes[0].children[page - 1] ||
+    !size
+  )
+    return null;
 
   const { height, width } = nodes[0].children[page - 1].box;
   const scale = Math.min(size.height / height, size.width / width);

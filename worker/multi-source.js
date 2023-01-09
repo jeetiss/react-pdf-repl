@@ -224,8 +224,6 @@ const serializeLayout = (layout) => {
     return sNode;
   };
 
-  console.log(layout)
-
   return layout && serializeNode(layout);
 };
 
