@@ -131,28 +131,6 @@ const addId = (node, parent, prefix, postfix) => {
 };
 
 const Repl = () => {
-  const [state, update] = useSetState(() => ({
-    url: null,
-    version: null,
-    time: null,
-    error: null,
-    isDebuggingSupported: true,
-    isDebugging:
-      typeof window !== "undefined" &&
-      (() => {
-        // HARD COOODEEEE
-        try {
-          const sizes = window.localStorage.getItem(
-            "PanelGroup:sizes:react-pdf-repl-debug"
-          );
-          if (!sizes) return true;
-          return !!JSON.parse(sizes)["20,20"].at(-1);
-        } catch (error) {
-          return true;
-        }
-      })(),
-  }));
-
   const urlParams = useConstant(() => {
     if (typeof window === "undefined") return {};
 
@@ -174,6 +152,28 @@ const Repl = () => {
   const [options, updateOptions] = useSetState(() => ({
     version: checkRange(urlParams.version) ?? supportedVersions[0],
     modules: urlParams.code ? Boolean(urlParams.modules) : true,
+  }));
+
+  const [state, update] = useSetState(() => ({
+    url: null,
+    version: null,
+    time: null,
+    error: null,
+    isDebuggingSupported: options.modules,
+    isDebugging:
+      typeof window !== "undefined" &&
+      (() => {
+        // HARD COOODEEEE
+        try {
+          const sizes = window.localStorage.getItem(
+            "PanelGroup:sizes:react-pdf-repl-debug"
+          );
+          if (!sizes) return true;
+          return !!JSON.parse(sizes)["20,20"].at(-1);
+        } catch (error) {
+          return true;
+        }
+      })(),
   }));
 
   const [isReady, setReady] = useState(false);
