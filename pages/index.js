@@ -130,49 +130,16 @@ const addId = (node, parent, prefix, postfix) => {
   return node;
 };
 
-const checkMode = (mode, value, { isMobile }) => {
-  if (isMobile) {
-    return mode[0] === value;
-  } else {
-    return mode.includes(value);
+const toggleMode = (state, key, { keys, forcedValue }) => {
+  console.log({ state, key, keys, forcedValue });
+
+  const newState = {};
+  if (keys) {
+    keys.forEach((key) => (newState[key] = false));
   }
-};
 
-const toggleMode = (mode, key, { isMobile, forcedValue }) => {
-  console.log({ mode, key, isMobile, forcedValue });
-  const setFromTheMode = new Set([...mode]);
-  if (isMobile) {
-    if (typeof forcedValue !== "undefined") {
-      if (forcedValue) {
-        return [key];
-      }
-
-      return [];
-    }
-    if (setFromTheMode.has(key)) {
-      return [];
-    }
-
-    return [key];
-  } else {
-    if (typeof forcedValue !== "undefined") {
-      if (forcedValue) {
-        setFromTheMode.add(key);
-      } else {
-        setFromTheMode.delete(key);
-      }
-    } else {
-      if (setFromTheMode.has(key)) {
-        setFromTheMode.delete(key);
-      } else {
-        setFromTheMode.add(key);
-      }
-    }
-
-    console.log(setFromTheMode);
-
-    return [...setFromTheMode];
-  }
+  newState[key] = forcedValue ?? !state[key];
+  return newState;
 };
 
 const Repl = () => {
@@ -205,7 +172,8 @@ const Repl = () => {
     time: null,
     error: null,
     isDebuggingSupported: options.modules,
-    mode: ["debug", "code"],
+    isDebugOpened: true,
+    isCodeOpened: true,
   }));
 
   const [isReady, setReady] = useState(false);
@@ -225,6 +193,7 @@ const Repl = () => {
 
   const debuggerAPI = useRef();
   const editorAPI = useRef();
+  const mobileBottomPanelAPI = useRef();
 
   useEffect(() => {
     if (options.version !== state.version) {
@@ -232,6 +201,10 @@ const Repl = () => {
       pdf.call("init", options.version).then(() => setReady(true));
     }
   }, [pdf, update, state.version, options.version]);
+
+  useEffect(() => {
+    console.log(state);
+  }, [state]);
 
   useEffect(() => {
     if (isReady) {
@@ -268,263 +241,336 @@ const Repl = () => {
   }, [pdf, code, update, isReady, options.modules, setLayout]);
 
   const editorPanel = (
-    <ResizablePanel
-      ref={editorAPI}
-      defaultSize={50}
-      minSize={20}
-      collapsible
-      onCollapse={(collapsed) =>
-        update({
-          mode: toggleMode(state.mode, "code", {
-            isMobile,
-            forcedValue: !collapsed,
-          }),
-        })
-      }
-    >
-      <Editor
-        loading={<Loader />}
-        language="javascript"
-        value={code}
-        onChange={(newCode) => {
-          setCode(newCode ?? "");
-        }}
-        beforeMount={(_monaco) => {
-          _monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
-            allowNonTsExtensions: true,
-            checkJs: true,
-            allowJs: true,
-            noLib: true,
-            jsx: "react",
-          });
-          _monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions(
-            { noSemanticValidation: true }
-          );
-        }}
-        options={{
-          wordWrap: "on",
-          tabSize: 2,
-          minimap: {
-            enabled: false,
-          },
-          contextmenu: false,
-        }}
-      />
-    </ResizablePanel>
+    <Editor
+      loading={<Loader />}
+      language="javascript"
+      value={code}
+      onChange={(newCode) => {
+        setCode(newCode ?? "");
+      }}
+      beforeMount={(_monaco) => {
+        _monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
+          allowNonTsExtensions: true,
+          checkJs: true,
+          allowJs: true,
+          noLib: true,
+          jsx: "react",
+        });
+        _monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
+          noSemanticValidation: true,
+        });
+      }}
+      options={{
+        wordWrap: "on",
+        tabSize: 2,
+        minimap: {
+          enabled: false,
+        },
+        contextmenu: false,
+      }}
+    />
   );
 
-  const viewerPanel = (
-    <ResizablePanel minSize={20}>
-      <PanelGroup autoSaveId="react-pdf-repl-debug" direction="vertical">
-        <ResizablePanel minSize={20}>
-          <PreviewPanel>
-            <HeaderControls>
-              <Select
-                time={state.time}
-                value={options.version}
-                onChange={(e) => {
-                  update({ url: null });
-                  updateOptions({ version: e.target.value });
-                }}
-              >
-                {supportedVersions.map((version) => (
-                  <option key={version}>{version}</option>
-                ))}
-              </Select>
+  // const viewerPanel = ();
 
-              {page && (
-                <div style={{ display: "flex", alignItems: "center" }}>
-                  <button disabled={!canDecrease} onClick={() => decrease()}>
-                    {"<"}
-                  </button>
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      padding: "0px 0px 3px 5px",
-                    }}
-                  >
-                    page:
-                    <div style={{ textAlign: "center", minWidth: 20 }}>
-                      {page}
-                    </div>
-                  </div>
-                  <button disabled={!canIncrease} onClick={() => increase()}>
-                    {">"}
-                  </button>
-                </div>
-              )}
-
-              <Buttons>
-                <button
-                  onClick={() => {
-                    const link = new URL(window.location);
-                    const params = `?modules=1&version=${
-                      options.version
-                    }&cp_code=${compress(code)}`;
-                    link.search = params;
-                    navigator.clipboard.writeText(link.toString());
-                  }}
-                >
-                  copy link
-                </button>
-
-                <button
-                  onClick={() => {
-                    window.open(state.url);
-                  }}
-                >
-                  open pdf
-                </button>
-              </Buttons>
-            </HeaderControls>
-
-            <Preview>
-              <Viewer
-                url={state.url}
-                page={page}
-                isDebugging={checkMode(state.mode, "debug", { isMobile })}
-                layout={layout}
-                onParse={({ pagesCount }) => setPagesCount(pagesCount)}
-              />
-            </Preview>
-
-            <FooterControls>
-              <button
-                onClick={() => {
-                  const panel = editorAPI.current;
-                  if (panel) {
-                    if (checkMode(state.mode, "code", { isMobile })) {
-                      panel.collapse();
-                    } else {
-                      panel.expand();
-                    }
-                  }
-                }}
-              >
-                code
-              </button>
-              <button
-                onClick={() => {
-                  const panel = debuggerAPI.current;
-                  if (panel) {
-                    if (checkMode(state.mode, "debug", { isMobile })) {
-                      panel.collapse();
-                    } else {
-                      panel.expand();
-                    }
-                  }
-                }}
-              >
-                debugger
-              </button>
-            </FooterControls>
-
-            {state.error && (
-              <div
-                style={{
-                  position: "fixed",
-                  bottom: 0,
-                  zIndex: 10,
-                  minHeight: 100,
-                  width: "50%",
-                  padding: 5,
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    width: "100%",
-                    overflow: "scroll",
-                    backgroundColor: "#fec1c1",
-                    border: "3px solid red",
-                    padding: 15,
-                  }}
-                >
-                  <pre style={{ margin: 0 }}>
-                    {typeof state.error === "string"
-                      ? state.error
-                      : state.error.stack || state.error.message}
-                  </pre>
-                </div>
-              </div>
-            )}
-          </PreviewPanel>
-        </ResizablePanel>
-
-        <ResizeHandle />
-
-        <ResizablePanel
-          minSize={20}
-          collapsible
-          onCollapse={(collapsed) =>
-            update({
-              mode: toggleMode(state.mode, "debug", {
-                isMobile,
-                forcedValue: !collapsed,
-              }),
-            })
-          }
-          ref={debuggerAPI}
+  const previewPanel = (
+    <PreviewPanel>
+      <HeaderControls>
+        <Select
+          time={state.time}
+          value={options.version}
+          onChange={(e) => {
+            update({ url: null });
+            updateOptions({ version: e.target.value });
+          }}
         >
-          {state.isDebuggingSupported ? (
-            <PanelGroup
-              autoSaveId="react-pdf-repl-debug-info"
-              direction="horizontal"
-            >
-              <ResizablePanel>
-                {layout && (
-                  <ScrollBox>
-                    <DebugFont>
-                      <Tree nodes={[layout]} />
-                    </DebugFont>
-                  </ScrollBox>
-                )}
-              </ResizablePanel>
-              <ResizeHandle />
-              <ResizablePanel>
-                <ScrollBox>
-                  <DebugInfo>
-                    {selectedNode && selectedNode.style && (
-                      <Styles>
-                        <pre>
-                          {Object.entries(selectedNode.style)
-                            .map(([key, value]) => `${key}: ${value}`)
-                            .join("\n")}
-                        </pre>
-                      </Styles>
-                    )}
+          {supportedVersions.map((version) => (
+            <option key={version}>{version}</option>
+          ))}
+        </Select>
 
-                    {selectedNode && (
-                      <BoxInfo>
-                        <BoxSizing box={selectedNode.box} />
-                      </BoxInfo>
-                    )}
-                  </DebugInfo>
-                </ScrollBox>
-              </ResizablePanel>
-            </PanelGroup>
-          ) : (
-            <EmptyDebugger>{`Debugger doesn't supported by this @react-pdf/renderer version`}</EmptyDebugger>
-          )}
-        </ResizablePanel>
-      </PanelGroup>
-    </ResizablePanel>
+        {page && (
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <button disabled={!canDecrease} onClick={() => decrease()}>
+              {"<"}
+            </button>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                padding: "0px 0px 3px 5px",
+              }}
+            >
+              page:
+              <div style={{ textAlign: "center", minWidth: 20 }}>{page}</div>
+            </div>
+            <button disabled={!canIncrease} onClick={() => increase()}>
+              {">"}
+            </button>
+          </div>
+        )}
+
+        <Buttons>
+          <button
+            onClick={() => {
+              const link = new URL(window.location);
+              const params = `?modules=1&version=${
+                options.version
+              }&cp_code=${compress(code)}`;
+              link.search = params;
+              navigator.clipboard.writeText(link.toString());
+            }}
+          >
+            copy link
+          </button>
+
+          <button
+            onClick={() => {
+              window.open(state.url);
+            }}
+          >
+            open pdf
+          </button>
+        </Buttons>
+      </HeaderControls>
+
+      <Preview>
+        <Viewer
+          url={state.url}
+          page={page}
+          isDebugging={state.isDebugOpened}
+          layout={layout}
+          onParse={({ pagesCount }) => setPagesCount(pagesCount)}
+        />
+      </Preview>
+
+      <FooterControls>
+        <button
+          onClick={() => {
+            if (isMobile) {
+              const panel = mobileBottomPanelAPI.current;
+              if (!panel) return;
+
+              if (state.isCodeOpened) {
+                panel.collapse();
+              } else if (state.isDebugOpened) {
+                update(
+                  toggleMode(state, "isCodeOpened", {
+                    keys: ["isCodeOpened", "isDebugOpened"],
+                  })
+                );
+              } else {
+                update(
+                  toggleMode(state, "isCodeOpened", {
+                    keys: ["isCodeOpened", "isDebugOpened"],
+                  })
+                );
+                panel.expand();
+              }
+
+              return;
+            }
+
+            const panel = editorAPI.current;
+            if (!panel) return;
+
+            if (state.isCodeOpened) {
+              panel.collapse();
+            } else {
+              panel.expand();
+            }
+          }}
+        >
+          code
+        </button>
+        <button
+          onClick={() => {
+            if (isMobile) {
+              const panel = mobileBottomPanelAPI.current;
+              if (!panel) return;
+
+              if (state.isDebugOpened) {
+                panel.collapse();
+              } else if (state.isCodeOpened) {
+                update(
+                  toggleMode(state, "isDebugOpened", {
+                    keys: ["isCodeOpened", "isDebugOpened"],
+                  })
+                );
+              } else {
+                update(
+                  toggleMode(state, "isDebugOpened", {
+                    keys: ["isCodeOpened", "isDebugOpened"],
+                  })
+                );
+                panel.expand();
+              }
+              return;
+            }
+          
+            const panel = debuggerAPI.current;
+            if (!panel) return;
+
+            if (state.isDebugOpened) {
+              panel.collapse();
+            } else {
+              panel.expand();
+            }
+          }}
+        >
+          debugger
+        </button>
+      </FooterControls>
+
+      {state.error && (
+        <div
+          style={{
+            position: "fixed",
+            bottom: 0,
+            zIndex: 10,
+            minHeight: 100,
+            width: "50%",
+            padding: 5,
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              width: "100%",
+              overflow: "scroll",
+              backgroundColor: "#fec1c1",
+              border: "3px solid red",
+              padding: 15,
+            }}
+          >
+            <pre style={{ margin: 0 }}>
+              {typeof state.error === "string"
+                ? state.error
+                : state.error.stack || state.error.message}
+            </pre>
+          </div>
+        </div>
+      )}
+    </PreviewPanel>
+  );
+
+  const debugPanel = state.isDebuggingSupported ? (
+    <PanelGroup autoSaveId="react-pdf-repl-debug-info" direction="horizontal">
+      <ResizablePanel>
+        {layout && (
+          <ScrollBox>
+            <DebugFont>
+              <Tree nodes={[layout]} />
+            </DebugFont>
+          </ScrollBox>
+        )}
+      </ResizablePanel>
+      <ResizeHandle />
+      <ResizablePanel>
+        <ScrollBox>
+          <DebugInfo>
+            {selectedNode && selectedNode.style && (
+              <Styles>
+                <pre>
+                  {Object.entries(selectedNode.style)
+                    .map(([key, value]) => `${key}: ${value}`)
+                    .join("\n")}
+                </pre>
+              </Styles>
+            )}
+
+            {selectedNode && (
+              <BoxInfo>
+                <BoxSizing box={selectedNode.box} />
+              </BoxInfo>
+            )}
+          </DebugInfo>
+        </ScrollBox>
+      </ResizablePanel>
+    </PanelGroup>
+  ) : (
+    <EmptyDebugger>{`Debugger doesn't supported by this @react-pdf/renderer version`}</EmptyDebugger>
   );
 
   return (
     <ClientOnly>
       {isMobile ? (
-        <PanelGroup autoSaveId="react-pdf-repl-mobile" direction="vertical">
-          {viewerPanel}
+        <PanelGroup
+          key="mobile"
+          autoSaveId="react-pdf-repl-mobile"
+          direction="vertical"
+        >
+          <ResizablePanel minSize={20}>{previewPanel}</ResizablePanel>
+
           <ResizeHandle />
-          {editorPanel}
+          <ResizablePanel
+            minSize={20}
+            collapsible
+            onCollapse={(collapsed) =>
+              update(
+                toggleMode(
+                  state,
+                  state.isDebugOpened ? "isDebugOpened" : "isCodeOpened",
+                  {
+                    keys: ["isDebugOpened", "isCodeOpened"],
+                    forcedValue: !collapsed,
+                  }
+                )
+              )
+            }
+            ref={mobileBottomPanelAPI}
+          >
+            {state.isDebugOpened && debugPanel}
+
+            {state.isCodeOpened && editorPanel}
+          </ResizablePanel>
         </PanelGroup>
       ) : (
-        <PanelGroup autoSaveId="react-pdf-repl" direction="horizontal">
-          {editorPanel}
+        <PanelGroup
+          key="desktop"
+          autoSaveId="react-pdf-repl"
+          direction="horizontal"
+        >
+          <ResizablePanel
+            ref={editorAPI}
+            defaultSize={50}
+            minSize={20}
+            collapsible
+            onCollapse={(collapsed) =>
+              update(
+                toggleMode(state, "isCodeOpened", {
+                  forcedValue: !collapsed,
+                })
+              )
+            }
+          >
+            {state.isCodeOpened && editorPanel}
+          </ResizablePanel>
+
           <ResizeHandle />
-          {viewerPanel}
+
+          <ResizablePanel minSize={20}>
+            <PanelGroup autoSaveId="react-pdf-repl-debug" direction="vertical">
+              <ResizablePanel minSize={20}>{previewPanel}</ResizablePanel>
+
+              <ResizeHandle />
+
+              <ResizablePanel
+                minSize={20}
+                collapsible
+                onCollapse={(collapsed) =>
+                  update(
+                    toggleMode(state, "isDebugOpened", {
+                      forcedValue: !collapsed,
+                    })
+                  )
+                }
+                ref={debuggerAPI}
+              >
+                {state.isDebugOpened && debugPanel}
+              </ResizablePanel>
+            </PanelGroup>
+          </ResizablePanel>
         </PanelGroup>
       )}
     </ClientOnly>
