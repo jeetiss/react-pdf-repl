@@ -29,12 +29,12 @@ import {
 } from "../components/repl-layout";
 import { loader } from "../components/viewer.module.css";
 import {
-  page,
-  pagesCount,
-  canDecrease,
-  canIncrease,
-  increase,
-  decrease,
+  page as pageAtom,
+  pagesCount as pagesCountAtom,
+  canDecrease as canDecreaseAtom,
+  canIncrease as canIncreaseAtom,
+  increase as increaseAtom,
+  decrease as decreaseAtom,
 } from "../state/page";
 
 import { layoutAtom, selectedAtom } from "../state/debugger";
@@ -130,6 +130,51 @@ const addId = (node, parent, prefix, postfix) => {
   return node;
 };
 
+const checkMode = (mode, value, { isMobile }) => {
+  if (isMobile) {
+    return mode[0] === value;
+  } else {
+    return mode.includes(value);
+  }
+};
+
+const toggleMode = (mode, key, { isMobile, forcedValue }) => {
+  console.log({ mode, key, isMobile, forcedValue });
+  const setFromTheMode = new Set([...mode]);
+  if (isMobile) {
+    if (typeof forcedValue !== "undefined") {
+      if (forcedValue) {
+        return [key];
+      }
+
+      return [];
+    }
+    if (setFromTheMode.has(key)) {
+      return [];
+    }
+
+    return [key];
+  } else {
+    if (typeof forcedValue !== "undefined") {
+      if (forcedValue) {
+        setFromTheMode.add(key);
+      } else {
+        setFromTheMode.delete(key);
+      }
+    } else {
+      if (setFromTheMode.has(key)) {
+        setFromTheMode.delete(key);
+      } else {
+        setFromTheMode.add(key);
+      }
+    }
+
+    console.log(setFromTheMode);
+
+    return [...setFromTheMode];
+  }
+};
+
 const Repl = () => {
   const urlParams = useConstant(() => {
     if (typeof window === "undefined") return {};
@@ -160,31 +205,18 @@ const Repl = () => {
     time: null,
     error: null,
     isDebuggingSupported: options.modules,
-    isDebugging:
-      typeof window !== "undefined" &&
-      (() => {
-        // HARD COOODEEEE
-        try {
-          const sizes = window.localStorage.getItem(
-            "PanelGroup:sizes:react-pdf-repl-debug"
-          );
-          if (!sizes) return true;
-          return !!JSON.parse(sizes)["20,20"].at(-1);
-        } catch (error) {
-          return true;
-        }
-      })(),
+    mode: ["debug", "code"],
   }));
 
   const [isReady, setReady] = useState(false);
   const [code, setCode] = useState(() => urlParams.code ?? defCode);
 
-  const [pageV] = useAtom(page);
-  const [, setPagesCount] = useAtom(pagesCount);
-  const [canDecreaseV] = useAtom(canDecrease);
-  const [, decreaseS] = useAtom(decrease);
-  const [canIncreaseV] = useAtom(canIncrease);
-  const [, increaseS] = useAtom(increase);
+  const [page] = useAtom(pageAtom);
+  const [, setPagesCount] = useAtom(pagesCountAtom);
+  const [canDecrease] = useAtom(canDecreaseAtom);
+  const [, decrease] = useAtom(decreaseAtom);
+  const [canIncrease] = useAtom(canIncreaseAtom);
+  const [, increase] = useAtom(increaseAtom);
 
   const [layout, setLayout] = useAtom(layoutAtom);
   const [selectedNode] = useAtom(selectedAtom);
@@ -192,6 +224,7 @@ const Repl = () => {
   const pdf = useWorker();
 
   const debuggerAPI = useRef();
+  const editorAPI = useRef();
 
   useEffect(() => {
     if (options.version !== state.version) {
@@ -235,7 +268,20 @@ const Repl = () => {
   }, [pdf, code, update, isReady, options.modules, setLayout]);
 
   const editorPanel = (
-    <ResizablePanel defaultSize={50} minSize={20}>
+    <ResizablePanel
+      ref={editorAPI}
+      defaultSize={50}
+      minSize={20}
+      collapsible
+      onCollapse={(collapsed) =>
+        update({
+          mode: toggleMode(state.mode, "code", {
+            isMobile,
+            forcedValue: !collapsed,
+          }),
+        })
+      }
+    >
       <Editor
         loading={<Loader />}
         language="javascript"
@@ -286,9 +332,9 @@ const Repl = () => {
                 ))}
               </Select>
 
-              {pageV && (
+              {page && (
                 <div style={{ display: "flex", alignItems: "center" }}>
-                  <button disabled={!canDecreaseV} onClick={() => decreaseS()}>
+                  <button disabled={!canDecrease} onClick={() => decrease()}>
                     {"<"}
                   </button>
                   <div
@@ -300,10 +346,10 @@ const Repl = () => {
                   >
                     page:
                     <div style={{ textAlign: "center", minWidth: 20 }}>
-                      {pageV}
+                      {page}
                     </div>
                   </div>
-                  <button disabled={!canIncreaseV} onClick={() => increaseS()}>
+                  <button disabled={!canIncrease} onClick={() => increase()}>
                     {">"}
                   </button>
                 </div>
@@ -336,8 +382,8 @@ const Repl = () => {
             <Preview>
               <Viewer
                 url={state.url}
-                page={pageV}
-                isDebugging={state.isDebugging}
+                page={page}
+                isDebugging={checkMode(state.mode, "debug", { isMobile })}
                 layout={layout}
                 onParse={({ pagesCount }) => setPagesCount(pagesCount)}
               />
@@ -346,9 +392,23 @@ const Repl = () => {
             <FooterControls>
               <button
                 onClick={() => {
+                  const panel = editorAPI.current;
+                  if (panel) {
+                    if (checkMode(state.mode, "code", { isMobile })) {
+                      panel.collapse();
+                    } else {
+                      panel.expand();
+                    }
+                  }
+                }}
+              >
+                code
+              </button>
+              <button
+                onClick={() => {
                   const panel = debuggerAPI.current;
                   if (panel) {
-                    if (state.isDebugging) {
+                    if (checkMode(state.mode, "debug", { isMobile })) {
                       panel.collapse();
                     } else {
                       panel.expand();
@@ -397,7 +457,14 @@ const Repl = () => {
         <ResizablePanel
           minSize={20}
           collapsible
-          onCollapse={(collapsed) => update({ isDebugging: !collapsed })}
+          onCollapse={(collapsed) =>
+            update({
+              mode: toggleMode(state.mode, "debug", {
+                isMobile,
+                forcedValue: !collapsed,
+              }),
+            })
+          }
           ref={debuggerAPI}
         >
           {state.isDebuggingSupported ? (

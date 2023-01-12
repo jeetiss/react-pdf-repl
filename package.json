@@ -28,7 +28,7 @@
     "pdfjs-dist": "^3.1.81",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "react-resizable-panels": "~0.0.30",
+    "react-resizable-panels": "~0.0.32",
     "react-suspense-fetch": "^0.6.0",
     "rpr1.6.17": "npm:@react-pdf/renderer@1.6.17",
     "rpr2.0.21": "npm:@react-pdf/renderer@2.0.21",
