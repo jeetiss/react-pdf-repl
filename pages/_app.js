@@ -2,6 +2,7 @@ import { Analytics } from "@vercel/analytics/react";
 import { Component } from "react";
 import GlobalError from "next/dist/client/components/error-boundary";
 import { log } from "next-axiom/dist/logger";
+import Head from "next/head";
 
 import "../styles/globals.css";
 import "../styles/mosaic.css";
@@ -32,10 +33,22 @@ class ErrorBoundary extends Component {
 
 function MyApp({ Component, pageProps }) {
   return (
-    <ErrorBoundary>
-      <Component {...pageProps} />
-      <Analytics />
-    </ErrorBoundary>
+    <>
+      <Head>
+        <title>react-pdf playground</title>
+        <title>react-pdf playground</title>
+
+        <link rel="icon" type="image/svg" href="/favicon.svg" />
+        <meta
+          name="keywords"
+          content="react pdf playground with interactive debugger"
+        />
+      </Head>
+      <ErrorBoundary>
+        <Component {...pageProps} />
+        <Analytics />
+      </ErrorBoundary>
+    </>
   );
 }
 
