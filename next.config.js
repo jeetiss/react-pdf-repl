@@ -3,7 +3,7 @@ const { withAxiom } = require("next-axiom");
 module.exports = withAxiom({
   reactStrictMode: true,
   outputFileTracing: false,
-  async redirects() {
+  redirects() {
     return [
       {
         source: "/null",
@@ -14,6 +14,12 @@ module.exports = withAxiom({
         source: "/repl",
         destination: "/",
         permanent: true,
+      },
+      {
+        source: "/new",
+        destination:
+          "/?modules=1&version=3.0.2&cp_code=JYWwDg9gTgLgBAbzgFQKYA8YBo4AUCGA5qjgGrCoDuOAIhAMYCuIqAdvAL5wBmUEIcAEQABKKnz0YAWjAATbgHoxrWajFRBAbgBQ2jJFhxV3fIwA28ABQBKOAF4AfHEva4cADx0mLdg9duPAmI4AGdgAC9UO0EAQQA2QT8AgPdyKn9ktxCYAE8zKIQEDMy3AAtUYEJSmAAuIQBGAAZGgFJBLGKSgCtGbOBuHIBhCHY2WqF6MbV2zsz8M0rWAEkYVBAQusFJ0Y0OkrcODlmk_fc0TAdWKiMGZjH3BXOYE-SHtMoXjwUg1BOHrzuvm01h0QA",
+        permanent: false,
       },
     ];
   },
