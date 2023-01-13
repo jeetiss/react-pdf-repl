@@ -1,3 +1,5 @@
-## react-pdf-experiments
+## react-pdf-repl
 
-👉🏻 https://react-pdf-experiments.vercel.app 👈🏻
+`@react-pdf/renderer` playground with interactive debugger
+
+👉🏻 https://react-pdf-repl.vercel.app/ 👈🏻
