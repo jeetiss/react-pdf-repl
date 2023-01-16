@@ -24,6 +24,8 @@
   grid-column: 1;
 
   overflow: scroll;
+
+  position: relative;
 }
 
 .footerControls {
@@ -152,4 +154,24 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.replError {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  font-family: iaw-mono-var, SF Mono, SFMono-Regular, ui-monospace, Menlo,
+    Consolas, monospace;
+  padding: 10px 20px;
+  overflow: auto;
+  color: #ff3737;
+  font-size: 13px;
+  z-index: 1;
+  background-color: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(12px);
+}
+
+.replError > pre {
+  margin: 0;
+  white-space: pre-wrap;
 }

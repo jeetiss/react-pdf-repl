@@ -26,6 +26,7 @@ import {
   FooterControls,
   EmptyDebugger,
   Preview,
+  Error,
 } from "../components/repl-layout";
 import { loader } from "../components/viewer.module.css";
 import {
@@ -356,6 +357,16 @@ const Repl = () => {
                 layout={layout}
                 onParse={({ pagesCount }) => setPagesCount(pagesCount)}
               />
+
+              {state.error && (
+                <Error
+                  message={
+                    typeof state.error === "string"
+                      ? state.error
+                      : state.error.stack || state.error.message
+                  }
+                />
+              )}
             </Preview>
 
             <FooterControls>
@@ -374,36 +385,6 @@ const Repl = () => {
                 debugger
               </button>
             </FooterControls>
-
-            {state.error && (
-              <div
-                style={{
-                  position: "fixed",
-                  bottom: 0,
-                  zIndex: 10,
-                  minHeight: 100,
-                  width: "50%",
-                  padding: 5,
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    width: "100%",
-                    overflow: "scroll",
-                    backgroundColor: "#fec1c1",
-                    border: "3px solid red",
-                    padding: 15,
-                  }}
-                >
-                  <pre style={{ margin: 0 }}>
-                    {typeof state.error === "string"
-                      ? state.error
-                      : state.error.stack || state.error.message}
-                  </pre>
-                </div>
-              </div>
-            )}
           </PreviewPanel>
         </ResizablePanel>
 

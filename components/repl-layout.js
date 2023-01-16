@@ -16,6 +16,7 @@ import {
   footerControls,
   headerControls,
   preview,
+  replError,
 } from "./repl-layout.module.css";
 
 const Buttons = ({ children }) => <div className={buttons}>{children}</div>;
@@ -43,7 +44,9 @@ function ResizeHandle({ className = "" }) {
 
 const ScrollBox = ({ children }) => <div className={scrollBox}>{children}</div>;
 const DebugFont = ({ children }) => <div className={debugFont}>{children}</div>;
-const EmptyDebugger = ({ children }) => <div className={emptyDebugger}>{children}</div>;
+const EmptyDebugger = ({ children }) => (
+  <div className={emptyDebugger}>{children}</div>
+);
 
 const DebugInfo = ({ children }) => <div className={debugInfo}>{children}</div>;
 const Styles = ({ children }) => <div className={nodeStyles}>{children}</div>;
@@ -60,6 +63,25 @@ const FooterControls = ({ children }) => (
 );
 const Preview = ({ children }) => <div className={preview}>{children}</div>;
 
+const errorRegexp = /underlying failures:(?<errors>.+)/;
+const Error = ({ message }) => {
+  const { groups } = errorRegexp.exec(message) ?? {
+    groups: { errors: message },
+  };
+
+  return (
+    <code className={replError}>
+      <pre>
+        {groups.errors
+          .trim()
+          .split(",")
+          .map((part) => part.trim())
+          .join("\n")}
+      </pre>
+    </code>
+  );
+};
+
 export {
   Buttons,
   Select,
@@ -74,4 +96,5 @@ export {
   HeaderControls,
   FooterControls,
   Preview,
+  Error,
 };
