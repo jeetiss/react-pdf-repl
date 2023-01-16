@@ -130,6 +130,22 @@ const addId = (node, parent, prefix, postfix) => {
   return node;
 };
 
+const createLink = (options) => {
+  const link = new URL(window.location);
+
+  link.searchParams.set("cp_code", compress(options.code));
+
+  if (options.modules) {
+    link.searchParams.set("modules", options.modules);
+  }
+
+  if (options.version !== supportedVersions[0]) {
+    link.searchParams.set("version", options.version);
+  }
+
+  return link.toString();
+};
+
 const Repl = () => {
   const urlParams = useConstant(() => {
     if (typeof window === "undefined") return {};
@@ -227,12 +243,12 @@ const Repl = () => {
         })
         .catch((error) => {
           if (error === "fatal_error") {
-            log.error(error, { code: compress(code) });
+            log.error(error, { link: createLink({ code, ...options }) });
           }
           update({ time: Date.now() - startTime, error });
         });
     }
-  }, [pdf, code, update, isReady, options.modules, setLayout]);
+  }, [pdf, code, update, isReady, options.modules, setLayout, options]);
 
   const editorPanel = (
     <ResizablePanel defaultSize={50} minSize={20}>
@@ -311,14 +327,11 @@ const Repl = () => {
 
               <Buttons>
                 <button
-                  onClick={() => {
-                    const link = new URL(window.location);
-                    const params = `?modules=1&version=${
-                      options.version
-                    }&cp_code=${compress(code)}`;
-                    link.search = params;
-                    navigator.clipboard.writeText(link.toString());
-                  }}
+                  onClick={() =>
+                    navigator.clipboard.writeText(
+                      createLink({ code, ...options })
+                    )
+                  }
                 >
                   copy link
                 </button>
