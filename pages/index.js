@@ -238,6 +238,8 @@ const Repl = () => {
         .then(({ url, layout }) => {
           if (layout) {
             setLayout(addId(layout));
+          } else {
+            setLayout(null);
           }
           update({ url, time: Date.now() - startTime, error: null });
         })

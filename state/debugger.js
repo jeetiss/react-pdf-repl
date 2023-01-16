@@ -76,7 +76,7 @@ const derivedLayout = atom(
 
     // update selectedNode
     const selectedNode = get(selected);
-    if (!selectedNode) {
+    if (!nodeTree || !selectedNode) {
       return set(selected, nodeTree);
     }
 
