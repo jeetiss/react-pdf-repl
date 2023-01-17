@@ -186,7 +186,7 @@ const serializeProps = (props) => {
         if (value === null) return [key, "null"];
         if (value === undefined) return [key, "undefined"];
 
-        if (Array.isArray(value)) return [key, `[${value.join(', ')}]`]
+        if (Array.isArray(value)) return [key, `[${value.join(", ")}]`];
 
         switch (typeof value) {
           case "number":
@@ -252,6 +252,10 @@ const evaluate = (code) =>
       );
 
       const { namespace } = await compartment.import("file://internal/code.js");
+
+      if (!("default" in namespace)) {
+        throw new Error("The default export is not a React PDF Component");
+      }
 
       let layout = null;
 
