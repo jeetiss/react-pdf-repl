@@ -1,5 +1,7 @@
 import styles from "../styles/box-sizing.module.css";
 
+const isDefined = (value) => value != null;
+
 const BoxSizing = ({ box }) => {
   return (
     <div className={styles.container}>
@@ -14,19 +16,47 @@ const BoxSizing = ({ box }) => {
         ]}
       >
         <SizingWrapper
-          className={styles.padding}
-          text={<div className={styles.text}>padding</div>}
+          className={styles.border}
+          text={<div className={styles.text}>border</div>}
           numbers={[
-            box.paddingTop,
-            box.paddingLeft,
-            box.paddingRight,
-            box.paddingBottom,
+            box.borderTopWidth,
+            box.borderLeftWidth,
+            box.borderRightWidth,
+            box.borderBottomWidth,
           ]}
         >
-          <div className={styles.size}>
-            {box.width ? box.width.toFixed(2) : "-"} x{" "}
-            {box.height ? box.height.toFixed(2) : "-"}
-          </div>
+          <SizingWrapper
+            className={styles.padding}
+            text={<div className={styles.text}>padding</div>}
+            numbers={[
+              box.paddingTop,
+              box.paddingLeft,
+              box.paddingRight,
+              box.paddingBottom,
+            ]}
+          >
+            <div className={styles.size}>
+              {isDefined(box.width)
+                ? (
+                    box.width -
+                    box.paddingTop -
+                    box.paddingBottom -
+                    box.borderTopWidth -
+                    box.borderBottomWidth
+                  ).toFixed(2)
+                : "-"}{" "}
+              x{" "}
+              {isDefined(box.height)
+                ? (
+                    box.height -
+                    box.paddingLeft -
+                    box.paddingRight -
+                    box.borderLeftWidth -
+                    box.borderRightWidth
+                  ).toFixed(2)
+                : "-"}
+            </div>
+          </SizingWrapper>
         </SizingWrapper>
       </SizingWrapper>
     </div>

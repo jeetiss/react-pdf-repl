@@ -21,6 +21,12 @@
   align-items: center;
 }
 
+.border {
+  background-color: rgb(250 220 160);
+  padding: 1px 8px;
+  border: 1px solid black;
+}
+
 .padding {
   border: 1px dashed black;
   background-color: rgb(196 207 140);
