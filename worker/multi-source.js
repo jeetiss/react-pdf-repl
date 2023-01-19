@@ -238,6 +238,10 @@ const evaluate = (code) =>
       const compartment = new Compartment(
         {
           console,
+          fetch: (...a) => fetch(...a),
+          Headers,
+          Request,
+          Response,
         },
         {
           react: reactModule,
