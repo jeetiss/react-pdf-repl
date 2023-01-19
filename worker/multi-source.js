@@ -238,7 +238,7 @@ const evaluate = (code) =>
       const compartment = new Compartment(
         {
           console,
-          fetch,
+          fetch: (...a) => fetch(...a),
           Headers,
           Request,
           Response,
