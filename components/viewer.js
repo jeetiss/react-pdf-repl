@@ -77,10 +77,14 @@ const Viewer = ({ page: pageNumber, url, isDebugging, layout, onParse }) => {
   }, [state.document, onParseCallback]);
 
   useEffect(() => {
-    const getDocument = ({ signal }) => {
-      const task = pdfjs.getDocument({ url, worker });
-      signal.addEventListener("abort", () => task.destroy());
-      return task.promise
+    const getDocument = ({ signal }) =>
+      Promise.resolve(signal.aborted)
+        .then((aborted) => {
+          if (aborted) throw Error("aborted");
+          const task = pdfjs.getDocument({ url, worker });
+          signal.addEventListener("abort", () => task.destroy());
+          return task.promise;
+        })
         .then((document) => {
           if (!signal.aborted) {
             set({ document });
@@ -91,7 +95,6 @@ const Viewer = ({ page: pageNumber, url, isDebugging, layout, onParse }) => {
             throw error;
           }
         });
-    };
 
     if (url) {
       const controller = new AbortController();
@@ -107,8 +110,11 @@ const Viewer = ({ page: pageNumber, url, isDebugging, layout, onParse }) => {
 
   useEffect(() => {
     const getRenderedPage = ({ pageNumber, signal }) =>
-      state.document
-        .getPage(pageNumber)
+      Promise.resolve(signal.aborted)
+        .then((aborted) => {
+          if (aborted) throw Error("aborted");
+          return state.document.getPage(pageNumber);
+        })
         .then((page) => {
           let viewport = page.getViewport({
             scale: 1 / window.devicePixelRatio,
