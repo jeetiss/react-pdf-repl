@@ -1,5 +1,5 @@
 ## react-pdf-repl
 
-`@react-pdf/renderer` playground with interactive debugger
+REPL for `@react-pdf/renderer` with interactive debugger
 
-👉🏻 https://react-pdf-repl.vercel.app/ 👈🏻
+👉🏻 https://react-pdf-repl.vercel.app/
