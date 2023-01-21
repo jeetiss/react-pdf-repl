@@ -13,7 +13,7 @@ class Wrapper {
   }
 
   __call(method, ...args) {
-    if (this.workerIsDead) return Promise.reject("fatal_error");
+    if (this.workerIsDead) return Promise.reject("worker is dead, reload the page");
     const info = { method, args, key: `_${this.index++}_` };
 
     return new Promise((resolve, reject) => {

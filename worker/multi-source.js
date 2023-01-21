@@ -142,7 +142,8 @@ const versions = {
   "2.3.0": wrap(() => import("rpr2.3.0")),
   "3.0.0": wrap(() => import("rpr3.0.0")),
   "3.0.1": wrap(() => import("rpr3.0.1")),
-  "3.0.2": wrap(() => import("@react-pdf/renderer")),
+  "3.0.2": wrap(() => import("rpr3.0.2")),
+  "3.0.3": wrap(() => import("@react-pdf/renderer")),
 };
 
 const isRelative = (spec) =>
@@ -327,7 +328,7 @@ const legacyEvaluate = (code) =>
 
 const version = () => ({
   version: rpGlobals.version,
-  isDebuggingSupported: rpGlobals.version === "3.0.2",
+  isDebuggingSupported: rpGlobals.version === Object.keys(versions).at(-1),
 });
 
 const init = (version) => {
