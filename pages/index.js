@@ -27,6 +27,7 @@ import {
   EmptyDebugger,
   Preview,
   Error,
+  GithubButton,
 } from "../components/repl-layout";
 import { loader } from "../components/viewer.module.css";
 import {
@@ -347,6 +348,8 @@ const Repl = () => {
                 >
                   open pdf
                 </button>
+
+                <GithubButton />
               </Buttons>
             </HeaderControls>
 

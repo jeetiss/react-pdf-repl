@@ -175,3 +175,8 @@
   margin: 0;
   white-space: pre-wrap;
 }
+
+.githubLink {
+  display: flex;
+  justify-content: center;
+}
