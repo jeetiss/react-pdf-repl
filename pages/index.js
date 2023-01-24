@@ -42,6 +42,7 @@ import {
 import { layoutAtom, selectedAtom } from "../state/debugger";
 
 import { code as defCode } from "../code/default-example";
+import { tryFormat } from "../worker/format-code";
 
 const compress = (string) =>
   LZString.compressToBase64(string)
@@ -331,6 +332,13 @@ const Repl = () => {
               )}
 
               <Buttons>
+                <button
+                  onClick={() =>
+                    tryFormat(code, (formattedCode) => setCode(formattedCode))
+                  }
+                >
+                  format
+                </button>
                 <button
                   onClick={() =>
                     navigator.clipboard.writeText(
