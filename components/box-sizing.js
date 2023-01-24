@@ -1,6 +1,15 @@
 import styles from "../styles/box-sizing.module.css";
 
 const isDefined = (value) => value != null;
+const format = (number) => {
+  const isFloat = number - Math.floor(number) > 0;
+
+  if (isFloat) {
+    return number.toFixed(2);
+  }
+
+  return number;
+};
 
 const BoxSizing = ({ box }) => {
   return (
@@ -37,23 +46,23 @@ const BoxSizing = ({ box }) => {
           >
             <div className={styles.size}>
               {isDefined(box.width)
-                ? (
+                ? format(
                     box.width -
-                    box.paddingTop -
-                    box.paddingBottom -
-                    box.borderTopWidth -
-                    box.borderBottomWidth
-                  ).toFixed(2)
-                : "-"}{" "}
-              x{" "}
-              {isDefined(box.height)
-                ? (
-                    box.height -
                     box.paddingLeft -
                     box.paddingRight -
                     box.borderLeftWidth -
                     box.borderRightWidth
-                  ).toFixed(2)
+                  )
+                : "-"}{" "}
+              x{" "}
+              {isDefined(box.height)
+                ? format(
+                    box.height -
+                    box.paddingTop -
+                    box.paddingBottom -
+                    box.borderTopWidth -
+                    box.borderBottomWidth
+                  )
                 : "-"}
             </div>
           </SizingWrapper>
@@ -66,13 +75,21 @@ const BoxSizing = ({ box }) => {
 const SizingWrapper = ({ className, numbers = [], children, text }) => (
   <div className={[styles.sizingWrapper, className].join(" ")}>
     {text && text}
-    <div style={{ gridRow: "1", gridColumn: "2" }}>{numbers[0] || "-"}</div>
-    <div style={{ gridRow: "2", gridColumn: "1" }}>{numbers[1] || "-"}</div>
+    <div style={{ gridRow: "1", gridColumn: "2" }}>
+      {isDefined(numbers[0]) ? format(numbers[0]) : "-"}
+    </div>
+    <div style={{ gridRow: "2", gridColumn: "1" }}>
+      {isDefined(numbers[1]) ? format(numbers[1]) : "-"}
+    </div>
 
     <div style={{ gridRow: "2", gridColumn: "2" }}>{children}</div>
 
-    <div style={{ gridRow: "2", gridColumn: "3" }}>{numbers[2] || "-"}</div>
-    <div style={{ gridRow: "3", gridColumn: "2" }}>{numbers[3] || "-"}</div>
+    <div style={{ gridRow: "2", gridColumn: "3" }}>
+      {isDefined(numbers[2]) ? format(numbers[2]) : "-"}
+    </div>
+    <div style={{ gridRow: "3", gridColumn: "2" }}>
+      {isDefined(numbers[3]) ? format(numbers[3]) : "-"}
+    </div>
   </div>
 );
 
