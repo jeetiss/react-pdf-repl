@@ -11,6 +11,9 @@ const scale = (box, dpr) =>
       )
     : box;
 
+const trimNegative = (value) => (value < 0 ? 0 : value);
+const getNegative = (value) => (value > 0 ? 0 : value);
+
 const BoxOnCanvas = ({ box }) => {
   const ref = useRef();
 
@@ -43,8 +46,10 @@ const BoxOnCanvas = ({ box }) => {
       height,
     } = scale(box, dpr);
 
-    const canvasWidth = width + marginLeft + marginRight;
-    const canvasHeight = height + marginBottom + marginTop;
+    const canvasWidth =
+      width + trimNegative(marginLeft) + trimNegative(marginRight);
+    const canvasHeight =
+      height + trimNegative(marginBottom) + trimNegative(marginTop);
 
     ctx.canvas.width = canvasWidth;
     ctx.canvas.height = canvasHeight;
@@ -57,7 +62,12 @@ const BoxOnCanvas = ({ box }) => {
       marginTop !== 0
     ) {
       ctx.fillStyle = "rgb(248 204 158)";
-      ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+      ctx.fillRect(
+        -getNegative(marginLeft),
+        -getNegative(marginTop),
+        width + marginLeft + marginRight,
+        height + marginBottom + marginTop
+      );
     }
 
     if (
@@ -68,7 +78,12 @@ const BoxOnCanvas = ({ box }) => {
     ) {
       // border
       ctx.fillStyle = "rgb(250 220 160)";
-      ctx.fillRect(marginLeft, marginTop, width, height);
+      ctx.fillRect(
+        trimNegative(marginLeft),
+        trimNegative(marginTop),
+        width,
+        height
+      );
     }
 
     if (
@@ -80,8 +95,8 @@ const BoxOnCanvas = ({ box }) => {
       // padding
       ctx.fillStyle = "rgb(196 207 140)";
       ctx.fillRect(
-        marginLeft + borderLeftWidth,
-        marginTop + borderTopWidth,
+        trimNegative(marginLeft) + borderLeftWidth,
+        trimNegative(marginTop) + borderTopWidth,
         width - borderLeftWidth - borderRightWidth,
         height - borderTopWidth - borderBottomWidth
       );
@@ -90,8 +105,8 @@ const BoxOnCanvas = ({ box }) => {
     // body
     ctx.fillStyle = "rgb(172 201 255)";
     ctx.fillRect(
-      marginLeft + paddingLeft + borderLeftWidth,
-      marginTop + paddingTop + borderTopWidth,
+      trimNegative(marginLeft) + paddingLeft + borderLeftWidth,
+      trimNegative(marginTop) + paddingTop + borderTopWidth,
       width - paddingLeft - paddingRight - borderLeftWidth - borderRightWidth,
       height - paddingBottom - paddingTop - borderTopWidth - borderBottomWidth
     );
@@ -102,8 +117,8 @@ const BoxOnCanvas = ({ box }) => {
     }
     ctx.canvas.style.opacity = 0.75;
     ctx.canvas.style.position = "absolute";
-    ctx.canvas.style.top = `${-box.marginTop}px`;
-    ctx.canvas.style.left = `${-box.marginLeft}px`;
+    ctx.canvas.style.top = `${-trimNegative(box.marginTop)}px`;
+    ctx.canvas.style.left = `${-trimNegative(box.marginLeft)}px`;
     ctx.canvas.style.pointerEvents = "none";
   }, [box]);
 
