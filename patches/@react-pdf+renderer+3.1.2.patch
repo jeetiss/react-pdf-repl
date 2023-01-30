@@ -1,17 +1,16 @@
 diff --git a/node_modules/@react-pdf/renderer/lib/react-pdf.browser.es.js b/node_modules/@react-pdf/renderer/lib/react-pdf.browser.es.js
-index e69d4b6..a66b358 100644
+index 6d4c0ca..d7f8dc7 100644
 --- a/node_modules/@react-pdf/renderer/lib/react-pdf.browser.es.js
 +++ b/node_modules/@react-pdf/renderer/lib/react-pdf.browser.es.js
-@@ -4940,7 +4940,7 @@ var pdf = function pdf(initialValue) {
-   };
+@@ -4910,6 +4910,7 @@ var pdf = function pdf(initialValue) {
  
    if (initialValue) updateContainer(initialValue);
--
+ 
 +  var _GLOBAL_LAYOUT_ = null
    var render = /*#__PURE__*/function () {
      var _ref = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee(compress) {
        var props, pdfVersion, language, pageLayout, pageMode, ctx, layout;
-@@ -4968,6 +4968,7 @@ var pdf = function pdf(initialValue) {
+@@ -4937,6 +4938,7 @@ var pdf = function pdf(initialValue) {
  
              case 6:
                layout = _context.sent;
@@ -19,7 +18,7 @@ index e69d4b6..a66b358 100644
                return _context.abrupt("return", renderPDF(ctx, layout));
  
              case 8:
-@@ -5016,7 +5017,8 @@ var pdf = function pdf(initialValue) {
+@@ -4985,7 +4987,8 @@ var pdf = function pdf(initialValue) {
                        type: 'application/pdf'
                      });
                      callOnRender({
