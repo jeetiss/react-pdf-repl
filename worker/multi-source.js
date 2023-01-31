@@ -139,7 +139,7 @@ const versions = {
   "2.2.0": wrap(() => import("rpr2.2.0")),
   "2.3.0": wrap(() => import("rpr2.3.0")),
   "3.0.3": wrap(() => import("rpr3.0.3")),
-  "3.1.2": wrap(() => import("@react-pdf/renderer")),
+  "3.1.3": wrap(() => import("@react-pdf/renderer")),
 };
 
 const isRelative = (spec) =>
