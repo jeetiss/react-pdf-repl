@@ -171,7 +171,7 @@ const listStyles = StyleSheet.create({
 
 const List = ({ children }) => children;
 
-export const Item = ({ children }) => (
+const Item = ({ children }) => (
   <View style={listStyles.item}>
     <Text style={listStyles.bulletPoint}>•</Text>
     <Text style={listStyles.itemContent}>{children}</Text>
