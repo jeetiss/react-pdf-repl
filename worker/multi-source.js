@@ -34,7 +34,9 @@ export const makeImporter = (locate, retrieve) => async (moduleSpecifier) => {
 
 const createVirtualModuleFromVariable = (name, exports, options = {}) => {
   const { jsx } = options;
-  const exportsList = Object.keys(exports).filter((exp) => exp !== "default");
+  const exportKeys = Object.keys(exports);
+  const hasDefault = exportKeys.some((_export) => _export === "default");
+  const exportsList = exportKeys.filter((_export) => _export !== "default");
   const declarations = exportsList.map((_, index) => `__v$${index}$__`);
   const declarationString = declarations
     .map((id, index) => `${id} = ${exportsList[index]}`)
@@ -44,13 +46,26 @@ const createVirtualModuleFromVariable = (name, exports, options = {}) => {
     .join(",");
 
   const moduleRecord = new StaticModuleRecord(
-    `const ${declarationString};export { ${exportString} }`,
+    [
+      `const ${declarationString}`,
+      `export { ${exportString} }`,
+      hasDefault ? `export default __v_default__` : null,
+    ]
+      .filter(Boolean)
+      .join(";"),
+
     name,
     { jsx }
   );
 
+  let globals = exports;
+  if (hasDefault) {
+    const { default: __v_default__, ...rest } = exports;
+    globals = { __v_default__, ...rest };
+  }
+
   const compartment = new Compartment(
-    exports,
+    globals,
     {},
     {
       name,
