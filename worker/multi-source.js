@@ -1,6 +1,7 @@
 import "ses";
 import * as React from "react";
 import { jsx, jsxs, Fragment } from "react/jsx-runtime";
+import * as tailwind from "react-pdf-tailwind";
 import { StaticModuleRecord } from "./better-static-module-record.mjs";
 import preprocessJsx from "./process-jsx";
 
@@ -137,6 +138,10 @@ const wrap = (factory) => () =>
     );
   });
 
+const tailwindModule = createVirtualModuleFromVariable(
+  "react-pdf-tailwind",
+  tailwind
+);
 const reactModule = createVirtualModuleFromVariable("react", React);
 const reactRuntimeModule = createVirtualModuleFromVariable(
   "react/jsx-runtime",
@@ -259,6 +264,7 @@ const evaluate = (code) =>
           react: reactModule,
           "react/jsx-runtime": reactRuntimeModule,
           "@react-pdf/renderer": reactPdfModule,
+          "react-pdf-tailwind": tailwindModule,
         },
         {
           name: "repl",
