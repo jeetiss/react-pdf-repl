@@ -1,4 +1,4 @@
-import { useEffect, useReducer, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Editor from "@monaco-editor/react";
 import LZString from "lz-string";
 import useConstant from "use-constant";
@@ -14,7 +14,7 @@ import Tree from "../components/elements-tree";
 import BoxSizing from "../components/box-sizing";
 import {
   Buttons,
-  Select,
+  Version,
   ResizeHandle,
   ScrollBox,
   DebugFont,
@@ -60,22 +60,6 @@ const useWorker = createSingleton(
   () => new Worker(),
   (worker) => worker.terminate()
 );
-
-const supportedVersions = [
-  "3.1.3",
-  "3.0.3",
-  "2.3.0",
-  "2.2.0",
-  "2.1.2",
-  "2.0.21",
-  "1.6.17",
-];
-
-const checkRange = (version) => {
-  if (version && supportedVersions.includes(version)) return version;
-
-  return null;
-};
 
 function useMediaQuery(query) {
   const getMatches = (query) => {
@@ -138,10 +122,6 @@ const createLink = (options) => {
     link.searchParams.set("modules", options.modules);
   }
 
-  if (options.version !== supportedVersions[0]) {
-    link.searchParams.set("version", options.version);
-  }
-
   return link.toString();
 };
 
@@ -165,7 +145,6 @@ const Repl = () => {
   const isMobile = useMediaQuery("(max-width: 600px)");
 
   const [options, updateOptions] = useSetState(() => ({
-    version: checkRange(urlParams.version) ?? supportedVersions[0],
     modules: urlParams.code ? Boolean(urlParams.modules) : true,
   }));
 
@@ -209,21 +188,17 @@ const Repl = () => {
   const debuggerAPI = useRef();
 
   useEffect(() => {
-    if (options.version !== state.version) {
-      setReady(false);
-      pdf.call("init", options.version).then(() => setReady(true));
-    }
-  }, [pdf, update, state.version, options.version]);
-
-  useEffect(() => {
     if (isReady) {
-      pdf
-        .call("version")
-        .then(({ version, isDebuggingSupported }) =>
-          update({ version, isDebuggingSupported })
-        );
+      pdf.call("version").then(({ version, isDebuggingSupported }) =>
+        update({
+          version,
+          isDebuggingSupported: options.modules && isDebuggingSupported,
+        })
+      );
+    } else {
+      pdf.call("init").then(() => setReady(true));
     }
-  }, [pdf, update, isReady]);
+  }, [pdf, update, isReady, options.modules]);
 
   useEffect(() => {
     if (isReady) {
@@ -290,18 +265,7 @@ const Repl = () => {
         <ResizablePanel minSize={20}>
           <PreviewPanel>
             <HeaderControls>
-              <Select
-                time={state.time}
-                value={options.version}
-                onChange={(e) => {
-                  update({ url: null });
-                  updateOptions({ version: e.target.value });
-                }}
-              >
-                {supportedVersions.map((version) => (
-                  <option key={version}>{version}</option>
-                ))}
-              </Select>
+              <Version time={state.time} value={state.version} />
 
               {pageV && (
                 <div style={{ display: "flex", alignItems: "center" }}>
