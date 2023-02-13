@@ -2,6 +2,7 @@ import "ses";
 import * as React from "react";
 import { jsx, jsxs, Fragment } from "react/jsx-runtime";
 import * as tailwind from "react-pdf-tailwind";
+import * as rpGlobals from "@react-pdf/renderer";
 import { StaticModuleRecord } from "./better-static-module-record.mjs";
 import preprocessJsx from "./process-jsx";
 
@@ -122,22 +123,6 @@ const Provider = (props) => {
   );
 };
 
-let rpGlobals = null;
-let reactPdfModule = null;
-const wrap = (factory) => () =>
-  factory().then((moduleExports) => {
-    rpGlobals = moduleExports;
-
-    let exports = { ...moduleExports };
-    if (rpGlobals.version === Object.keys(versions).at(-1)) {
-      exports["Document"] = createDocumentWithCallback(rpGlobals);
-    }
-    reactPdfModule = createVirtualModuleFromVariable(
-      "@react-pdf/renderer",
-      exports
-    );
-  });
-
 const tailwindModule = createVirtualModuleFromVariable(
   "react-pdf-tailwind",
   tailwind
@@ -152,15 +137,10 @@ const reactRuntimeModule = createVirtualModuleFromVariable(
   }
 );
 
-const versions = {
-  "1.6.17": wrap(() => import("rpr1.6.17")),
-  "2.0.21": wrap(() => import("rpr2.0.21")),
-  "2.1.2": wrap(() => import("rpr2.1.2")),
-  "2.2.0": wrap(() => import("rpr2.2.0")),
-  "2.3.0": wrap(() => import("rpr2.3.0")),
-  "3.0.3": wrap(() => import("rpr3.0.3")),
-  "3.1.3": wrap(() => import("@react-pdf/renderer")),
-};
+const reactPdfModule = createVirtualModuleFromVariable("@react-pdf/renderer", {
+  ...rpGlobals,
+  Document: createDocumentWithCallback(rpGlobals),
+});
 
 const isRelative = (spec) =>
   spec.startsWith("./") ||
@@ -345,16 +325,10 @@ const legacyEvaluate = (code) =>
 
 const version = () => ({
   version: rpGlobals.version,
-  isDebuggingSupported: rpGlobals.version === Object.keys(versions).at(-1),
+  isDebuggingSupported: true,
 });
 
-const init = (version) => {
-  const initiator = versions[version];
-
-  if (!initiator) console.log(version, versions);
-
-  return initiator().then(() => true);
-};
+const init = () => true;
 
 const methods = {
   init,

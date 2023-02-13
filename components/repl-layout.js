@@ -22,14 +22,9 @@ import {
 
 const Buttons = ({ children }) => <div className={buttons}>{children}</div>;
 
-const Select = ({ time, value, onChange, children }) => (
+const Version = ({ time, value }) => (
   <div className={selectWithInfo}>
-    <div>
-      version:{" "}
-      <select value={value} onChange={onChange}>
-        {children}
-      </select>
-    </div>
+    <div>version: {value ?? "--"}</div>
     <div className={infoTime}>generation time: {time ?? "--"}</div>
   </div>
 );
@@ -101,7 +96,7 @@ const GithubButton = () => (
 
 export {
   Buttons,
-  Select,
+  Version,
   ResizeHandle,
   ScrollBox,
   DebugFont,
