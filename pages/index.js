@@ -154,20 +154,8 @@ const Repl = () => {
     time: null,
     error: null,
     isDebuggingSupported: options.modules,
-    isDebugging:
-      typeof window !== "undefined" &&
-      (() => {
-        // HARD COOODEEEE
-        try {
-          const sizes = window.localStorage.getItem(
-            "PanelGroup:sizes:react-pdf-repl-debug"
-          );
-          if (!sizes) return true;
-          return !!JSON.parse(sizes)["20,20"].at(-1);
-        } catch (error) {
-          return true;
-        }
-      })(),
+    isDebugging: true,
+    isEditing: true,
   }));
 
   const [isReady, setReady] = useState(false);
@@ -186,6 +174,7 @@ const Repl = () => {
   const pdf = useWorker();
 
   const debuggerAPI = useRef();
+  const editorPanelAPI = useRef();
 
   useEffect(() => {
     if (isReady) {
@@ -227,7 +216,13 @@ const Repl = () => {
   }, [pdf, code, update, isReady, options.modules, setLayout, options]);
 
   const editorPanel = (
-    <ResizablePanel defaultSize={50} minSize={20}>
+    <ResizablePanel
+      ref={editorPanelAPI}
+      defaultSize={50}
+      minSize={20}
+      collapsible
+      onCollapse={(collapsed) => update({ isEditing: !collapsed })}
+    >
       <Editor
         loading={<Loader />}
         language="javascript"
@@ -336,6 +331,20 @@ const Repl = () => {
             <FooterControls>
               <button
                 onClick={() => {
+                  const panel = editorPanelAPI.current;
+                  if (panel) {
+                    if (state.isEditing) {
+                      panel.collapse();
+                    } else {
+                      panel.expand();
+                    }
+                  }
+                }}
+              >
+                {state.isEditing ? "hide" : "show"} editor
+              </button>
+              <button
+                onClick={() => {
                   const panel = debuggerAPI.current;
                   if (panel) {
                     if (state.isDebugging) {
@@ -346,7 +355,7 @@ const Repl = () => {
                   }
                 }}
               >
-                debugger
+                {state.isDebugging ? "hide" : "show"} debugger
               </button>
             </FooterControls>
           </PreviewPanel>
@@ -408,13 +417,21 @@ const Repl = () => {
   return (
     <ClientOnly>
       {isMobile ? (
-        <PanelGroup autoSaveId="react-pdf-repl-mobile" direction="vertical">
+        <PanelGroup
+          key="mobile"
+          autoSaveId="react-pdf-repl-mobile"
+          direction="vertical"
+        >
           {viewerPanel}
           <ResizeHandle />
           {editorPanel}
         </PanelGroup>
       ) : (
-        <PanelGroup autoSaveId="react-pdf-repl" direction="horizontal">
+        <PanelGroup
+          key="desktop"
+          autoSaveId="react-pdf-repl"
+          direction="horizontal"
+        >
           {editorPanel}
           <ResizeHandle />
           {viewerPanel}
