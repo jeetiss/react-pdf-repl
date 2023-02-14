@@ -220,8 +220,8 @@ const TreeCore = ({ nodes, size }) => {
       onMouseLeave={() => hover(null)}
       style={{
         position: "absolute",
-        top: 0,
-        left: 0,
+        top: 1, // border
+        left: 1, // border
         transform: `scale(${scale})`,
       }}
     >

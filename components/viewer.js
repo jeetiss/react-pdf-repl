@@ -13,9 +13,6 @@ const useWorker = createSingleton(
   (worker) => worker.destroy()
 );
 
-const WIDTH = 210;
-const HEIGHT = 297;
-
 const client = (fn) => typeof window !== "undefined" && fn();
 
 let canvases = [];
@@ -164,60 +161,64 @@ const Viewer = ({ page: pageNumber, url, isDebugging, layout, onParse }) => {
     set({ size: { width: width - 2, height: height - 2 } });
   });
 
-  const ratio = state.size
-    ? state.size.height / HEIGHT < state.size.width / WIDTH
-    : 0;
-
   return (
     <div
-      ref={blockRef}
       style={{
-        position: "relative",
-        height: "100%",
-        width: "100%",
-        minHeight: 200,
-        minWidth: 200,
+        display: "flex",
+        justifyContent: "center",
       }}
     >
-      {state.document && pageNumber && (
-        <Canvas
-          canvas={state.canvas}
-          after={(canvas) => freeCanvas(canvas)}
-          style={{
-            position: "absolute",
-            border: "1px solid rgba(0, 0, 0, 0.18)",
-            transformOrigin: "0 0",
-            transform: `scale(${
-              1 / client(() => window.devicePixelRatio) ?? 1
-            })`,
-          }}
-        ></Canvas>
-      )}
+      <div
+        ref={blockRef}
+        style={{
+          position: "relative",
+          minWidth: 200,
+          maxWidth: 900,
+          flex: "0 0 100%",
+        }}
+      >
+        {state.document && pageNumber && (
+          <Canvas
+            canvas={state.canvas}
+            after={(canvas) => freeCanvas(canvas)}
+            style={{
+              position: "absolute",
+              border: "1px solid rgba(0, 0, 0, 0.18)",
+              transformOrigin: "0 0",
+              transform: `scale(${
+                1 / client(() => window.devicePixelRatio) ?? 1
+              })`,
+            }}
+          ></Canvas>
+        )}
 
-      {isDebugging && layout && <TreeCore nodes={[layout]} size={state.size} />}
+        {isDebugging && layout && (
+          <TreeCore nodes={[layout]} size={state.size} />
+        )}
 
-      {state.document && !pageNumber && (
-        <div
-          style={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-          }}
-        >
-          Blank PDF Document
-        </div>
-      )}
+        {state.document && !pageNumber && (
+          <div
+            style={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+            }}
+          >
+            Blank PDF Document
+          </div>
+        )}
 
-      {state.size && !state.document && (
-        <div
-          className={loader}
-          style={{
-            width: "100%",
-            height: "100%",
-          }}
-        />
-      )}
+        {state.size && !state.document && (
+          <div
+            className={loader}
+            style={{
+              width: "100%",
+              height: "100%",
+            }}
+          />
+        )}
+      </div>
     </div>
   );
 };
