@@ -13,9 +13,6 @@ const useWorker = createSingleton(
   (worker) => worker.destroy()
 );
 
-const WIDTH = 210;
-const HEIGHT = 297;
-
 const client = (fn) => typeof window !== "undefined" && fn();
 
 let canvases = [];
@@ -120,10 +117,7 @@ const Viewer = ({ page: pageNumber, url, isDebugging, layout, onParse }) => {
             scale: 1 / window.devicePixelRatio,
           });
           const size = state.size;
-          const scale = Math.min(
-            size.height / viewport.height,
-            size.width / viewport.width
-          );
+          const scale = size.width / viewport.width;
 
           viewport = page.getViewport({ scale });
 
@@ -167,38 +161,41 @@ const Viewer = ({ page: pageNumber, url, isDebugging, layout, onParse }) => {
     set({ size: { width: width - 2, height: height - 2 } });
   });
 
-  const ratio = state.size
-    ? state.size.height / HEIGHT < state.size.width / WIDTH
-    : 0;
-
   return (
     <div
-      ref={blockRef}
       style={{
-        position: "relative",
-        height: "100%",
-        width: "100%",
-        minHeight: 200,
-        minWidth: 200,
+        display: "flex",
+        justifyContent: "center",
       }}
     >
-      {state.document && pageNumber && (
-        <Canvas
-          canvas={state.canvas}
-          after={(canvas) => freeCanvas(canvas)}
-          style={{
-            position: "absolute",
-            border: "1px solid rgba(0, 0, 0, 0.18)",
-            top: "50%",
-            left: "50%",
-            transform: `translate(-50%, -50%) scale(${
-              1 / client(() => window.devicePixelRatio) ?? 1
-            })`,
-          }}
-        ></Canvas>
-      )}
+      <div
+        ref={blockRef}
+        style={{
+          position: "relative",
+          minWidth: 200,
+          maxWidth: 900,
+          flex: "0 0 100%",
+        }}
+      >
+        {state.document && pageNumber && (
+          <Canvas
+            canvas={state.canvas}
+            after={(canvas) => freeCanvas(canvas)}
+            style={{
+              position: "absolute",
+              border: "1px solid rgba(0, 0, 0, 0.18)",
+              transformOrigin: "0 0",
+              transform: `scale(${
+                1 / client(() => window.devicePixelRatio) ?? 1
+              })`,
+            }}
+          ></Canvas>
+        )}
 
-      {isDebugging && layout && <TreeCore nodes={[layout]} size={state.size} />}
+        {isDebugging && layout && (
+          <TreeCore nodes={[layout]} size={state.size} />
+        )}
+      </div>
 
       {state.document && !pageNumber && (
         <div
@@ -217,9 +214,10 @@ const Viewer = ({ page: pageNumber, url, isDebugging, layout, onParse }) => {
         <div
           className={loader}
           style={{
-            width: ratio ? "unset" : state.size.width,
-            height: ratio ? state.size.height : "unset",
-            aspectRatio: `${WIDTH} / ${HEIGHT}`,
+            width: "100%",
+            minWidth: 200,
+            maxWidth: 900,
+            height: "100%",
           }}
         />
       )}

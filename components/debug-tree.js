@@ -209,8 +209,8 @@ const TreeCore = ({ nodes, size }) => {
   )
     return null;
 
-  const { height, width } = nodes[0].children[page - 1].box;
-  const scale = Math.min(size.height / height, size.width / width);
+  const { width } = nodes[0].children[page - 1].box;
+  const scale = size.width / width;
 
   return (
     <div
@@ -220,11 +220,9 @@ const TreeCore = ({ nodes, size }) => {
       onMouseLeave={() => hover(null)}
       style={{
         position: "absolute",
-        top: "50%",
-        left: "50%",
-        transform: `translate(-${(width / 2) * scale}px, -${
-          (height / 2) * scale
-        }px) scale(${scale})`,
+        top: 1, // border
+        left: 1, // border
+        transform: `scale(${scale})`,
       }}
     >
       <DebugTree nodes={nodes}></DebugTree>
