@@ -120,10 +120,7 @@ const Viewer = ({ page: pageNumber, url, isDebugging, layout, onParse }) => {
             scale: 1 / window.devicePixelRatio,
           });
           const size = state.size;
-          const scale = Math.min(
-            size.height / viewport.height,
-            size.width / viewport.width
-          );
+          const scale = size.width / viewport.width;
 
           viewport = page.getViewport({ scale });
 
@@ -189,9 +186,8 @@ const Viewer = ({ page: pageNumber, url, isDebugging, layout, onParse }) => {
           style={{
             position: "absolute",
             border: "1px solid rgba(0, 0, 0, 0.18)",
-            top: "50%",
-            left: "50%",
-            transform: `translate(-50%, -50%) scale(${
+            transformOrigin: "0 0",
+            transform: `scale(${
               1 / client(() => window.devicePixelRatio) ?? 1
             })`,
           }}
@@ -217,9 +213,8 @@ const Viewer = ({ page: pageNumber, url, isDebugging, layout, onParse }) => {
         <div
           className={loader}
           style={{
-            width: ratio ? "unset" : state.size.width,
-            height: ratio ? state.size.height : "unset",
-            aspectRatio: `${WIDTH} / ${HEIGHT}`,
+            width: "100%",
+            height: "100%",
           }}
         />
       )}
