@@ -1,4 +1,4 @@
-import styles from "../styles/box-sizing.module.css";
+import styles from "./box-sizing.module.css";
 
 const isDefined = (value) => value != null;
 const format = (number) => {

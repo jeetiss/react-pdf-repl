@@ -18,7 +18,7 @@ import {
 } from "../state/debugger";
 import { page as pageNumberAtom } from "../state/page";
 
-import styles from "../styles/elements-tree.module.css";
+import styles from "./elements-tree.module.css";
 
 const cn = (...styles) => styles.filter((v) => v).join(" ");
 

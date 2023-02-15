@@ -4,8 +4,7 @@ import GlobalError from "next/dist/client/components/error-boundary";
 import { log } from "next-axiom/dist/logger";
 import Head from "next/head";
 
-import "../styles/globals.css";
-import "../styles/mosaic.css";
+import "./globals.css";
 
 class ErrorBoundary extends Component {
   constructor(props) {

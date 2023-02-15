@@ -1,63 +1,60 @@
 import { PanelResizeHandle } from "react-resizable-panels";
-import {
-  buttons,
-  selectWithInfo,
-  infoTime,
-  resizeHandleOuter,
-  resizeHandleHoverArea,
-  resizeHandleInner,
-  scrollBox,
-  debugFont,
-  emptyDebugger,
-  debugInfo,
-  nodeStyles,
-  boxInfo,
-  panelGrid,
-  footerControls,
-  headerControls,
-  preview,
-  replError,
-  githubLink,
-} from "./repl-layout.module.css";
+import * as styles from "./repl-layout.module.css";
 
-const Buttons = ({ children }) => <div className={buttons}>{children}</div>;
+const Buttons = ({ children }) => (
+  <div className={styles.buttons}>{children}</div>
+);
 
 const Version = ({ time, value }) => (
-  <div className={selectWithInfo}>
+  <div className={styles.selectWithInfo}>
     <div>version: {value ?? "--"}</div>
-    <div className={infoTime}>generation time: {time ?? "--"}</div>
+    <div className={styles.infoTime}>generation time: {time ?? "--"}</div>
   </div>
 );
 
 function ResizeHandle({ className = "" }) {
   return (
-    <PanelResizeHandle className={[resizeHandleOuter, className].join(" ")}>
-      <div className={resizeHandleHoverArea} />
-      <div className={resizeHandleInner} />
+    <PanelResizeHandle
+      className={[styles.resizeHandleOuter, className].join(" ")}
+    >
+      <div className={styles.resizeHandleHoverArea} />
+      <div className={styles.resizeHandleInner} />
     </PanelResizeHandle>
   );
 }
 
-const ScrollBox = ({ children }) => <div className={scrollBox}>{children}</div>;
-const DebugFont = ({ children }) => <div className={debugFont}>{children}</div>;
+const ScrollBox = ({ children }) => (
+  <div className={styles.scrollBox}>{children}</div>
+);
+const DebugFont = ({ children }) => (
+  <div className={styles.debugFont}>{children}</div>
+);
 const EmptyDebugger = ({ children }) => (
-  <div className={emptyDebugger}>{children}</div>
+  <div className={styles.emptyDebugger}>{children}</div>
 );
 
-const DebugInfo = ({ children }) => <div className={debugInfo}>{children}</div>;
-const Styles = ({ children }) => <div className={nodeStyles}>{children}</div>;
-const BoxInfo = ({ children }) => <div className={boxInfo}>{children}</div>;
+const DebugInfo = ({ children }) => (
+  <div className={styles.debugInfo}>{children}</div>
+);
+const Styles = ({ children }) => (
+  <div className={styles.nodeStyles}>{children}</div>
+);
+const BoxInfo = ({ children }) => (
+  <div className={styles.boxInfo}>{children}</div>
+);
 
 const PreviewPanel = ({ children }) => (
-  <section className={panelGrid}>{children}</section>
+  <section className={styles.panelGrid}>{children}</section>
 );
 const HeaderControls = ({ children }) => (
-  <div className={headerControls}>{children}</div>
+  <div className={styles.headerControls}>{children}</div>
 );
 const FooterControls = ({ children }) => (
-  <div className={footerControls}>{children}</div>
+  <div className={styles.footerControls}>{children}</div>
 );
-const Preview = ({ children }) => <div className={preview}>{children}</div>;
+const Preview = ({ children }) => (
+  <div className={styles.preview}>{children}</div>
+);
 
 const errorRegexp = /underlying failures:(?<errors>.+)/;
 const Error = ({ message }) => {
@@ -66,7 +63,7 @@ const Error = ({ message }) => {
   };
 
   return (
-    <code className={replError}>
+    <code className={styles.replError}>
       <pre>
         {groups.errors
           .trim()
@@ -83,7 +80,7 @@ const GithubButton = () => (
     target="_blank"
     rel="noopener noreferrer"
     href="https://github.com/jeetiss/react-pdf-repl"
-    className={githubLink}
+    className={styles.githubLink}
   >
     <svg height={20} viewBox="0 0 16 16" width={20}>
       <path
