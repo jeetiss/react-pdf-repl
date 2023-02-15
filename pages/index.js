@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useReducer, useRef, useState } from "react";
 import Editor from "@monaco-editor/react";
 import LZString from "lz-string";
 import useConstant from "use-constant";
@@ -57,8 +57,8 @@ const decompress = (string) =>
   );
 
 const useWorker = createSingleton(
-  () => new Worker(),
-  (worker) => worker.terminate()
+  () => (typeof document !== "undefined" ? new Worker() : null),
+  (worker) => worker?.terminate()
 );
 
 function useMediaQuery(query) {
@@ -148,6 +148,8 @@ const Repl = () => {
     modules: urlParams.code ? Boolean(urlParams.modules) : true,
   }));
 
+  const timeout = useRef(20_000);
+
   const [state, update] = useSetState(() => ({
     url: null,
     version: null,
@@ -160,6 +162,7 @@ const Repl = () => {
 
   const [isReady, setReady] = useState(false);
   const [code, setCode] = useState(() => urlParams.code ?? defCode);
+  const [v, forceRender] = useReducer((v) => !v);
 
   const [pageV] = useAtom(page);
   const [, setPagesCount] = useAtom(pagesCount);
@@ -196,7 +199,7 @@ const Repl = () => {
         .call("evaluate", {
           code,
           options: { modules: options.modules },
-          timeout: 20_000,
+          timeout: timeout.current,
         })
         .then(({ url, layout }) => {
           if (layout) {
@@ -207,13 +210,15 @@ const Repl = () => {
           update({ url, time: Date.now() - startTime, error: null });
         })
         .catch((error) => {
-          if (error === "fatal_error") {
-            log.error(error, { link: createLink({ code, ...options }) });
+          if (error.fatal) {
+            log.error(error.message, {
+              link: createLink({ code, ...options }),
+            });
           }
           update({ time: Date.now() - startTime, error });
         });
     }
-  }, [pdf, code, update, isReady, options.modules, setLayout, options]);
+  }, [pdf, code, update, isReady, setLayout, options, v]);
 
   const editorPanel = (
     <ResizablePanel
@@ -308,22 +313,38 @@ const Repl = () => {
               </Buttons>
             </HeaderControls>
 
-            <Preview>
-              <Viewer
-                url={state.url}
-                page={pageV}
-                isDebugging={state.isDebugging}
-                layout={layout}
-                onParse={({ pagesCount }) => setPagesCount(pagesCount)}
-              />
+            <Preview style={{ overflow: state.error ? "hidden" : "scroll" }}>
+              <ScrollBox>
+                <Viewer
+                  url={state.url}
+                  page={pageV}
+                  isDebugging={state.isDebugging}
+                  layout={layout}
+                  onParse={({ pagesCount }) => setPagesCount(pagesCount)}
+                />
+              </ScrollBox>
 
               {state.error && (
                 <Error
-                  message={
-                    typeof state.error === "string"
-                      ? state.error
-                      : state.error.stack || state.error.message
-                  }
+                  error={state.error}
+                  actions={[
+                    [
+                      "restart",
+                      () => {
+                        pdf.start();
+                        forceRender();
+                      },
+                    ],
+
+                    [
+                      "increase timeout and restart",
+                      () => {
+                        pdf.start();
+                        timeout.current = timeout.current * 2;
+                        forceRender();
+                      },
+                    ],
+                  ]}
                 />
               )}
             </Preview>

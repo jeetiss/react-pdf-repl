@@ -23,8 +23,6 @@
   grid-row: 2;
   grid-column: 1;
 
-  overflow: scroll;
-
   position: relative;
 }
 
@@ -156,24 +154,38 @@
   justify-content: center;
 }
 
-.replError {
+.errorContainer {
   position: absolute;
   inset: 0;
   width: 100%;
-  font-family: iaw-mono-var, SF Mono, SFMono-Regular, ui-monospace, Menlo,
-    Consolas, monospace;
+
   padding: 10px 20px;
-  overflow: auto;
-  color: #ff3737;
-  font-size: 13px;
+
   z-index: 1;
   background-color: rgba(255, 255, 255, 0.6);
   backdrop-filter: blur(12px);
+
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.replError {
+  font-family: iaw-mono-var, SF Mono, SFMono-Regular, ui-monospace, Menlo,
+    Consolas, monospace;
+  overflow: auto;
+  color: #ff3737;
+  font-size: 13px;
 }
 
 .replError > pre {
   margin: 0;
   white-space: pre-wrap;
+}
+
+.errorActions {
+  display: flex;
+  gap: 10px;
 }
 
 .githubLink {

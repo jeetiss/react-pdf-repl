@@ -1,26 +1,33 @@
 class Wrapper {
   constructor(ctr) {
     this.index = 0;
-    if (typeof document !== "undefined") {
-      this.worker = ctr();
-    } else {
-      this.worker = {};
-    }
+    this.__ctr = ctr;
+    this.start();
+  }
+
+  start() {
+    if (this.worker) return;
+
+    this.worker = this.__ctr();
   }
 
   terminate() {
-    return this.worker.terminate();
+    if (this.worker) {
+      this.worker.terminate();
+      this.worker = null;
+    }
   }
 
   __call(method, ...args) {
-    if (this.workerIsDead) return Promise.reject("worker is dead, reload the page");
+    if (!this.worker)
+      return Promise.reject({ fatal: true, message: "Worker is destroyed" });
     const info = { method, args, key: `_${this.index++}_` };
 
     return new Promise((resolve, reject) => {
       const handler = ({ data }) => {
         if (data.key === info.key) {
           if (data.error) {
-            reject(data.error);
+            reject({ message: data.error });
           } else {
             resolve(data.result);
           }
@@ -44,12 +51,18 @@ class Wrapper {
       this.__call(...args),
 
       new Promise((resolve, reject) =>
-        setTimeout(() => reject("fatal_error"), timeout)
+        setTimeout(
+          () =>
+            reject({
+              fatal: true,
+              message: `Worker is not responded in ${timeout}ms`,
+            }),
+          timeout
+        )
       ),
     ]).catch((error) => {
-      if (error === "fatal_error") {
+      if (error?.fatal) {
         this.terminate();
-        this.workerIsDead = true;
       }
 
       return Promise.reject(error);
@@ -59,7 +72,7 @@ class Wrapper {
 
 const CoreWorker = Wrapper.bind(
   Wrapper,
-  () => new Worker(new URL("./multi-source", import.meta.url))
+  () => new Worker(new URL("./executer.js", import.meta.url))
 );
 
 export { CoreWorker as Worker };

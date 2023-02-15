@@ -52,26 +52,45 @@ const HeaderControls = ({ children }) => (
 const FooterControls = ({ children }) => (
   <div className={styles.footerControls}>{children}</div>
 );
-const Preview = ({ children }) => (
-  <div className={styles.preview}>{children}</div>
+const Preview = ({ children, style }) => (
+  <div className={styles.preview} style={style}>
+    {children}
+  </div>
 );
 
 const errorRegexp = /underlying failures:(?<errors>.+)/;
-const Error = ({ message }) => {
+const Error = ({ error, actions = [] }) => {
+  const message =
+    typeof error === "string"
+      ? error
+      : error.stack || error.message;
   const { groups } = errorRegexp.exec(message) ?? {
     groups: { errors: message },
   };
 
+  const showActions = error?.fatal;
+
   return (
-    <code className={styles.replError}>
-      <pre>
-        {groups.errors
-          .trim()
-          .split(",")
-          .map((part) => part.trim())
-          .join("\n")}
-      </pre>
-    </code>
+    <div className={styles.errorContainer}>
+      <code className={styles.replError}>
+        <pre>
+          {groups.errors
+            .trim()
+            .split(",")
+            .map((part) => part.trim())
+            .join("\n")}
+        </pre>
+      </code>
+      {showActions && (
+        <div className={styles.errorActions}>
+          {actions.map(([text, action]) => (
+            <button key={text} onClick={action}>
+              {text}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
   );
 };
 
