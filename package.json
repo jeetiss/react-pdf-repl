@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@codesandbox/sandpack-react": "^2.0.1",
     "@endo/static-module-record": "^0.7.16",
     "@monaco-editor/react": "^4.4.6",
     "@react-hook/resize-observer": "^1.2.6",
