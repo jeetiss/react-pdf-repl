@@ -6,14 +6,13 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "postinstall": "patch-package"
+    "lint": "next lint"
   },
   "dependencies": {
     "@endo/static-module-record": "^0.7.16",
     "@monaco-editor/react": "^4.4.6",
     "@react-hook/resize-observer": "^1.2.6",
-    "@react-pdf/renderer": "^3.1.4",
+    "@react-pdf/renderer": "^3.1.5",
     "@tokey/css-selector-parser": "^0.6.0",
     "@vercel/analytics": "^0.1.6",
     "acorn": "^8.8.1",

@@ -265,7 +265,7 @@ const evaluate = (code) =>
         .pdf(
           React.createElement(
             Provider,
-            { fn: (info) => (layout = info.layout) },
+            { fn: (info) => (layout = info._INTERNAL__LAYOUT__DATA_) },
             React.createElement(namespace.default)
           )
         )
