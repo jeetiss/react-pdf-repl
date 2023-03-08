@@ -35,7 +35,6 @@ function MyApp({ Component, pageProps }) {
     <>
       <Head>
         <title>react-pdf playground</title>
-        <title>react-pdf playground</title>
 
         <link rel="icon" type="image/svg" href="/favicon.svg" />
         <meta
