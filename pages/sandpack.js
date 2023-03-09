@@ -5,10 +5,6 @@ export default function App() {
   return (
     <>
       <Head>
-        <meta
-          httpEquiv="Content-Security-Policy"
-          content="frame-src https://*;"
-        />
         <style
           dangerouslySetInnerHTML={{ __html: getSandpackCssText() }}
           id="sandpack"
