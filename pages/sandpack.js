@@ -1,13 +1,17 @@
 import { Sandpack, getSandpackCssText } from "@codesandbox/sandpack-react";
+import Head from "next/head";
+
+const sandpackStyles = getSandpackCssText();
 
 export default function App() {
   return (
     <>
-      <style id="sandpack" global jsx>
-        {`
-          ${getSandpackCssText()}
-        `}
-      </style>
+      <Head>
+        <style
+          dangerouslySetInnerHTML={{ __html: sandpackStyles }}
+          id="sandpack"
+        />
+      </Head>
 
       <Sandpack
         template="vite-react"
