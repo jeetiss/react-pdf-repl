@@ -9,7 +9,7 @@ export default function App() {
 
 export default () => (
   <Document>
-    <Page size="A6">
+    <Page size={[100, 100]}>
       <View
         style={{
           height: "100%",
@@ -17,11 +17,12 @@ export default () => (
           alignItems: "center",
         }}
       >
-        <Text>new document</Text>
+        <Text>new</Text>
       </View>
     </Page>
   </Document>
-);`,
+);
+        `,
 
         "/package.json": JSON.stringify({
           scripts: {
@@ -30,15 +31,14 @@ export default () => (
             preview: "vite preview",
           },
           dependencies: {
-            "@react-pdf/renderer": "^3.1.4",
-            events: "^3.3.0",
+            "@react-pdf/renderer": "^3.1.7",
             react: "^18.2.0",
             "react-dom": "^18.2.0",
           },
           devDependencies: {
-            "@vitejs/plugin-react": "3.1.0",
-            vite: "4.0.0",
-            "esbuild-wasm": "0.15.12",
+            "@vitejs/plugin-react": "^3.1.0",
+            vite: "^4.0.0",
+            "esbuild-wasm": "^0.17.11",
           },
         }),
         "/vite.config.js": `import { defineConfig } from 'vite'
@@ -52,11 +52,14 @@ export default defineConfig({
         "/index.jsx": `import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { PDFViewer } from "@react-pdf/renderer";
-import "./styles.css";
+
 import MyDocument from "./App";
+import "./styles.css";
+
 const root = createRoot(document.getElementById("root"));
 root.render(
   <StrictMode>
+    <h1>Hello react-pdf</h1>
     <PDFViewer>
       <MyDocument />
     </PDFViewer>
