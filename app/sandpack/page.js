@@ -1,4 +1,6 @@
-import { Sandpack, getSandpackCssText } from "@codesandbox/sandpack-react";
+"use client";
+
+import { Sandpack } from "@codesandbox/sandpack-react";
 
 function App() {
   return (

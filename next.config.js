@@ -1,6 +1,10 @@
 const { withAxiom } = require("next-axiom");
 
-module.exports = withAxiom({
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  experimental: {
+    appDir: true,
+  },
   reactStrictMode: true,
   outputFileTracing: false,
   redirects() {
@@ -36,7 +40,10 @@ module.exports = withAxiom({
 
     config.resolve.alias["iconv-lite"] = false;
     config.resolve.alias["whatwg-fetch"] = false;
+    config.resolve.alias["canvas"] = false;
 
     return config;
   },
-});
+};
+
+module.exports = withAxiom(nextConfig);
