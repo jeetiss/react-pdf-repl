@@ -3,6 +3,7 @@ import { Component } from "react";
 import GlobalError from "next/dist/client/components/error-boundary";
 import { log } from "next-axiom/dist/logger";
 import Head from "next/head";
+import { getSandpackCssText } from "@codesandbox/sandpack-react";
 
 import "./globals.css";
 
@@ -40,6 +41,12 @@ function MyApp({ Component, pageProps }) {
         <meta
           name="keywords"
           content="react pdf playground with interactive debugger"
+        />
+
+        <style
+          dangerouslySetInnerHTML={{ __html: getSandpackCssText() }}
+          id="sandpack"
+          key="sandpack-css"
         />
       </Head>
       <ErrorBoundary>
