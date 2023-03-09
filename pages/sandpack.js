@@ -6,6 +6,7 @@ export default function App() {
     <>
       <Head>
         <style
+          global
           dangerouslySetInnerHTML={{ __html: getSandpackCssText() }}
           id="sandpack"
           key="sandpack-css"
