@@ -7,7 +7,7 @@ export default function App() {
       <Head>
         <meta
           httpEquiv="Content-Security-Policy"
-          content="frame-src https://nodebox.codesandbox.io/;"
+          content="frame-src https://*;"
         />
         <style
           dangerouslySetInnerHTML={{ __html: getSandpackCssText() }}
