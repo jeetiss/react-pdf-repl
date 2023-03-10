@@ -1,4 +1,4 @@
-// import { Analytics } from "@vercel/analytics/react";
+import { Analytics } from "@vercel/analytics/react";
 
 import "./globals.css";
 
@@ -15,7 +15,7 @@ export default function RootLayout(props) {
       </head>
       <body>
         {props.children}
-        {/* <Analytics /> */}
+        <Analytics />
       </body>
     </html>
   );
