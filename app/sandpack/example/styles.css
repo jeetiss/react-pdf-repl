@@ -1,0 +1,16 @@
+body {
+  margin: 0;
+}
+
+html,
+body,
+div#root,
+.Viewer {
+  width: 100%;
+  height: 100%;
+}
+
+.Viewer {
+  display: block;
+  border: none;
+}

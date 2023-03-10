@@ -38,6 +38,16 @@ const nextConfig = {
       },
     });
 
+    config.module.rules.forEach((rule) => {
+      if (rule.oneOf) {
+        rule.oneOf.unshift({
+          test: /app\/sandpack\/example/,
+          resourceQuery: /raw/,
+          type: "asset/source",
+        });
+      }
+    });
+
     config.resolve.alias["iconv-lite"] = false;
     config.resolve.alias["whatwg-fetch"] = false;
     config.resolve.alias["canvas"] = false;
