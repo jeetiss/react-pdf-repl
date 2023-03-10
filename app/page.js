@@ -1,4 +1,6 @@
-import { useEffect, useReducer, useRef, useState } from "react";
+"use client";
+
+import { Suspense, lazy, useEffect, useReducer, useRef, useState } from "react";
 import Editor from "@monaco-editor/react";
 import LZString from "lz-string";
 import useConstant from "use-constant";
@@ -9,7 +11,6 @@ import { Panel as ResizablePanel, PanelGroup } from "react-resizable-panels";
 
 import { createSingleton, useSetState } from "../hooks";
 import { Worker } from "../worker";
-import Viewer from "../components/viewer";
 import Tree from "../components/elements-tree";
 import BoxSizing from "../components/box-sizing";
 import {
@@ -42,6 +43,8 @@ import {
 import { layoutAtom, selectedAtom } from "../state/debugger";
 
 import { code as defCode } from "../code/default-example";
+
+const Viewer = lazy(() => import("../components/viewer"));
 
 const compress = (string) =>
   LZString.compressToBase64(string)
