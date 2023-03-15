@@ -39,5 +39,6 @@
     "eslint-config-next": "11.0.1",
     "monaco-editor": "^0.34.1",
     "patch-package": "^6.5.0"
-  }
+  },
+  "license": "ISC"
 }
