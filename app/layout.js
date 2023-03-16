@@ -14,6 +14,7 @@ export const metadata = {
     "debug pdf",
   ],
   robots: "index, follow",
+  referrer: "origin",
   icons: "/favicon.svg",
   openGraph: {
     type: "website",
@@ -33,6 +34,7 @@ export const metadata = {
     creator: "Dmitry Ivakhnenko <jeetiss@ya.ru>",
     images: "https://react-pdf-repl.vercel.app/og.png",
   },
+  alternates: { canonical: "https://react-pdf-repl.vercel.app/" },
 };
 
 export default function RootLayout(props) {
