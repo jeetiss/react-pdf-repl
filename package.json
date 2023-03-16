@@ -6,12 +6,14 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@codesandbox/sandpack-react": "^2.1.2",
     "@endo/static-module-record": "^0.7.16",
     "@monaco-editor/react": "^4.4.6",
+    "@napi-rs/canvas": "^0.1.39",
     "@react-hook/resize-observer": "^1.2.6",
     "@react-pdf/renderer": "^3.1.8",
     "@vercel/analytics": "^0.1.11",
