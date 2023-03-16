@@ -11,6 +11,12 @@ import * as rpGlobals from "@react-pdf/renderer";
 
 import { StaticModuleRecord } from "../../worker/better-static-module-record.mjs";
 
+// hack to bundle worker
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+  "pdfjs-dist/legacy/build/pdf.worker.js",
+  import.meta.url
+);
+
 const canvas = createCanvas(1600, 900);
 
 const templatePromise = readFile(
