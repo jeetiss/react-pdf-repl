@@ -11,6 +11,7 @@ import * as tailwind from "react-pdf-tailwind";
 import * as rpGlobals from "@react-pdf/renderer";
 
 import { StaticModuleRecord } from "../../worker/better-static-module-record.mjs";
+import { code } from "../../code/default-example";
 
 const canvas = createCanvas(1600, 900);
 
@@ -294,7 +295,7 @@ const evaluate = async (code) => {
       layout: serializeLayout(layout),
     };
   } catch (error) {
-    reject(error);
+    console.log(error);
   }
 };
 
@@ -350,11 +351,7 @@ export default async function GET(req, res) {
   ctx.fillRect(0, 0, 1600, 900);
   ctx.drawImage(await getTemplate(), 0, 0);
 
-  if (!cp_code) {
-    res.setHeader("content-type", "image/jpeg");
-    return res.send(await defaultPromise);
-  }
-  const pdf = await evaluate(decompress(cp_code));
+  const pdf = await evaluate(cp_code ? decompress(cp_code) : code);
 
   const document = await pdfjs.getDocument({
     data: pdf.buffer,
