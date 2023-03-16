@@ -1,6 +1,7 @@
 import "ses";
 import { createCanvas, Image } from "@napi-rs/canvas";
 import * as pdfjs from "pdfjs-dist/legacy/build/pdf";
+import "pdfjs-dist/legacy/build/pdf.worker";
 import { readFile } from "node:fs/promises";
 import LZString from "lz-string";
 
@@ -10,12 +11,6 @@ import * as tailwind from "react-pdf-tailwind";
 import * as rpGlobals from "@react-pdf/renderer";
 
 import { StaticModuleRecord } from "../../worker/better-static-module-record.mjs";
-
-// hack to bundle worker
-pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-  "pdfjs-dist/legacy/build/pdf.worker.js",
-  import.meta.url
-);
 
 const canvas = createCanvas(1600, 900);
 
