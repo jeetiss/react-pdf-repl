@@ -34,3 +34,30 @@ index 9f5a013..4f53b6e 100644
      return Canvas.createCanvas(width, height);
    }
  }
+diff --git a/node_modules/pdfjs-dist/legacy/build/pdf.worker.js b/node_modules/pdfjs-dist/legacy/build/pdf.worker.js
+index 25b266d..eeb6415 100644
+--- a/node_modules/pdfjs-dist/legacy/build/pdf.worker.js
++++ b/node_modules/pdfjs-dist/legacy/build/pdf.worker.js
+@@ -1523,20 +1523,13 @@ var _is_node = __w_pdfjs_require__(4);
+   if (globalThis.DOMMatrix || !_is_node.isNodeJS) {
+     return;
+   }
+-  globalThis.DOMMatrix = require("canvas").DOMMatrix;
++  globalThis.DOMMatrix = require("@napi-rs/canvas").DOMMatrix;
+ })();
+ (function checkPath2D() {
+   if (globalThis.Path2D || !_is_node.isNodeJS) {
+     return;
+   }
+-  const {
+-    CanvasRenderingContext2D
+-  } = require("canvas");
+-  const {
+-    polyfillPath2D
+-  } = require("path2d-polyfill");
+-  globalThis.CanvasRenderingContext2D = CanvasRenderingContext2D;
+-  polyfillPath2D(globalThis);
++  globalThis.Path2D = require("@napi-rs/canvas").Path2D;
+ })();
+ (function checkReadableStream() {
+   if (globalThis.ReadableStream || !_is_node.isNodeJS) {
