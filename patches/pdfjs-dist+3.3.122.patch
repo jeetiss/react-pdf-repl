@@ -1,0 +1,36 @@
+diff --git a/node_modules/pdfjs-dist/legacy/build/pdf.js b/node_modules/pdfjs-dist/legacy/build/pdf.js
+index 9f5a013..4f53b6e 100644
+--- a/node_modules/pdfjs-dist/legacy/build/pdf.js
++++ b/node_modules/pdfjs-dist/legacy/build/pdf.js
+@@ -922,20 +922,13 @@ var _is_node = __w_pdfjs_require__(3);
+   if (globalThis.DOMMatrix || !_is_node.isNodeJS) {
+     return;
+   }
+-  globalThis.DOMMatrix = require("canvas").DOMMatrix;
++  globalThis.DOMMatrix = require("@napi-rs/canvas").DOMMatrix;
+ })();
+ (function checkPath2D() {
+   if (globalThis.Path2D || !_is_node.isNodeJS) {
+     return;
+   }
+-  const {
+-    CanvasRenderingContext2D
+-  } = require("canvas");
+-  const {
+-    polyfillPath2D
+-  } = require("path2d-polyfill");
+-  globalThis.CanvasRenderingContext2D = CanvasRenderingContext2D;
+-  polyfillPath2D(globalThis);
++  globalThis.Path2D = require("@napi-rs/canvas").Path2D;
+ })();
+ (function checkReadableStream() {
+   if (globalThis.ReadableStream || !_is_node.isNodeJS) {
+@@ -12566,7 +12559,7 @@ const fetchData = function (url) {
+ };
+ class NodeCanvasFactory extends _base_factory.BaseCanvasFactory {
+   _createCanvas(width, height) {
+-    const Canvas = require("canvas");
++    const Canvas = require("@napi-rs/canvas");
+     return Canvas.createCanvas(width, height);
+   }
+ }
