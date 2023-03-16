@@ -374,6 +374,7 @@ export default async function GET(req, res) {
   ctx.drawImage(pdfCanvas, 800, 100);
   ctx.restore();
 
+  res.setHeader("Cache-Control", "public, max-age=2592000, immutable");
   res.setHeader("content-type", "image/jpeg");
   return res.send(canvas.toBuffer("image/jpeg"));
 }
