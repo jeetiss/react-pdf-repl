@@ -19,10 +19,6 @@ const templatePromise = readFile(
   new URL("../../public/template.png", import.meta.url)
 );
 
-const defaultPromise = readFile(
-  new URL("../../public/og.png", import.meta.url)
-);
-
 const decompress = (string) =>
   LZString.decompressFromBase64(
     string
