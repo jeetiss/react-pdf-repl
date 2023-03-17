@@ -26,8 +26,8 @@ export async function generateMetadata({ searchParams }) {
     openGraph: {
       type: "website",
       url: "https://react-pdf-repl.vercel.app/",
-      title: "react-pdf playground",
-      description: "react pdf playground with interactive debugger",
+      title: "react-pdf-repl",
+      description: "playground with interactive debugger",
       siteName: "react-pdf-repl",
       images: [
         {
@@ -38,6 +38,8 @@ export async function generateMetadata({ searchParams }) {
     twitter: {
       card: "summary_large_image",
       site: "https://react-pdf-repl.vercel.app/",
+      title: "react-pdf-repl",
+      description: "playground with interactive debugger",
       creator: "Dmitry Ivakhnenko <jeetiss@ya.ru>",
       images: ogUrl.toString(),
     },
