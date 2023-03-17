@@ -338,6 +338,8 @@ async function getCanvas(pagePromise, { height, width }) {
   return { canvas, viewport };
 }
 
+// 1200x630
+
 export default async function GET(req, res) {
   const canvas = createCanvas(1600, 800);
 

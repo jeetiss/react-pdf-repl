@@ -11,7 +11,7 @@ export async function generateMetadata({ searchParams }) {
 
   /** @type {import('next').Metadata} */
   const metadata = {
-    title: "react-pdf playground",
+    title: "react-pdf repl",
     description: "react pdf playground with interactive debugger",
     keywords: [
       "PDF",
@@ -26,9 +26,8 @@ export async function generateMetadata({ searchParams }) {
     openGraph: {
       type: "website",
       url: "https://react-pdf-repl.vercel.app/",
-      title: "react-pdf-repl",
+      title: "react-pdf repl",
       description: "playground with interactive debugger",
-      siteName: "react-pdf-repl",
       images: [
         {
           url: ogUrl.toString(),
@@ -37,8 +36,7 @@ export async function generateMetadata({ searchParams }) {
     },
     twitter: {
       card: "summary_large_image",
-      site: "https://react-pdf-repl.vercel.app/",
-      title: "react-pdf-repl",
+      title: "react-pdf repl",
       description: "playground with interactive debugger",
       creator: "Dmitry Ivakhnenko <jeetiss@ya.ru>",
       images: ogUrl.toString(),
