@@ -224,67 +224,54 @@ const serializeLayout = (layout) => {
   return layout && serializeNode(layout);
 };
 
-const evaluate = (code) =>
-  new Promise(async (resolve, reject) => {
-    try {
-      const retrieve = makeStaticRetriever({
-        "file://internal/code.js": code,
-      });
-      const importHook = makeImporter(locate, retrieve);
-
-      const compartment = new Compartment(
-        {
-          console,
-          fetch: (...a) => fetch(...a),
-          Headers,
-          Request,
-          Response,
-        },
-        {
-          react: reactModule,
-          "react/jsx-runtime": reactRuntimeModule,
-          "@react-pdf/renderer": reactPdfModule,
-          "react-pdf-tailwind": tailwindModule,
-        },
-        {
-          name: "repl",
-          resolveHook,
-          importHook,
-        }
-      );
-
-      const { namespace } = await compartment.import("file://internal/code.js");
-
-      if (!("default" in namespace)) {
-        throw new Error("The default export is not a React PDF Component");
-      }
-
-      let layout = null;
-
-      rpGlobals
-        .pdf(
-          React.createElement(
-            Provider,
-            { fn: (info) => (layout = info._INTERNAL__LAYOUT__DATA_) },
-            React.createElement(namespace.default)
-          )
-        )
-        .toBlob()
-        .then((res) => URL.createObjectURL(res))
-        .then(
-          (result) =>
-            resolve({
-              url: result,
-              layout: serializeLayout(layout),
-            }),
-          (error) => {
-            reject(error);
-          }
-        );
-    } catch (error) {
-      reject(error);
-    }
+const evaluate = async (code) => {
+  const retrieve = makeStaticRetriever({
+    "file://internal/code.js": code,
   });
+  const importHook = makeImporter(locate, retrieve);
+
+  const compartment = new Compartment(
+    {
+      console,
+      fetch: (...a) => fetch(...a),
+      Headers,
+      Request,
+      Response,
+    },
+    {
+      react: reactModule,
+      "react/jsx-runtime": reactRuntimeModule,
+      "@react-pdf/renderer": reactPdfModule,
+      "react-pdf-tailwind": tailwindModule,
+    },
+    {
+      name: "repl",
+      resolveHook,
+      importHook,
+    }
+  );
+
+  const { namespace } = await compartment.import("file://internal/code.js");
+
+  if (!("default" in namespace)) {
+    throw new Error("The default export is not a React PDF Component");
+  }
+
+  let layout = null;
+
+  const blobPDF = await rpGlobals.pdf(
+    React.createElement(
+      Provider,
+      { fn: (info) => (layout = info._INTERNAL__LAYOUT__DATA_) },
+      React.createElement(namespace.default)
+    )
+  );
+
+  return {
+    url: URL.createObjectURL(blobPDF),
+    layout: serializeLayout(layout),
+  };
+};
 
 const createRender = (callback) => (element) => {
   rpGlobals
