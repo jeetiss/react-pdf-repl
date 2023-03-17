@@ -214,7 +214,9 @@ const serializeLayout = (layout) => {
 
     if (node.children) {
       for (let child of node.children) {
-        sNode.children.push(serializeNode(child));
+        if (child.type !== "TEXT_INSTANCE") {
+          sNode.children.push(serializeNode(child));
+        }
       }
     }
 
@@ -259,13 +261,15 @@ const evaluate = async (code) => {
 
   let layout = null;
 
-  const blobPDF = await rpGlobals.pdf(
-    React.createElement(
-      Provider,
-      { fn: (info) => (layout = info._INTERNAL__LAYOUT__DATA_) },
-      React.createElement(namespace.default)
+  const blobPDF = await rpGlobals
+    .pdf(
+      React.createElement(
+        Provider,
+        { fn: (info) => (layout = info._INTERNAL__LAYOUT__DATA_) },
+        React.createElement(namespace.default)
+      )
     )
-  );
+    .toBlob();
 
   return {
     url: URL.createObjectURL(blobPDF),
