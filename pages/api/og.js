@@ -13,10 +13,8 @@ import * as rpGlobals from "@react-pdf/renderer";
 import { StaticModuleRecord } from "../../worker/better-static-module-record.mjs";
 import { code } from "../../code/default-example";
 
-const canvas = createCanvas(1600, 900);
-
 const templatePromise = readFile(
-  new URL("../../public/template.png", import.meta.url)
+  new URL("../../public/g-template.png", import.meta.url)
 );
 
 const decompress = (string) =>
@@ -341,6 +339,8 @@ async function getCanvas(pagePromise, { height, width }) {
 }
 
 export default async function GET(req, res) {
+  const canvas = createCanvas(1600, 900);
+
   const { cp_code } = req.query;
   const ctx = canvas.getContext("2d");
   ctx.fillStyle = "white";
@@ -355,16 +355,16 @@ export default async function GET(req, res) {
   }).promise;
 
   const { canvas: pdfCanvas, viewport } = await getCanvas(document.getPage(1), {
-    width: 700,
-    height: 900,
+    width: 1400,
+    height: 900 - 104,
   });
   ctx.save();
   ctx.fillStyle = "#e2e2e2";
-  ctx.shadowColor = "rgba(0, 0, 0, .2)";
+  ctx.shadowColor = "rgba(0, 0, 0, .15)";
   ctx.shadowBlur = 200;
   ctx.shadowOffsetY = 300;
-  ctx.fillRect(800 - 1, 100 - 1, viewport.width + 2, viewport.height + 2);
-  ctx.drawImage(pdfCanvas, 800, 100);
+  ctx.fillRect(100 - 1, 104 - 1, viewport.width + 2, viewport.height + 2);
+  ctx.drawImage(pdfCanvas, 100, 104);
   ctx.restore();
 
   res.setHeader("Cache-Control", "public, max-age=2592000, immutable");
