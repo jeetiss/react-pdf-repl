@@ -339,7 +339,7 @@ async function getCanvas(pagePromise, { height, width }) {
 }
 
 export default async function GET(req, res) {
-  const canvas = createCanvas(1600, 900);
+  const canvas = createCanvas(1600, 800);
 
   const { cp_code } = req.query;
   const ctx = canvas.getContext("2d");
@@ -356,7 +356,7 @@ export default async function GET(req, res) {
 
   const { canvas: pdfCanvas, viewport } = await getCanvas(document.getPage(1), {
     width: 1400,
-    height: 900 - 104,
+    height: 800 - 104,
   });
   ctx.save();
   ctx.fillStyle = "#e2e2e2";
