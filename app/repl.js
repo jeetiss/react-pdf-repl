@@ -2,7 +2,6 @@
 
 import { Suspense, lazy, useEffect, useReducer, useRef, useState } from "react";
 import Editor from "@monaco-editor/react";
-import LZString from "lz-string";
 import useConstant from "use-constant";
 import { useAtom } from "jotai/react";
 import { log } from "next-axiom/dist/logger";
@@ -42,22 +41,10 @@ import {
 
 import { layoutAtom, selectedAtom } from "../state/debugger";
 
+import { compress, decompress } from "../code/lz";
 import { code as defCode } from "../code/default-example";
 
 const Viewer = lazy(() => import("../components/viewer"));
-
-const compress = (string) =>
-  LZString.compressToBase64(string)
-    .replace(/\+/g, "-") // Convert '+' to '-'
-    .replace(/\//g, "_") // Convert '/' to '_'
-    .replace(/=+$/, ""); // Remove ending '='
-
-const decompress = (string) =>
-  LZString.decompressFromBase64(
-    string
-      .replace(/-/g, "+") // Convert '-' to '+'
-      .replace(/_/g, "/") // Convert '_' to '/'
-  );
 
 const useWorker = createSingleton(
   () => (typeof document !== "undefined" ? new Worker() : null),
