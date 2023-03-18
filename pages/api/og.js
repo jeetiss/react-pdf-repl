@@ -94,6 +94,11 @@ async function getCanvas(pagePromise, { height, width }) {
 }
 
 export default async function GET(req, res) {
+  // cors preflight
+  if (req.method?.toUpperCase() === "OPTIONS") {
+    return res.status(200).send("ok");
+  }
+
   const canvas = createCanvas(1600, 800);
 
   const { cp_code } = req.query;
