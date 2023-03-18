@@ -1,8 +1,8 @@
+import "ses";
 import { createCanvas, Image, Path2D } from "@napi-rs/canvas";
 import * as pdfjs from "pdfjs-dist/legacy/build/pdf";
 import "pdfjs-dist/legacy/build/pdf.worker";
 import { readFile } from "node:fs/promises";
-import LZString from "lz-string";
 
 import * as React from "react";
 import { renderToBuffer } from "@react-pdf/renderer";
