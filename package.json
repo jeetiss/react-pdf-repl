@@ -24,7 +24,7 @@
     "estree-util-build-jsx": "^2.2.2",
     "jotai": "^2.0.2",
     "lz-string": "^1.4.4",
-    "next": "^13.2.4",
+    "next": "^13.2.5-canary.8",
     "next-axiom": "^0.17.0",
     "pdfjs-dist": "^3.3.122",
     "react": "18.2.0",
@@ -37,10 +37,10 @@
     "use-constant": "^1.1.1"
   },
   "devDependencies": {
-    "eslint": "7.32.0",
-    "eslint-config-next": "11.0.1",
+    "eslint": "^8.36.0",
+    "eslint-config-next": "^13.2.4",
     "monaco-editor": "^0.34.1",
-    "patch-package": "^6.5.0"
+    "patch-package": "^6.5.1"
   },
   "license": "ISC"
 }
