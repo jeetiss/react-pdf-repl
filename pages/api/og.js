@@ -12,7 +12,7 @@ import {
   serializeLayout,
 } from "../../worker/to-module";
 
-import { decompress } from "../../code/lz";
+import { decompress, gzDecompress } from "../../code/lz";
 import { code } from "../../code/default-example";
 
 const templatePromise = readFile(
@@ -101,14 +101,20 @@ export default async function GET(req, res) {
 
   const canvas = createCanvas(1600, 800);
 
-  const { cp_code } = req.query;
+  const { cp_code, gz_code } = req.query;
   const ctx = canvas.getContext("2d");
   ctx.fillStyle = "white";
   ctx.fillRect(0, 0, 1600, 900);
   ctx.drawImage(await getTemplate(), 0, 0);
 
   try {
-    const pdf = await evaluate(cp_code ? decompress(cp_code) : code);
+    const pdf = await evaluate(
+      (() => {
+        if (gz_code) return gzDecompress(gz_code);
+        if (cp_code) return decompress(cp_code);
+        return code;
+      })()
+    );
 
     const document = await pdfjs.getDocument({
       data: pdf.buffer,

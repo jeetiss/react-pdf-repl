@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, lazy, useEffect, useReducer, useRef, useState } from "react";
+import { lazy, useEffect, useReducer, useRef, useState } from "react";
 import Editor from "@monaco-editor/react";
 import useConstant from "use-constant";
 import { useAtom } from "jotai/react";
@@ -41,7 +41,7 @@ import {
 
 import { layoutAtom, selectedAtom } from "../state/debugger";
 
-import { compress, decompress } from "../code/lz";
+import { decompress, gzCompress, gzDecompress } from "../code/lz";
 import { code as defCode } from "../code/default-example";
 
 const Viewer = lazy(() => import("../components/viewer"));
@@ -106,7 +106,7 @@ const addId = (node, parent, prefix, postfix) => {
 const createLink = (options) => {
   const link = new URL(window.location);
 
-  link.searchParams.set("cp_code", compress(options.code));
+  link.searchParams.set("gz_code", gzCompress(options.code));
 
   if (options.modules) {
     link.searchParams.set("modules", options.modules);
@@ -124,6 +124,9 @@ const Repl = () => {
         ([key, value]) => {
           if (key.startsWith("cp_")) {
             return [key.slice(3), decompress(value)];
+          }
+          if (key.startsWith("gz_")) {
+            return [key.slice(3), gzDecompress(value)];
           }
 
           return [key, value];
