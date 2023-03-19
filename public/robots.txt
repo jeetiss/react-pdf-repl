@@ -1,0 +1,2 @@
+User-agent: *
+Sitemap: https://react-pdf-repl.vercel.app/sitemap.xml
