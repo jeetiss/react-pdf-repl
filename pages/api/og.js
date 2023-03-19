@@ -16,7 +16,7 @@ import { decompress, gzDecompress } from "../../code/lz";
 import { code } from "../../code/default-example";
 
 const templatePromise = readFile(
-  new URL("../../public/g-template.png", import.meta.url)
+  new URL("./g-template.png", import.meta.url)
 );
 
 const getTemplate = async () => {
