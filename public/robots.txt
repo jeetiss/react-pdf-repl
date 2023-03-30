@@ -1,2 +1,4 @@
-User-agent: *
+User-Agent: *
+
+Host: https://react-pdf-repl.vercel.app
 Sitemap: https://react-pdf-repl.vercel.app/sitemap.xml
