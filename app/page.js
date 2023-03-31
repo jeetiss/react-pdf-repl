@@ -42,6 +42,9 @@ export async function generateMetadata({ searchParams }) {
       images: ogUrl.toString(),
     },
     alternates: { canonical: "https://react-pdf-repl.vercel.app/" },
+    verification: {
+      google: "2bziNAAYpAHDvCHHUiSzPFk2dEtXm4kLetSFMyAJuyU",
+    },
   };
 
   return metadata;
