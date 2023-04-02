@@ -44,6 +44,7 @@ export async function generateMetadata({ searchParams }) {
     alternates: { canonical: "https://react-pdf-repl.vercel.app/" },
     verification: {
       google: "2bziNAAYpAHDvCHHUiSzPFk2dEtXm4kLetSFMyAJuyU",
+      yandex: "36d69e4ea21041e0",
     },
   };
 
