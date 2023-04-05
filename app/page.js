@@ -1,12 +1,15 @@
 import Repl from "./repl";
 
 export async function generateMetadata({ searchParams }) {
-  const code = searchParams && searchParams.cp_code;
+  const cpCode = searchParams && searchParams.cp_code;
+  const gzCode = searchParams && searchParams.gz_code;
 
   const ogUrl = new URL("https://react-pdf-repl.vercel.app/api/og");
 
-  if (code) {
-    ogUrl.searchParams.append("cp_code", code);
+  if (cpCode) {
+    ogUrl.searchParams.append("cp_code", cpCode);
+  } else if (gzCode) {
+    ogUrl.searchParams.append("gz_code", gzCode);
   }
 
   /** @type {import('next').Metadata} */
