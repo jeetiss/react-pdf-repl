@@ -15,9 +15,7 @@ import {
 import { decompress, gzDecompress } from "../../code/lz";
 import { code } from "../../code/default-example";
 
-const templatePromise = readFile(
-  new URL("./g-template.png", import.meta.url)
-);
+const templatePromise = readFile(new URL("./g-template.png", import.meta.url));
 
 const getTemplate = async () => {
   const template = new Image();
@@ -108,13 +106,18 @@ export default async function GET(req, res) {
   ctx.drawImage(await getTemplate(), 0, 0);
 
   try {
-    const pdf = await evaluate(
-      (() => {
-        if (gz_code) return gzDecompress(gz_code);
-        if (cp_code) return decompress(cp_code);
-        return code;
-      })()
-    );
+    const pdf = await Promise.race([
+      evaluate(
+        (() => {
+          if (gz_code) return gzDecompress(gz_code);
+          if (cp_code) return decompress(cp_code);
+          return code;
+        })()
+      ),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(Error("Timeout")), 8_500)
+      ),
+    ]);
 
     const document = await pdfjs.getDocument({
       data: pdf.buffer,
