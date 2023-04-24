@@ -24,7 +24,7 @@
     "estree-util-build-jsx": "^2.2.2",
     "jotai": "^2.0.2",
     "lz-string": "^1.4.4",
-    "next": "~13.2.5-canary.16",
+    "next": "13.3.0",
     "next-axiom": "^0.17.0",
     "pdfjs-dist": "^3.3.122",
     "react": "18.2.0",
