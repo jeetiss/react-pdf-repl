@@ -10,7 +10,7 @@
     "postinstall": "patch-package"
   },
   "dependencies": {
-    "@codesandbox/sandpack-react": "^2.1.2",
+    "@codesandbox/sandpack-react": "^2.6.1",
     "@endo/static-module-record": "^0.7.16",
     "@monaco-editor/react": "^4.4.6",
     "@napi-rs/canvas": "^0.1.39",
@@ -24,7 +24,7 @@
     "estree-util-build-jsx": "^2.2.2",
     "jotai": "^2.0.2",
     "lz-string": "^1.4.4",
-    "next": "^13.2.5-canary.16",
+    "next": "^13.3.1",
     "next-axiom": "^0.17.0",
     "pdfjs-dist": "^3.3.122",
     "react": "18.2.0",
