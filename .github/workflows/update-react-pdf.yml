@@ -1,0 +1,24 @@
+name: Autoupdate
+on:
+  schedule:
+    - cron: "5 9 * * *"
+concurrency:
+  group: "${{ github.workflow }} @ ${{ github.ref }}"
+  cancel-in-progress: true
+jobs:
+  autoupdate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+      - name: Update react-pdf
+        run: npm update @react-pdf/renderer
+      - name: Update react-pdf
+        run: npm update @react-pdf/renderer
+
+      - name: commit and push
+        run: |
+          git add --all
+          git commit -m 'update @react-pdf/renderer'
+          git push origin main
