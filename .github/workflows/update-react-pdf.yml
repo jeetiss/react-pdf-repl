@@ -1,7 +1,7 @@
 name: Autoupdate
 on:
   schedule:
-    - cron: "15 9 * * *"
+    - cron: "30 10 * * *"
 concurrency:
   group: "${{ github.workflow }} @ ${{ github.ref }}"
   cancel-in-progress: true
