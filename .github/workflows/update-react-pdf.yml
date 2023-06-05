@@ -1,7 +1,7 @@
 name: Autoupdate
 on:
   schedule:
-    - cron: "30 10 * * *"
+    - cron: "40 11 * * *"
 concurrency:
   group: "${{ github.workflow }} @ ${{ github.ref }}"
   cancel-in-progress: true
@@ -16,11 +16,7 @@ jobs:
         run: npm update @react-pdf/renderer
       - name: Update react-pdf
         run: npm update @react-pdf/renderer
-
-      - name: commit and push
-        run: |
-          git config --global user.email "actions@github.com"
-          git config --global user.name "GitHUB Actions"
-          git add --all
-          git commit -m 'update @react-pdf/renderer'
-          git push origin main
+      - name: Commit and push
+        uses: EndBug/add-and-commit@v9
+        with:
+          default_author: github_actions
