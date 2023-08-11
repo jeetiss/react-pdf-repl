@@ -97,7 +97,6 @@ const Error = ({ error, actions = [] }) => {
 const GithubButton = () => (
   <a
     target="_blank"
-    rel="noopener noreferrer"
     href="https://github.com/jeetiss/react-pdf-repl"
     className={styles.githubLink}
   >
